@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Онлайн-конфігуратор виробів BUDZIRKA — сантехнічні кабіни та стільниці Fundermax. Миттєвий розрахунок та комерційна пропозиція." />
+<title>BUDZIRKA · Конфігуратор</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23274C4F'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   BUDZIRKA Configurator — brand tokens
+   Палітра знята 1-в-1 з budzirka.com.ua (тема Blocksy)
+   ============================================================ */
+:root{
+  --brand:#274C4F;        /* основний — глибокий петроль */
+  --brand-2:#456A6D;      /* hover */
+  --brand-3:#42504b;
+  --ink:#152420;          /* заголовки / темний */
+  --ink-soft:#3c4a46;
+  --ink-mut:#7c8b86;
+  --bg:#FBFCFC;
+  --surface:#EEF4F5;
+  --surface-2:#E2EDEF;
+  --white:#ffffff;
+  --border:#dbe6e6;
+  --border-2:#cddbdb;
+  --brand-soft:#e6f0f0;
+  --ok:#2e7d5b; --ok-soft:#e4f2ea;
+  --warn:#9a6b12; --warn-soft:#f4ecda;
+  --shadow-sm:0 1px 2px rgba(21,36,32,.05);
+  --shadow:0 2px 6px rgba(21,36,32,.06),0 14px 34px rgba(21,36,32,.07);
+  --shadow-lg:0 24px 60px rgba(21,36,32,.14);
+  --r:16px; --r-sm:11px; --r-pill:100px;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--font);color:var(--ink);background:var(--surface);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select{font-family:inherit;color:inherit}
+::selection{background:var(--brand);color:#fff}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  background:var(--brand);color:#fff;padding:13px 24px;box-shadow:0 2px 18px rgba(21,36,32,.16)}
+.logo{display:flex;align-items:center;gap:11px;cursor:pointer}
+.logo .mark{width:32px;height:32px;border-radius:9px;background:#fff;color:var(--brand);
+  display:grid;place-items:center;font-weight:800;font-size:17px}
+.logo b{font-size:18px;letter-spacing:.6px;font-weight:700}
+.logo span{color:#b8cdce;font-size:13px;margin-left:3px;font-weight:400}
+.topbar .spacer{flex:1}
+.cart{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);color:#fff;
+  border:1px solid rgba(255,255,255,.22);padding:8px 16px;border-radius:var(--r-pill);font-size:13.5px;font-weight:600;transition:.15s}
+.cart:hover{background:rgba(255,255,255,.2)}
+.cart .cn{background:#fff;color:var(--brand);min-width:20px;height:20px;padding:0 5px;border-radius:999px;
+  display:inline-grid;place-items:center;font-size:12px;font-weight:800}
+.demo-chip{font-size:11.5px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+  color:#cddedf;padding:5px 11px;border-radius:var(--r-pill)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1200px;margin:0 auto;padding:30px 24px 70px}
+.page-title{font-size:13px;color:var(--ink-mut);margin:0 0 20px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  text-transform:uppercase;letter-spacing:.7px;font-weight:600}
+.page-title .crumb{cursor:pointer}
+.page-title .crumb:hover{color:var(--brand)}
+.page-title .sep{color:var(--border-2)}
+.page-title b{color:var(--ink)}
+
+/* ---------- home ---------- */
+.hero{margin:6px 0 30px}
+.hero h1{font-size:34px;margin:0 0 10px;letter-spacing:-.6px;font-weight:800}
+.hero p{margin:0;color:var(--ink-soft);max-width:620px;font-size:16px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  padding:28px;cursor:pointer;transition:.18s cubic-bezier(.2,.7,.3,1);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.pcard::after{content:"";position:absolute;inset:0;border:2px solid transparent;border-radius:var(--r);transition:.18s;pointer-events:none}
+.pcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.pcard:hover::after{border-color:var(--brand)}
+.pcard .ico{width:62px;height:62px;border-radius:16px;background:var(--brand-soft);color:var(--brand);
+  display:grid;place-items:center;margin-bottom:18px}
+.pcard h3{margin:0 0 7px;font-size:21px;font-weight:700}
+.pcard p{margin:0;color:var(--ink-soft);font-size:14.5px}
+.pcard .go{margin-top:18px;color:var(--brand);font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px}
+.pcard:hover .go{gap:10px}
+
+/* ---------- wizard ---------- */
+.wizard{display:grid;grid-template-columns:1fr 388px;gap:26px;align-items:start}
+.steps{display:flex;gap:7px;margin-bottom:20px;flex-wrap:wrap}
+.steps .st{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-mut);font-weight:500;
+  background:var(--white);border:1px solid var(--border);padding:8px 14px;border-radius:var(--r-pill);cursor:pointer;transition:.15s}
+.steps .st:hover{border-color:var(--border-2)}
+.steps .st .n{width:21px;height:21px;border-radius:50%;background:var(--surface-2);
+  display:grid;place-items:center;font-size:11.5px;font-weight:700;color:var(--ink-soft);transition:.15s}
+.steps .st.active{color:var(--ink);border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.steps .st.active .n{background:var(--brand);color:#fff}
+.steps .st.done .n{background:var(--ok);color:#fff}
+
+.panel{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  padding:28px;box-shadow:var(--shadow);min-height:360px;animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.panel h2{margin:0 0 5px;font-size:22px;font-weight:700;letter-spacing:-.3px}
+.panel .sub{margin:0 0 22px;color:var(--ink-soft);font-size:14.5px}
+
+/* choice grid */
+.grid{display:grid;gap:13px}
+.grid.c2{grid-template-columns:repeat(2,1fr)}
+.grid.c3{grid-template-columns:repeat(3,1fr)}
+.grid.c4{grid-template-columns:repeat(4,1fr)}
+.opt{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:15px;cursor:pointer;
+  transition:.15s;background:var(--white);text-align:left;position:relative}
+.opt:hover{border-color:var(--brand-2);transform:translateY(-1px)}
+.opt.sel{border-color:var(--brand);background:var(--brand-soft)}
+.opt.sel::before{content:"✓";position:absolute;top:9px;right:11px;color:var(--brand);font-weight:800;font-size:13px}
+.opt .t{font-weight:600;font-size:14.5px}
+.opt .d{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.35}
+.opt .glyph{display:block;margin-bottom:9px;color:var(--brand)}
+
+/* swatches */
+.matbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.matbar input[type=search],.matbar select{border:1.5px solid var(--border);border-radius:var(--r-pill);
+  padding:8px 14px;font-size:13px;background:var(--white)}
+.matbar input[type=search]{min-width:170px}
+.matbar label{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-soft);cursor:pointer}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:13px}
+.sw{border:1.5px solid var(--border);border-radius:var(--r-sm);overflow:hidden;cursor:pointer;transition:.15s;background:var(--white)}
+.sw:hover{border-color:var(--brand-2);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.sw.sel{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
+.sw .chip{height:68px;position:relative}
+.sw.sel .chip::after{content:"✓";position:absolute;top:6px;right:8px;width:20px;height:20px;background:var(--brand);
+  color:#fff;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800}
+.sw .meta{padding:9px 10px}
+.sw .code{font-weight:700;font-size:13px}
+.sw .nm{font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sw .badge{display:inline-block;margin-top:6px;font-size:10.5px;padding:2px 8px;border-radius:999px;font-weight:600}
+.badge.in{background:var(--ok-soft);color:var(--ok)}
+.badge.out{background:var(--warn-soft);color:var(--warn)}
+.empty{padding:30px;text-align:center;color:var(--ink-mut);font-size:14px}
+
+/* fields */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:7px}
+.field .hint{font-size:12px;color:var(--ink-mut);font-weight:400}
+.inp{width:100%;border:1.5px solid var(--border);border-radius:var(--r-sm);
+  padding:11px 13px;font-size:14.5px;background:var(--white);transition:.15s}
+.inp:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.inp.bad{border-color:#c9512e}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.stepper{display:flex;align-items:stretch;border:1.5px solid var(--border);border-radius:var(--r-sm);overflow:hidden;width:fit-content}
+.stepper button{background:var(--surface);width:42px;font-size:19px;color:var(--brand);transition:.15s}
+.stepper button:hover{background:var(--brand-soft)}
+.stepper input{border:none;width:66px;text-align:center;font-size:15px;font-weight:600;background:var(--white)}
+.stepper input:focus{outline:none}
+
+/* ---------- aside ---------- */
+.aside{position:sticky;top:90px;display:flex;flex-direction:column;gap:16px}
+.preview{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.preview .ttl{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-mut);margin-bottom:10px;font-weight:600}
+.preview svg{width:100%;height:auto;display:block}
+.summary{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.summary .plabel{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-mut);font-weight:600}
+.summary .price{font-size:34px;font-weight:800;letter-spacing:-.8px;display:inline-block}
+.summary .price.bump{animation:bump .26s ease}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+.summary .price small{font-size:13px;font-weight:600;color:var(--ink-mut);letter-spacing:0}
+.summary .lines{margin:15px 0;border-top:1px dashed var(--border-2);padding-top:13px;display:flex;flex-direction:column;gap:8px}
+.summary .ln{display:flex;justify-content:space-between;font-size:13px}
+.summary .ln span:first-child{color:var(--ink-soft)}
+.summary .ln.tot{font-weight:700;font-size:15px;border-top:1px solid var(--border);padding-top:10px;margin-top:3px}
+.note{font-size:11.5px;color:var(--ink-mut);background:var(--surface);border-radius:9px;padding:9px 11px;margin-top:11px;line-height:1.45}
+
+.nav{display:flex;gap:10px;margin-top:8px}
+.btn{border:1.5px solid var(--border);background:var(--white);color:var(--ink);
+  padding:12px 18px;border-radius:var(--r-pill);font-size:14px;font-weight:600;transition:.15s;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;flex:1}
+.btn.primary:hover{background:var(--brand-2);border-color:var(--brand-2);color:#fff}
+.btn.ghost{flex:0 0 auto}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn.lg{padding:14px 26px;font-size:15px}
+
+/* ---------- estimate ---------- */
+.est{display:grid;grid-template-columns:1fr 360px;gap:26px;align-items:start}
+.est-list{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.est-item{display:flex;gap:14px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--surface-2)}
+.est-item:last-child{border-bottom:none}
+.est-item .ei-main{flex:1;min-width:0}
+.est-item .ei-title{font-weight:600;font-size:14.5px}
+.est-item .ei-meta{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+.est-item .ei-price{font-weight:700;white-space:nowrap}
+.est-item .rm{width:30px;height:30px;border-radius:50%;color:var(--ink-mut);font-size:16px;transition:.15s}
+.est-item .rm:hover{background:var(--warn-soft);color:#b4471f}
+.miniqty{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:var(--r-pill);overflow:hidden}
+.miniqty button{width:30px;height:30px;color:var(--brand);font-size:15px}
+.miniqty button:hover{background:var(--brand-soft)}
+.miniqty span{min-width:30px;text-align:center;font-weight:600;font-size:13.5px}
+.est-empty{background:var(--white);border:1px dashed var(--border-2);border-radius:var(--r);padding:50px 24px;text-align:center}
+.est-empty h3{margin:0 0 8px}
+.est-empty p{margin:0 0 18px;color:var(--ink-soft)}
+.formcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;margin-top:14px}
+.formcard textarea.inp{resize:vertical;min-height:46px;font-family:inherit}
+
+/* ---------- quote ---------- */
+.quote{max-width:760px;margin:0 auto;background:var(--white);border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.quote .qbar{background:var(--brand);color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:flex-start}
+.quote .qbar .co b{font-size:22px;letter-spacing:.5px}
+.quote .qbar .co div{font-size:12.5px;color:#cfe0e1;margin-top:3px}
+.quote .qbar .qn{text-align:right;font-size:13px}
+.quote .qbar .qn b{font-size:15px}
+.quote .qbody{padding:28px 32px 34px}
+.quote .qmeta{font-size:13.5px;color:var(--ink-soft);margin-bottom:18px;line-height:1.7}
+.quote .qmeta b{color:var(--ink)}
+.quote table{width:100%;border-collapse:collapse;margin:6px 0 16px;font-size:13.5px}
+.quote th{text-align:left;border-bottom:2px solid var(--ink);padding:9px 7px;font-weight:600}
+.quote td{padding:10px 7px;border-bottom:1px solid var(--surface-2);vertical-align:top}
+.quote td.r,.quote th.r{text-align:right;white-space:nowrap}
+.quote tfoot td{border:none;font-weight:700}
+.quote .qtot{text-align:right;font-size:24px;font-weight:800;margin-top:6px}
+.quote .qterms{margin-top:22px;font-size:12px;color:var(--ink-mut);border-top:1px solid var(--surface-2);padding-top:14px;line-height:1.6}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(24px);opacity:0;
+  background:var(--ink);color:#fff;padding:13px 22px;border-radius:var(--r-pill);font-size:14px;font-weight:500;
+  box-shadow:var(--shadow-lg);z-index:60;transition:.28s cubic-bezier(.2,.7,.3,1);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:920px){
+  .wizard,.est{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .aside{position:static}
+  .grid.c4{grid-template-columns:repeat(2,1fr)}
+  .demo-chip{display:none}
+  .hero h1{font-size:27px}
+}
+@media print{
+  .topbar,.no-print{display:none!important}
+  body{background:#fff}
+  .wrap{padding:0;max-width:none}
+  .quote{border:none;box-shadow:none;max-width:none;border-radius:0}
+  .quote .qbar{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo" data-action="goHome">
+    <div class="mark">B</div><b>BUDZIRKA</b><span>Конфігуратор</span>
+  </div>
+  <div class="spacer"></div>
+  <button id="cart" class="cart no-print" data-action="openEstimate" style="display:none"></button>
+  <div class="demo-chip">демо · ціни калібруються</div>
+</div>
+<div id="app" class="wrap"></div>
+
+<script>
+/* ============================================================
+   1) CONFIG — уся цінова логіка (калібрувати тут)
+   ============================================================ */
+const CONFIG = {
+  cur:'$',
+  cabins:{
+    basePerMeter:170,
+    defaultSectionWidth:900,
+    baseHeight:2000,
+    heightSurchargePer500:0.06,
+    decorTier:{ std:1.00, wood:1.08, premium:1.15 },
+    fittings:[
+      { id:'inox',   name:'Нержавіюча сталь',         perMeter:0,  note:'базова' },
+      { id:'alu',    name:'Алюміній анодований',      perMeter:-15 },
+      { id:'nylon',  name:'Поліамід (нейлон)',        perMeter:-25 },
+      { id:'inoxav', name:'Нержавіюча антивандальна', perMeter:25 },
+    ],
+  },
+  counters:{
+    defaultM2Price:135,
+    edgePerMeter:{ simple:8, bevel:12, profile:18 },
+    cutoutFee:15,
+  },
+  priceCat:{ 'Прайс 1':1.00, 'Прайс 2':0.97, 'Прайс 3':0.94, 'Прайс 4':0.91, 'Прайс 5':0.88 },
+};
+
+/* ============================================================
+   2) DATA — статичний знімок (потім → конектор до бази/1С)
+   ============================================================ */
+function d(code,name,hex,dir,core,surface,brand,tier,stock,m2){return{code,name,hex,dir,core,surface,brand,tier,stock,m2};}
+const DECORS=[
+  d('0085','White','#f1efe9','both','white core','FH','FUNDERMAX','std',24,130),
+  d('0080','Black','#1d1d1f','both','black core','FH','FUNDERMAX','std',18,130),
+  d('0077','Charcoal','#4b4f52','both','charcoal core','FH','FUNDERMAX','std',12,135),
+  d('0074','Pastel Grey','#c7c7c1','both','grey core','FH','FUNDERMAX','std',9,130),
+  d('0394','Moonwalk','#5a5e60','both','black core','NN/NW','FUNDERMAX','std',2,135),
+  d('0606','Arctic White','#ece9e1','counters','white core','FH','FUNDERMAX','std',6,130),
+  d('0027','Prado Agate Grey','#b9bbbd','counters','grey core','FH','FUNDERMAX','premium',4,150),
+  d('0075','Dark Grey','#6e7174','counters','grey core','FH','FUNDERMAX','std',7,135),
+  d('0386','Blues','#2f3b45','counters','black core','FH','FUNDERMAX','premium',3,150),
+  d('0599','Orca','#20242a','counters','black core','FH','FUNDERMAX','premium',5,160),
+  d('0793','Patina Tin','#8a8f8b','counters','grey core','SX','FUNDERMAX','premium',2,155),
+  d('0048','Cognac Oak','#8a5a2b','counters','brown core','NT','FUNDERMAX','wood',8,150),
+  d('5171','Polar Oak','#c8a877','counters','brown core','NT','FUNDERMAX','wood',6,150),
+  d('0927','Creek','#9c7b52','counters','brown core','NT','FUNDERMAX','wood',4,145),
+  d('0920','Natural Silver Fir','#b9a88a','counters','brown core','FH','FUNDERMAX','wood',3,145),
+  d('4037','Maryland','#7d8a8f','counters','black core','FH','FUNDERMAX','std',5,135),
+  d('0565','Polaris','#d9d6ce','counters','white core','FH','SMART','std',0,130),
+  d('0581','Lentos','#cfc6b6','counters','beige core','FH','SMART','std',0,130),
+];
+const CABIN_TYPES=[
+  {id:'standart', name:'MAX Standart', desc:'Класична сантехнічна кабіна'},
+  {id:'tube',     name:'Max Tube',     desc:'Трубчаста опорна система'},
+  {id:'top',      name:'Max Top',      desc:'Стельова, приховане кріплення'},
+  {id:'kids',     name:'Max Kids',     desc:'Занижена, для дитячих закладів'},
+  {id:'inclusive',name:'Max Inclusive',desc:'Інклюзивна, для МГН'},
+  {id:'comb',     name:'Max Comb',     desc:'Комбінована конфігурація'},
+  {id:'shower',   name:'Душова перегородка', desc:'Перегородка для душових'},
+  {id:'urinal',   name:'Пісуарна перегородка', desc:'Екран між пісуарами'},
+];
+const SHAPES=[
+  {id:'I',name:'I-подібна',segs:1,desc:'Пряма стільниця'},
+  {id:'L',name:'Г-подібна',segs:2,desc:'Кутова, 2 сегменти'},
+  {id:'U',name:'П-подібна',segs:3,desc:'3 сегменти'},
+];
+const EDGES=[
+  {n:1,name:'Торець №1',desc:'Прямий рез',tier:'simple'},
+  {n:2,name:'Торець №2',desc:'Фаска 45° (лице)',tier:'bevel'},
+  {n:3,name:'Торець №3',desc:'Подвійна фаска 45°',tier:'bevel'},
+  {n:4,name:'Торець №4',desc:'П-профіль 2 мм',tier:'profile'},
+  {n:5,name:'Торець №5',desc:'Скос 8 мм',tier:'profile'},
+  {n:6,name:'Торець №6',desc:'Радіус R',tier:'profile'},
+  {n:7,name:'Торець №7',desc:'Радіус R + лице',tier:'profile'},
+  {n:8,name:'Торець №8',desc:'Фаски 1 мм',tier:'bevel'},
+  {n:9,name:'Торець №9',desc:'Фаски 0.5 мм',tier:'bevel'},
+];
+const PRICE_CATS=Object.keys(CONFIG.priceCat);
+const CABIN_STEPS=['Тип','Розміри','Матеріал','Фурнітура'];
+const COUNTER_STEPS=['Форма','Розміри','Торець','Вирізи','Матеріал'];
+
+/* ============================================================
+   3) STATE (+persistence)
+   ============================================================ */
+const KEY='budzirka_cfg_v2';
+const defaultState=()=>({
+  screen:'home', prevScreen:'home',
+  cabins:{ step:0, type:'standart', sections:3, sectionWidth:900, height:2000, decor:'0085', fittings:'inox' },
+  counters:{ step:0, shape:'I', segs:[{l:2000,w:600},{l:1200,w:600},{l:1200,w:600}], edge:1, cutouts:1, decor:'0599' },
+  client:{ name:'', surname:'', company:'', phone:'', email:'', manager:'', comment:'', priceCat:'Прайс 1' },
+  estimate:[],
+  matFilter:{ search:'', core:'all', stock:false },
+  _last:{},
+});
+let state=defaultState();
+function save(){ try{ const{cabins,counters,client,estimate}=state;
+  localStorage.setItem(KEY,JSON.stringify({cabins,counters,client,estimate})); }catch(e){} }
+function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY));
+  if(s){ Object.assign(state.cabins,s.cabins); Object.assign(state.counters,s.counters);
+    Object.assign(state.client,s.client||{}); state.estimate=s.estimate||[]; } }catch(e){} }
+
+/* ============================================================
+   4) HELPERS
+   ============================================================ */
+const app=document.getElementById('app');
+const money=n=>CONFIG.cur+Math.round(n).toLocaleString('uk-UA');
+const decorBy=code=>DECORS.find(x=>x.code===code);
+const decorsFor=dir=>DECORS.filter(x=>x.dir==='both'||x.dir===dir);
+function setPath(obj,path,val){const p=path.split('.');let o=obj;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;}
+function getPath(path){const p=path.split('.');let o=state;for(const k of p)o=o[k];return o;}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ============================================================
+   5) PRICING (subtotal — без знижки категорії; катф застосовуємо у кошторисі)
+   ============================================================ */
+function priceCabins(c){
+  const meters=(c.sections*c.sectionWidth)/1000;
+  const dec=decorBy(c.decor);
+  const tierF=CONFIG.cabins.decorTier[dec?dec.tier:'std']||1;
+  const base=CONFIG.cabins.basePerMeter*meters;
+  const decorAdj=base*tierF-base;
+  const fit=CONFIG.cabins.fittings.find(f=>f.id===c.fittings)||{perMeter:0,name:''};
+  const fitAdj=fit.perMeter*meters;
+  const extra500=Math.max(0,(c.height-CONFIG.cabins.baseHeight))/500;
+  const heightAdj=base*(extra500*CONFIG.cabins.heightSurchargePer500);
+  const subtotal=base+decorAdj+fitAdj+heightAdj;
+  return {meters,base,decorAdj,fitAdj,heightAdj,subtotal,fitName:fit.name,dec};
+}
+function priceCounters(c){
+  const segs=c.segs.slice(0,SHAPES.find(s=>s.id===c.shape).segs);
+  const area=segs.reduce((a,s)=>a+(s.l*s.w)/1e6,0);
+  const dec=decorBy(c.decor);
+  const m2=dec&&dec.m2?dec.m2:CONFIG.counters.defaultM2Price;
+  const material=area*m2;
+  const edgeM=segs.reduce((a,s)=>a+s.l/1000,0);
+  const edge=EDGES.find(e=>e.n===c.edge)||EDGES[0];
+  const edgeRate=CONFIG.counters.edgePerMeter[edge.tier];
+  const edgeCost=edgeM*edgeRate;
+  const cutCost=c.cutouts*CONFIG.counters.cutoutFee;
+  const subtotal=material+edgeCost+cutCost;
+  return {area,m2,material,edgeM,edgeRate,edgeCost,cutCost,subtotal,edgeName:edge.name,dec};
+}
+function estimateTotals(){
+  const subtotal=state.estimate.reduce((a,i)=>a+i.unitBase*i.qty,0);
+  const catF=CONFIG.priceCat[state.client.priceCat]||1;
+  const total=subtotal*catF;
+  return {subtotal,catF,discount:subtotal-total,total};
+}
+
+/* ============================================================
+   6) SKETCHES
+   ============================================================ */
+function sketchCabins(c){
+  const W=340,H=200,pad=26;
+  const n=Math.max(1,Math.min(12,c.sections||1));
+  const innerW=W-pad*2,gap=5;
+  const dw=(innerW-gap*(n-1))/n;
+  const top=28,bottom=H-32,dh=bottom-top;
+  let doors='';
+  for(let i=0;i<n;i++){
+    const x=pad+i*(dw+gap);
+    doors+=`<rect x="${x.toFixed(1)}" y="${top}" width="${dw.toFixed(1)}" height="${dh}" rx="3"
+      fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="1.5"/>
+      <circle cx="${(x+dw-9).toFixed(1)}" cy="${(top+dh/2).toFixed(1)}" r="2.6" fill="var(--brand)"/>
+      <circle cx="${(x+6).toFixed(1)}" cy="${(top+12).toFixed(1)}" r="1.4" fill="var(--brand-2)"/>
+      <circle cx="${(x+6).toFixed(1)}" cy="${(bottom-12).toFixed(1)}" r="1.4" fill="var(--brand-2)"/>
+      <rect x="${(x+dw/2-7).toFixed(1)}" y="${bottom}" width="3" height="8" fill="var(--brand-3)"/>
+      <rect x="${(x+dw/2+4).toFixed(1)}" y="${bottom}" width="3" height="8" fill="var(--brand-3)"/>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}">
+    <line x1="${pad-5}" y1="${top-7}" x2="${W-pad+5}" y2="${top-7}" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+    ${doors}
+    <line x1="${pad}" y1="${bottom+18}" x2="${W-pad}" y2="${bottom+18}" stroke="var(--border-2)" stroke-width="1"/>
+    <text x="${W/2}" y="${bottom+30}" text-anchor="middle" font-size="11" fill="var(--ink-soft)">${(n*c.sectionWidth).toLocaleString('uk-UA')} мм · ${n} секц.</text>
+    <text x="14" y="${top+dh/2}" text-anchor="middle" font-size="10" fill="var(--ink-soft)" transform="rotate(-90 14 ${top+dh/2})">${c.height} мм</text>
+  </svg>`;
+}
+function sketchCounter(c){
+  const shape=SHAPES.find(s=>s.id===c.shape);
+  const segs=c.segs.slice(0,shape.segs);
+  let rects;
+  if(c.shape==='I') rects=[{x:0,y:0,w:segs[0].l,h:segs[0].w,lab:'СТ1',s:segs[0]}];
+  else if(c.shape==='L') rects=[
+    {x:0,y:0,w:segs[0].l,h:segs[0].w,lab:'СТ1',s:segs[0]},
+    {x:0,y:segs[0].w,w:segs[1].w,h:segs[1].l,lab:'СТ2',s:segs[1]}];
+  else rects=[
+    {x:0,y:0,w:segs[0].l,h:segs[0].w,lab:'СТ1',s:segs[0]},
+    {x:0,y:segs[0].w,w:segs[1].w,h:segs[1].l,lab:'СТ2',s:segs[1]},
+    {x:segs[0].l-segs[2].w,y:segs[0].w,w:segs[2].w,h:segs[2].l,lab:'СТ3',s:segs[2]}];
+  const maxX=Math.max(...rects.map(r=>r.x+r.w)),maxY=Math.max(...rects.map(r=>r.y+r.h));
+  const BW=320,BH=180,pad=22;
+  const sc=Math.min((BW-pad*2)/maxX,(BH-pad*2)/maxY);
+  const dec=decorBy(c.decor),fill=dec?dec.hex:'#ccc';
+  let body='';
+  rects.forEach((r,idx)=>{
+    const x=pad+r.x*sc,y=pad+r.y*sc,w=r.w*sc,h=r.h*sc;
+    body+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="2"
+      fill="${fill}" fill-opacity="0.34" stroke="var(--brand)" stroke-width="1.7"/>
+      <text x="${(x+w/2).toFixed(1)}" y="${(y+h/2-2).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${r.lab}</text>
+      <text x="${(x+w/2).toFixed(1)}" y="${(y+h/2+12).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--ink-soft)">${r.s.l}×${r.s.w}</text>`;
+    if(idx===0){ // вирізи на головному сегменті
+      const n=c.cutouts||0;
+      for(let k=0;k<n;k++){
+        const cx=x+w*(k+1)/(n+1), cy=y+h/2, rr=Math.min(11,h/3);
+        body+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${rr.toFixed(1)}" fill="none" stroke="var(--brand-2)" stroke-width="1.4" stroke-dasharray="3 2"/>`;
+      }
+    }
+  });
+  return `<svg viewBox="0 0 ${BW} ${BH}">${body}</svg>`;
+}
+
+/* ============================================================
+   7) RENDER
+   ============================================================ */
+function render(){
+  if(state.screen==='home') app.innerHTML=viewHome();
+  else if(state.screen==='cabins') app.innerHTML=viewWizard('cabins');
+  else if(state.screen==='counters') app.innerHTML=viewWizard('counters');
+  else if(state.screen==='estimate') app.innerHTML=viewEstimate();
+  else if(state.screen==='quote') app.innerHTML=viewQuote();
+  updateCart(); save();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function updateCart(){
+  const el=document.getElementById('cart'); if(!el) return;
+  const n=state.estimate.reduce((a,i)=>a+i.qty,0);
+  if(n===0){ el.style.display='none'; return; }
+  const{subtotal}=estimateTotals();
+  el.style.display='';
+  el.innerHTML=`<span class="cn">${n}</span> Кошторис · ${money(subtotal)}`;
+}
+
+const ICON_CABIN=`<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="15" rx="1"/><line x1="9" y1="4" x2="9" y2="19"/><line x1="15" y1="4" x2="15" y2="19"/><circle cx="7" cy="12" r=".9" fill="currentColor"/><circle cx="13" cy="12" r=".9" fill="currentColor"/></svg>`;
+const ICON_COUNTER=`<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9h18v3H3z"/><line x1="5" y1="12" x2="5" y2="20"/><line x1="19" y1="12" x2="19" y2="20"/><circle cx="15" cy="10.5" r="1.3"/></svg>`;
+
+function viewHome(){
+  return `
+  <div class="hero">
+    <h1>Конфігуратор виробів</h1>
+    <p>Підберіть конфігурацію та матеріал зі складу, отримайте миттєвий розрахунок і комерційну пропозицію.</p>
+  </div>
+  <div class="cards">
+    <div class="pcard" data-action="openCabins">
+      <div class="ico">${ICON_CABIN}</div>
+      <h3>Сантехнічні кабіни</h3>
+      <p>8 типів кабін і перегородок · HPL Fundermax · фурнітура · від 170&nbsp;$/пог.м.</p>
+      <div class="go">Відкрити конструктор →</div>
+    </div>
+    <div class="pcard" data-action="openCounters">
+      <div class="ico">${ICON_COUNTER}</div>
+      <h3>Стільниці Fundermax</h3>
+      <p>Форми I / Г / П · торці №1–9 · вирізи · розрахунок за площею.</p>
+      <div class="go">Відкрити конструктор →</div>
+    </div>
+  </div>`;
+}
+
+/* ---- wizard shell ---- */
+function canProceed(mod){
+  const c=state[mod];
+  if(mod==='cabins'&&c.step===1) return c.sections>=1&&c.sectionWidth>=400&&c.height>=1200;
+  if(mod==='counters'&&c.step===1){
+    const segs=c.segs.slice(0,SHAPES.find(s=>s.id===c.shape).segs);
+    return segs.every(s=>s.l>0&&s.w>0);
+  }
+  return true;
+}
+function viewWizard(mod){
+  const isC=mod==='cabins';
+  const c=state[mod];
+  const steps=isC?CABIN_STEPS:COUNTER_STEPS;
+  const title=isC?'Сантехнічні кабіни':'Стільниці Fundermax';
+  let chips='';
+  steps.forEach((s,i)=>{
+    const cls=i===c.step?'active':(i<c.step?'done':'');
+    chips+=`<div class="st ${cls}" data-action="setStep" data-mod="${mod}" data-n="${i}"><span class="n">${i<c.step?'✓':i+1}</span>${s}</div>`;
+  });
+  return `
+  <div class="page-title"><span class="crumb" data-action="goHome">Калькулятор</span><span class="sep">›</span><b>${title}</b></div>
+  <div class="steps">${chips}</div>
+  <div class="wizard">
+    <div class="panel">${isC?cabinStep(c):counterStep(c)}</div>
+    <div class="aside" id="aside">${renderAside(mod)}</div>
+  </div>`;
+}
+
+function cabinStep(c){
+  switch(c.step){
+    case 0: return `<h2>Тип виробу</h2><p class="sub">Оберіть тип сантехнічної кабіни чи перегородки.</p>
+      <div class="grid c4">${CABIN_TYPES.map(t=>`<div class="opt ${c.type===t.id?'sel':''}" data-action="setCabinType" data-id="${t.id}">
+        <div class="t">${t.name}</div><div class="d">${t.desc}</div></div>`).join('')}</div>`;
+    case 1: return `<h2>Розміри та розкладка</h2><p class="sub">Кількість секцій × ширина = довжина перегородки. База — за погонний метр.</p>
+      <div class="field"><label>Кількість секцій (дверей)</label>${stepper('cabins.sections',c.sections,1,12)}</div>
+      <div class="row">
+        <div class="field"><label>Ширина секції <span class="hint">мм</span></label>
+          <input class="inp ${c.sectionWidth<400?'bad':''}" type="number" min="400" step="50" data-field="cabins.sectionWidth" value="${c.sectionWidth}"></div>
+        <div class="field"><label>Висота <span class="hint">мм</span></label>
+          <input class="inp ${c.height<1200?'bad':''}" type="number" min="1200" step="50" data-field="cabins.height" value="${c.height}"></div>
+      </div>
+      <div class="note">Загальна довжина: <b>${(c.sections*c.sectionWidth).toLocaleString('uk-UA')} мм</b> = ${((c.sections*c.sectionWidth)/1000).toFixed(2)} пог.м</div>`;
+    case 2: return materialStep(c,'cabins');
+    case 3: return `<h2>Фурнітура</h2><p class="sub">Тип кріплення та петель. Впливає на ціну за погонний метр.</p>
+      <div class="grid c2">${CONFIG.cabins.fittings.map(f=>`<div class="opt ${c.fittings===f.id?'sel':''}" data-action="setCabinFittings" data-id="${f.id}">
+        <div class="t">${f.name}</div><div class="d">${f.perMeter===0?'базова комплектація':(f.perMeter>0?'+':'')+f.perMeter+' $/пог.м'}</div></div>`).join('')}</div>`;
+  }
+}
+function counterStep(c){
+  const shape=SHAPES.find(s=>s.id===c.shape);
+  switch(c.step){
+    case 0: return `<h2>Форма стільниці</h2><p class="sub">Виберіть конфігурацію.</p>
+      <div class="grid c3">${SHAPES.map(s=>`<div class="opt ${c.shape===s.id?'sel':''}" data-action="setShape" data-id="${s.id}">
+        <div class="t">${s.name}</div><div class="d">${s.desc}</div></div>`).join('')}</div>`;
+    case 1:{ let f='';
+      for(let i=0;i<shape.segs;i++){
+        f+=`<div class="field"><label>Сегмент СТ${i+1} <span class="hint">довжина × глибина, мм</span></label>
+          <div class="row">
+            <input class="inp ${c.segs[i].l<=0?'bad':''}" type="number" min="100" step="50" data-field="counters.segs.${i}.l" value="${c.segs[i].l}">
+            <input class="inp ${c.segs[i].w<=0?'bad':''}" type="number" min="100" step="50" data-field="counters.segs.${i}.w" value="${c.segs[i].w}">
+          </div></div>`;
+      }
+      return `<h2>Розміри сегментів</h2><p class="sub">Габарити кожної частини стільниці.</p>${f}
+        <div class="note">Сумарна площа: <b>${priceCounters(c).area.toFixed(2)} м²</b> · розкрій у форматах листів (4100×640, 2040×1300…) — Фаза&nbsp;2.</div>`;}
+    case 2: return `<h2>Обробка торця</h2><p class="sub">Профіль кромки. Складніший профіль — дорожча обробка за пог.м.</p>
+      <div class="grid c3">${EDGES.map(e=>`<div class="opt ${c.edge===e.n?'sel':''}" data-action="setEdge" data-n="${e.n}">
+        <div class="t">${e.name}</div><div class="d">${e.desc}</div>
+        <div class="d" style="color:var(--brand);margin-top:4px;font-weight:600">${CONFIG.counters.edgePerMeter[e.tier]} $/пог.м</div></div>`).join('')}</div>`;
+    case 3: return `<h2>Вирізи</h2><p class="sub">Кількість вирізів під мийку / варильну поверхню.</p>
+      <div class="grid c4">${[0,1,2,3].map(n=>`<div class="opt ${c.cutouts===n?'sel':''}" data-action="setCutouts" data-n="${n}">
+        <div class="t" style="font-size:22px">${n}</div><div class="d">${n===0?'без вирізів':n+' '+(n===1?'виріз':'вирізи')}</div></div>`).join('')}</div>
+      <div class="note">Вартість вирізу: <b>${CONFIG.counters.cutoutFee} $</b> за од. (placeholder)</div>`;
+    case 4: return materialStep(c,'counters');
+  }
+}
+
+/* ---- material step + filters ---- */
+function swGrid(mod){
+  const f=state.matFilter;
+  let list=decorsFor(mod);
+  if(f.search){ const q=f.search.toLowerCase(); list=list.filter(x=>(x.code+' '+x.name).toLowerCase().includes(q)); }
+  if(f.core!=='all') list=list.filter(x=>x.core===f.core);
+  if(f.stock) list=list.filter(x=>x.stock>0);
+  if(!list.length) return `<div class="empty">Нічого не знайдено за фільтром.</div>`;
+  const c=state[mod];
+  return `<div class="swatches">${list.map(x=>`<div class="sw ${c.decor===x.code?'sel':''}" data-action="setDecor" data-mod="${mod}" data-id="${x.code}">
+    <div class="chip" style="background:${x.hex}"></div>
+    <div class="meta"><div class="code">${x.code}</div><div class="nm">${esc(x.name)}</div>
+      <span class="badge ${x.stock>0?'in':'out'}">${x.stock>0?'В наявності: '+x.stock:'Під замовлення'}</span></div></div>`).join('')}</div>`;
+}
+function materialStep(c,mod){
+  const cores=[...new Set(decorsFor(mod).map(x=>x.core))];
+  return `<h2>Матеріал та декор</h2>
+    <p class="sub">HPL-панелі ${mod==='cabins'?'для напрямку «Сантехнічні кабіни»':'для напрямку «Стільниці»'}. Наявність — зі складу (демо).</p>
+    <div class="matbar">
+      <input type="search" placeholder="Пошук декору / коду" data-filter="search" data-mod="${mod}" value="${esc(state.matFilter.search)}">
+      <select data-filter="core" data-mod="${mod}">
+        <option value="all">Усі ядра</option>
+        ${cores.map(co=>`<option value="${co}" ${state.matFilter.core===co?'selected':''}>${co}</option>`).join('')}
+      </select>
+      <label><input type="checkbox" data-filter="stock" data-mod="${mod}" ${state.matFilter.stock?'checked':''}> лише в наявності</label>
+    </div>
+    <div id="swgrid">${swGrid(mod)}</div>`;
+}
+
+function stepper(path,val,min,max){
+  return `<div class="stepper">
+    <button data-action="dec" data-path="${path}" data-min="${min}">−</button>
+    <input type="number" data-field="${path}" value="${val}" min="${min}" max="${max}">
+    <button data-action="inc" data-path="${path}" data-max="${max}">+</button></div>`;
+}
+
+/* ---- aside ---- */
+function renderAside(mod){
+  const isC=mod==='cabins';
+  const c=state[mod];
+  const steps=isC?CABIN_STEPS:COUNTER_STEPS;
+  const last=c.step===steps.length-1;
+  const p=isC?priceCabins(c):priceCounters(c);
+  const bump=state._last[mod]!==undefined&&Math.round(state._last[mod])!==Math.round(p.subtotal)?'bump':'';
+  state._last[mod]=p.subtotal;
+  let lines;
+  if(isC){
+    lines=`<div class="ln"><span>База (${p.meters.toFixed(2)} м × ${CONFIG.cabins.basePerMeter}$)</span><span>${money(p.base)}</span></div>
+      ${p.decorAdj?`<div class="ln"><span>Декор ${p.dec?p.dec.code:''} (${p.dec?p.dec.tier:''})</span><span>+${money(p.decorAdj)}</span></div>`:''}
+      ${p.fitAdj?`<div class="ln"><span>Фурнітура</span><span>${(p.fitAdj>0?'+':'')+money(p.fitAdj)}</span></div>`:''}
+      ${p.heightAdj?`<div class="ln"><span>Висота ${c.height} мм</span><span>+${money(p.heightAdj)}</span></div>`:''}
+      <div class="ln tot"><span>За позицію</span><span>${money(p.subtotal)}</span></div>`;
+  }else{
+    lines=`<div class="ln"><span>Матеріал (${p.area.toFixed(2)} м² × ${p.m2}$)</span><span>${money(p.material)}</span></div>
+      <div class="ln"><span>Торець (${p.edgeM.toFixed(2)} м × ${p.edgeRate}$)</span><span>${money(p.edgeCost)}</span></div>
+      ${p.cutCost?`<div class="ln"><span>Вирізи ×${c.cutouts}</span><span>${money(p.cutCost)}</span></div>`:''}
+      <div class="ln tot"><span>За позицію</span><span>${money(p.subtotal)}</span></div>`;
+  }
+  const ok=canProceed(mod);
+  return `
+  <div class="preview"><div class="ttl">Ескіз</div>${isC?sketchCabins(c):sketchCounter(c)}</div>
+  <div class="summary">
+    <div class="plabel">Орієнтовна вартість</div>
+    <div class="price ${bump}">${money(p.subtotal)} <small>попередньо</small></div>
+    <div class="lines">${lines}</div>
+    <div class="nav no-print">
+      ${c.step>0?`<button class="btn ghost" data-action="prev" data-mod="${mod}">Назад</button>`:''}
+      ${last
+        ? `<button class="btn primary" data-action="addEstimate" data-mod="${mod}">＋ Додати до кошторису</button>`
+        : `<button class="btn primary" data-action="next" data-mod="${mod}" ${ok?'':'disabled'}>Далі →</button>`}
+    </div>
+    ${!ok?`<div class="note" style="color:#a5471f">Заповніть розміри коректно, щоб продовжити.</div>`:`<div class="note">Демо-розрахунок. Точні ставки/прайси під'єднаємо з бази (1С).</div>`}
+  </div>`;
+}
+function refreshAside(mod){ const el=document.getElementById('aside'); if(el) el.innerHTML=renderAside(mod); }
+
+/* ---- estimate ---- */
+function itemTitle(it){ return it.title; }
+function viewEstimate(){
+  if(!state.estimate.length){
+    return `<div class="page-title"><span class="crumb" data-action="goHome">Калькулятор</span><span class="sep">›</span><b>Кошторис</b></div>
+    <div class="est-empty"><h3>Кошторис порожній</h3><p>Додайте позиції з конструктора, щоб сформувати комерційну пропозицію.</p>
+      <button class="btn primary lg" data-action="goHome" style="display:inline-flex;max-width:260px;margin:0 auto">Почати конфігурацію</button></div>`;
+  }
+  const t=estimateTotals();
+  const rows=state.estimate.map(it=>`<div class="est-item">
+      <div class="ei-main"><div class="ei-title">${esc(it.title)}</div><div class="ei-meta">${esc(it.meta)}</div></div>
+      <div class="miniqty"><button data-action="estDec" data-id="${it.id}">−</button><span>${it.qty}</span><button data-action="estInc" data-id="${it.id}">+</button></div>
+      <div class="ei-price">${money(it.unitBase*it.qty)}</div>
+      <button class="rm" data-action="removeItem" data-id="${it.id}" title="Видалити">✕</button>
+    </div>`).join('');
+  const cl=state.client;
+  const okQuote=cl.name&&cl.phone;
+  return `
+  <div class="page-title"><span class="crumb" data-action="goHome">Калькулятор</span><span class="sep">›</span><b>Кошторис</b></div>
+  <div class="est">
+    <div>
+      <div class="est-list">${rows}</div>
+      <button class="btn ghost" data-action="goHome" style="margin-top:14px">＋ Додати ще позицію</button>
+      <div class="formcard">
+        <div class="plabel" style="margin-bottom:14px">Контактні дані</div>
+        <div class="row">
+          <div class="field"><label>Ім'я <span class="hint">обов'язково</span></label><input class="inp" data-field="client.name" value="${esc(cl.name)}" placeholder="Ім'я"></div>
+          <div class="field"><label>Прізвище</label><input class="inp" data-field="client.surname" value="${esc(cl.surname)}" placeholder="Прізвище"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Телефон <span class="hint">обов'язково</span></label><input class="inp" type="tel" data-field="client.phone" value="${esc(cl.phone)}" placeholder="+380…"></div>
+          <div class="field"><label>Email</label><input class="inp" type="email" data-field="client.email" value="${esc(cl.email)}" placeholder="email@…"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Компанія</label><input class="inp" data-field="client.company" value="${esc(cl.company)}" placeholder="Назва компанії"></div>
+          <div class="field"><label>Менеджер <span class="hint">необов'язково</span></label><input class="inp" data-field="client.manager" value="${esc(cl.manager)}" placeholder="Відповідальний"></div>
+        </div>
+        <div class="field" style="margin-bottom:0"><label>Коментар</label><textarea class="inp" rows="2" data-field="client.comment" placeholder="Побажання, терміни, адреса доставки…">${esc(cl.comment)}</textarea></div>
+      </div>
+    </div>
+    <div class="aside">
+      <div class="summary">
+        <div class="plabel">Підсумок</div>
+        <div class="field" style="margin-top:12px"><label>Цінова категорія</label><select class="inp" data-field="client.priceCat">${PRICE_CATS.map(p=>`<option ${cl.priceCat===p?'selected':''}>${p}</option>`).join('')}</select></div>
+        <div class="lines">
+          <div class="ln"><span>Позицій</span><span>${state.estimate.reduce((a,i)=>a+i.qty,0)}</span></div>
+          <div class="ln"><span>Сума</span><span>${money(t.subtotal)}</span></div>
+          ${t.catF!==1?`<div class="ln"><span>${cl.priceCat}</span><span style="color:var(--ok)">−${money(t.discount)}</span></div>`:''}
+          <div class="ln tot"><span>Разом</span><span>${money(t.total)}</span></div>
+        </div>
+        <button class="btn primary" id="mkq" data-action="makeQuote" ${okQuote?'':'disabled'}>Сформувати КП →</button>
+        <div class="note">${okQuote?'Готово до формування пропозиції.':"Вкажіть ім'я та телефон клієнта."}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---- quote ---- */
+function viewQuote(){
+  const t=estimateTotals();
+  const cl=state.client;
+  const num='КП-'+new Date().getFullYear()+'/'+String(Math.floor(Math.random()*9000+1000));
+  const date=new Date().toLocaleDateString('uk-UA');
+  const rows=state.estimate.map((it,i)=>`<tr><td>${i+1}</td><td><b>${esc(it.title)}</b><br><span style="color:var(--ink-soft);font-size:12.5px">${esc(it.meta)}</span></td>
+    <td class="r">${it.qty}</td><td class="r">${money(it.unitBase)}</td><td class="r">${money(it.unitBase*it.qty)}</td></tr>`).join('');
+  return `
+  <div class="no-print" style="max-width:760px;margin:0 auto 16px;display:flex;gap:10px">
+    <button class="btn ghost" data-action="backFromQuote">← Назад до кошторису</button>
+    <button class="btn primary" style="flex:0 0 auto" data-action="printQuote">🖨 Друк / Зберегти PDF</button>
+  </div>
+  <div class="quote">
+    <div class="qbar">
+      <div class="co"><b>BUDZIRKA</b><div>Постачаємо, оброблюємо та монтуємо</div><div>budzirka.com.ua</div></div>
+      <div class="qn"><b>${num}</b><br>${date}</div>
+    </div>
+    <div class="qbody">
+      <div class="qmeta">
+        <b>Клієнт:</b> ${esc(((cl.name||'')+' '+(cl.surname||'')).trim()||'—')}${cl.company?' · '+esc(cl.company):''}<br>
+        <b>Телефон:</b> ${esc(cl.phone||'—')}${cl.email?' · <b>Email:</b> '+esc(cl.email):''}<br>
+        ${cl.manager?'<b>Менеджер:</b> '+esc(cl.manager)+'<br>':''}<b>Цінова категорія:</b> ${cl.priceCat}${cl.comment?'<br><b>Коментар:</b> '+esc(cl.comment):''}
+      </div>
+      <table>
+        <thead><tr><th>№</th><th>Найменування / конфігурація</th><th class="r">К-сть</th><th class="r">Ціна</th><th class="r">Сума</th></tr></thead>
+        <tbody>${rows}</tbody>
+        ${t.catF!==1?`<tfoot><tr><td colspan="4" class="r">Знижка (${state.client.priceCat})</td><td class="r">−${money(t.discount)}</td></tr></tfoot>`:''}
+      </table>
+      <div class="qtot">Разом: ${money(t.total)}</div>
+      <div class="qterms">
+        Пропозиція дійсна 14 днів з дати формування. Ціни попередні, потребують підтвердження менеджером після перевірки наявності матеріалів на складі. Не є публічною офертою.<br>
+        Дані матеріалів — демонстраційний знімок; у продакшні — актуальні залишки та прайси з 1С.
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   8) ACTIONS
+   ============================================================ */
+function addToEstimate(mod){
+  const c=state[mod];
+  let title,meta,unitBase;
+  if(mod==='cabins'){
+    const p=priceCabins(c); const tp=CABIN_TYPES.find(x=>x.id===c.type); const dec=decorBy(c.decor);
+    const fit=CONFIG.cabins.fittings.find(f=>f.id===c.fittings);
+    title=tp.name;
+    meta=`${c.sections}×${c.sectionWidth} мм · H${c.height} · ${dec?dec.code+' '+dec.name:''} · ${fit?fit.name:''}`;
+    unitBase=p.subtotal;
+  }else{
+    const p=priceCounters(c); const sh=SHAPES.find(x=>x.id===c.shape); const dec=decorBy(c.decor);
+    title='Стільниця '+sh.name;
+    meta=`${p.area.toFixed(2)} м² · ${p.edgeName} · вирізів ${c.cutouts} · ${dec?dec.code+' '+dec.name:''}`;
+    unitBase=p.subtotal;
+  }
+  state.estimate.push({ id:'it'+Date.now()+Math.floor(Math.random()*1000), mod, title, meta, unitBase, qty:1 });
+  toast('Додано до кошторису ✓');
+}
+let toastTimer=null;
+function toast(msg){
+  let el=document.getElementById('toast');
+  if(!el){ el=document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); }
+  el.textContent=msg; requestAnimationFrame(()=>el.classList.add('show'));
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-action]'); if(!el) return;
+  const a=el.dataset.action, mod=el.dataset.mod;
+  switch(a){
+    case 'goHome': state.screen='home'; render(); break;
+    case 'openCabins': state.screen='cabins'; state.cabins.step=0; render(); break;
+    case 'openCounters': state.screen='counters'; state.counters.step=0; render(); break;
+    case 'openEstimate': state.screen='estimate'; render(); break;
+    case 'setStep': state[mod].step=+el.dataset.n; render(); break;
+    case 'next':{ if(!canProceed(mod))break; const st=state[mod]; const max=(mod==='cabins'?CABIN_STEPS:COUNTER_STEPS).length-1; st.step=Math.min(max,st.step+1); render(); break; }
+    case 'prev': state[mod].step=Math.max(0,state[mod].step-1); render(); break;
+    case 'setCabinType': state.cabins.type=el.dataset.id; render(); break;
+    case 'setCabinFittings': state.cabins.fittings=el.dataset.id; render(); break;
+    case 'setShape': state.counters.shape=el.dataset.id; render(); break;
+    case 'setEdge': state.counters.edge=+el.dataset.n; render(); break;
+    case 'setCutouts': state.counters.cutouts=+el.dataset.n; render(); break;
+    case 'setDecor': state[mod].decor=el.dataset.id; render(); break;
+    case 'inc':{ const p=el.dataset.path; setPath(state,p,Math.min(+el.dataset.max||999,getPath(p)+1)); render(); break; }
+    case 'dec':{ const p=el.dataset.path; setPath(state,p,Math.max(+el.dataset.min||0,getPath(p)-1)); render(); break; }
+    case 'addEstimate': addToEstimate(mod); state.screen='estimate'; render(); break;
+    case 'estInc':{ const it=state.estimate.find(x=>x.id===el.dataset.id); if(it){it.qty++; render();} break; }
+    case 'estDec':{ const it=state.estimate.find(x=>x.id===el.dataset.id); if(it){it.qty=Math.max(1,it.qty-1); render();} break; }
+    case 'removeItem': state.estimate=state.estimate.filter(x=>x.id!==el.dataset.id); render(); break;
+    case 'makeQuote': if(state.client.name&&state.client.phone){ state.screen='quote'; render(); } break;
+    case 'backFromQuote': state.screen='estimate'; render(); break;
+    case 'printQuote': window.print(); break;
+  }
+});
+
+function onField(el){
+  const path=el.dataset.field; let v=el.value;
+  if(el.type==='number') v=parseFloat(v)||0;
+  setPath(state,path,v); save();
+  if(path==='client.priceCat'){ render(); return; }
+  if(path.startsWith('client.')){ const b=document.getElementById('mkq'); if(b) b.disabled=!(state.client.name&&state.client.phone);
+    const note=b?b.nextElementSibling:null; if(note) note.textContent=(state.client.name&&state.client.phone)?'Готово до формування пропозиції.':"Вкажіть ім'я та телефон клієнта."; return; }
+  const mod=path.split('.')[0];
+  if(mod==='cabins'||mod==='counters') refreshAside(mod);
+}
+function onFilter(el){
+  const f=el.dataset.filter, mod=el.dataset.mod;
+  if(f==='stock') state.matFilter.stock=el.checked; else state.matFilter[f]=el.value;
+  const g=document.getElementById('swgrid'); if(g) g.innerHTML=swGrid(mod);
+}
+document.addEventListener('input',e=>{ const f=e.target.closest('[data-filter]'); if(f){onFilter(f);return;} const el=e.target.closest('[data-field]'); if(el) onField(el); });
+document.addEventListener('change',e=>{ const f=e.target.closest('[data-filter]'); if(f){onFilter(f);return;} const el=e.target.closest('[data-field]'); if(el) onField(el); });
+
+/* ============================================================
+   9) INIT
+   ============================================================ */
+load();
+render();
+</script>
+</body>
+</html>
