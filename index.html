@@ -230,9 +230,51 @@ input,select,textarea{font-family:inherit;color:inherit}
 .sum-h::after{content:"";flex:1;height:1px;background:var(--border)}
 .sum-h:first-of-type{margin-top:6px}
 .sumgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-.sumcard{background:var(--surface);border-radius:var(--r-sm);padding:11px 14px}
+.sumcard{background:var(--white);border:1px solid var(--border);box-shadow:var(--shadow-sm);border-radius:var(--r-sm);padding:11px 14px}
 .sumcard b{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-mut);margin-bottom:4px;font-weight:600}
-.sumcard .v{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.sumcard .v{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+.sumclient{display:flex;align-items:center;gap:16px;background:var(--white);border:1px solid var(--border);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);padding:16px 18px;flex-wrap:wrap}
+.sumclient .ava{width:46px;height:46px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px;flex:0 0 auto}
+.sumclient .who b{display:block;font-size:16px}
+.sumclient .who span{font-size:13px;color:var(--ink-soft)}
+.sumclient .tags{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.tagchip{font-size:12px;font-weight:600;background:var(--brand-soft);color:var(--brand);padding:5px 12px;border-radius:999px}
+.summat{display:flex;gap:18px;align-items:center;background:var(--white);border:1px solid var(--border);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);padding:16px 18px;flex-wrap:wrap}
+.summat .bigsw{width:88px;height:88px;border-radius:12px;border:1px solid rgba(0,0,0,.08);flex:0 0 auto;position:relative}
+.summat .bigsw span{position:absolute;left:9px;bottom:7px;font-size:11.5px;font-weight:700}
+.summat .mat-info{flex:1;min-width:220px}
+.summat .mat-name{font-weight:700;font-size:16px;margin-bottom:2px}
+.summat .mat-sub{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+.specs{display:flex;gap:8px;flex-wrap:wrap}
+.spec{font-size:12.5px;background:var(--surface);border-radius:999px;padding:5px 12px;color:var(--ink-soft)}
+.spec b{color:var(--ink)}
+.sumroom .sr-body{display:flex;gap:18px;align-items:flex-start}
+.sumroom .sr-rows{flex:1}
+.sumroom .sr-sketch{flex:0 0 200px;border:1px dashed var(--border-2);border-radius:10px;padding:6px;background:var(--bg)}
+.sumroom .sr-sketch svg{width:100%;height:auto;display:block}
+@media (max-width:700px){ .sumroom .sr-sketch{display:none} .sumclient .tags{margin-left:0} }
+/* чекбокси підтвердження */
+.checks{display:flex;flex-direction:column;gap:11px;background:var(--white);border:1px solid var(--border);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);padding:16px 18px}
+.checkrow{display:flex;align-items:flex-start;gap:11px;cursor:pointer;font-size:14px;line-height:1.45;position:relative}
+.checkrow input{position:absolute;opacity:0;width:1px;height:1px}
+.checkrow .box{width:21px;height:21px;border:1.5px solid var(--border-2);border-radius:6px;flex:0 0 auto;display:grid;place-items:center;transition:.15s;background:var(--white);margin-top:1px}
+.checkrow input:checked ~ .box{background:var(--brand);border-color:var(--brand)}
+.checkrow input:checked ~ .box::after{content:"✓";color:#fff;font-size:13px;font-weight:800}
+.checkrow input:focus-visible ~ .box{outline:2.5px solid var(--brand);outline-offset:2px}
+.checkrow a{color:var(--brand);font-weight:600}
+/* гейт на головній */
+.gate{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:28px;max-width:680px}
+.gate h3{margin:0 0 6px;font-size:20px}
+.gate .gsub{margin:0 0 18px;color:var(--ink-soft);font-size:14.5px}
+.benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:18px 0 26px}
+.benefit{display:flex;gap:10px;align-items:flex-start;background:var(--white);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px 15px;font-size:13.5px;line-height:1.4}
+.benefit .bi{width:30px;height:30px;border-radius:9px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:0 0 auto;font-size:15px}
+.benefit b{display:block;font-size:13.5px}
+.benefit span{color:var(--ink-soft);font-size:12.5px}
+.trustline{font-size:12px;color:var(--ink-mut);margin-top:12px;display:flex;align-items:center;gap:7px}
+.client-chip{display:inline-flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--border);border-radius:var(--r-pill);padding:9px 9px 9px 18px;box-shadow:var(--shadow-sm);margin-bottom:22px;font-size:14px}
+.client-chip b{font-weight:700}
+.client-chip .tagchip{margin-left:2px}
 .dot{width:17px;height:17px;border-radius:5px;display:inline-block;border:1px solid rgba(0,0,0,.1);flex:0 0 auto}
 .sumroom{border:1px solid var(--border);border-radius:var(--r-sm);padding:16px 18px;margin-bottom:11px;background:var(--white);box-shadow:var(--shadow-sm)}
 .sumroom .sr-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:11px}
@@ -478,8 +520,8 @@ const DEMO_ACCOUNTS=[
   {id:'demo2', name:'Олена', surname:'Тестова', company:'ФОП Тестова', phone:'0679998877', email:'olena@test.ua', priceCat:'Прайс 3'},
 ];
 
-const CABIN_STEPS=['Контакти','Тип і матеріал','Приміщення','Двері та перегородки','Підсумок'];
-const COUNTER_STEPS=['Контакти','Форма','Розміри','Торець','Вирізи','Матеріал','Підсумок'];
+const CABIN_STEPS=['Тип і матеріал','Приміщення','Двері та перегородки','Підсумок'];
+const COUNTER_STEPS=['Форма','Розміри','Торець','Вирізи','Матеріал','Підсумок'];
 
 /* ============================================================
    2.5) ЛІДИ ТА АНАЛІТИКА (Supabase, ключ insert-only під RLS)
@@ -507,7 +549,8 @@ function submitLead(){
   apiPost('budzirka_leads',{ session_id:SID, quote_number:state.quoteNum||null,
     name:c.name||null, surname:c.surname||null, phone:c.phone||null, email:c.email||null,
     company:c.company||null, manager:c.manager||null, comment:c.comment||null,
-    price_cat:c.priceCat||null, total_eur:Math.round(t.total*100)/100, estimate:state.estimate });
+    price_cat:c.priceCat||null, total_eur:Math.round(t.total*100)/100, estimate:state.estimate,
+    no_call:!!c.noCall, via_messenger:!!c.viaMessenger, terms_ok:!!c.termsOk });
 }
 /* колір тексту на свотчі за яскравістю декору (контраст) */
 function txtOn(hex){
@@ -527,8 +570,9 @@ function defaultRoom(n){
     nStd:3, wStd:650, nInc:0, wInc:900, parts:2, corners:0, pn:3, pw:1000 };
 }
 const defaultState=()=>({
-  screen:'home', prevScreen:'home',
-  client:{ name:'', surname:'', company:'', phone:'', email:'', manager:'', comment:'', priceCat:'Прайс 1', accountId:null },
+  screen:'home', prevScreen:'home', editGate:false,
+  client:{ name:'', surname:'', company:'', phone:'', email:'', manager:'', comment:'', priceCat:'Прайс 1', accountId:null,
+    noCall:false, viaMessenger:false, termsOk:false },
   lookup:{ status:'idle', match:null, dismissed:false },
   cabins:{ step:0, type:'standart', fittings:'inox', decor:'0085', rooms:[defaultRoom(1)], active:0 },
   counters:{ step:0, shape:'I', segs:[{l:2000,w:600},{l:1200,w:600},{l:1200,w:600}], edge:1, cutouts:1, mixer:0, decor:'0599' },
@@ -545,7 +589,10 @@ function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY));
     Object.assign(state.client,s.client||{}); state.estimate=s.estimate||[]; state.quoteNum=s.quoteNum||'';
     if(!state.cabins.rooms||!state.cabins.rooms.length) state.cabins.rooms=[defaultRoom(1)];
     if(state.cabins.active>=state.cabins.rooms.length) state.cabins.active=0;
-    state.cabins.rooms.forEach(r=>{ if(r.corners==null) r.corners=(VIDS.find(v=>v.id===r.vid)||VIDS[0]).sides; }); } }catch(e){} }
+    state.cabins.rooms.forEach(r=>{ if(r.corners==null) r.corners=(VIDS.find(v=>v.id===r.vid)||VIDS[0]).sides; });
+    // кроки могли зміститися між версіями — затискаємо в межі
+    state.cabins.step=Math.min(Math.max(0,state.cabins.step||0),CABIN_STEPS.length-1);
+    state.counters.step=Math.min(Math.max(0,state.counters.step||0),COUNTER_STEPS.length-1); } }catch(e){} }
 function getAccounts(){ let loc=[]; try{ loc=JSON.parse(localStorage.getItem(ACC_KEY))||[]; }catch(e){}
   return DEMO_ACCOUNTS.concat(loc); }
 function saveAccount(a){ let loc=[]; try{ loc=JSON.parse(localStorage.getItem(ACC_KEY))||[]; }catch(e){}
@@ -906,11 +953,45 @@ const ICON_CABIN=`<svg width="30" height="30" viewBox="0 0 24 24" fill="none" st
 const ICON_COUNTER=`<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9h18v3H3z"/><line x1="5" y1="12" x2="5" y2="20"/><line x1="19" y1="12" x2="19" y2="20"/><circle cx="15" cy="10.5" r="1.3"/></svg>`;
 
 function viewHome(){
+  const c=state.client;
+  const gated=!contactOk()||state.editGate;
+  if(gated){
+    const ok=contactOk();
+    return `
+  <div class="hero">
+    <h1>Розрахуйте кабіни та стільниці за 2 хвилини</h1>
+    <p>Професійний конфігуратор BUDZIRKA: жива ціна під час налаштування, реальні залишки складу Fundermax і готова комерційна пропозиція у PDF.</p>
+  </div>
+  <div class="benefits">
+    <div class="benefit"><div class="bi">⚡</div><div><b>Миттєвий розрахунок</b><span>ціна оновлюється з кожним кліком</span></div></div>
+    <div class="benefit"><div class="bi">📦</div><div><b>Реальний склад</b><span>декори з фактичними залишками</span></div></div>
+    <div class="benefit"><div class="bi">📄</div><div><b>КП у PDF</b><span>готовий документ за хвилину</span></div></div>
+    <div class="benefit"><div class="bi">★</div><div><b>Персональні ціни</b><span>постійним клієнтам — Прайс 1–5</span></div></div>
+  </div>
+  <div class="gate">
+    <h3>Представтесь — і переходьте до розрахунку</h3>
+    <p class="gsub">Якщо ви вже клієнт BUDZIRKA, введіть номер телефону — ми впізнаємо вас і застосуємо <b>ваші персональні ціни</b>.</p>
+    <div class="row">
+      <div class="field"><label>Ім'я <span class="hint">обов'язково</span></label><input class="inp" data-field="client.name" value="${esc(c.name)}" placeholder="Ім'я"></div>
+      <div class="field"><label>Прізвище <span class="hint">обов'язково</span></label><input class="inp" data-field="client.surname" value="${esc(c.surname)}" placeholder="Прізвище"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Номер телефону <span class="hint">обов'язково</span></label><input class="inp" type="tel" data-field="client.phone" data-lookup="1" value="${esc(c.phone)}" placeholder="+380…"></div>
+      <div class="field"><label>Email <span class="hint">необов'язково</span></label><input class="inp" type="email" data-field="client.email" data-lookup="1" value="${esc(c.email)}" placeholder="email@…"></div>
+    </div>
+    <div id="acctbox">${acctBoxHtml()}</div>
+    <div class="field"><label>Компанія <span class="hint">необов'язково</span></label><input class="inp" data-field="client.company" value="${esc(c.company)}" placeholder="Назва компанії"></div>
+    <button class="btn primary lg" id="gatego" data-action="gateGo" style="width:100%" ${ok?'':'disabled'}>Перейти до розрахунку →</button>
+    <div class="trustline">🔒 Дані потрібні лише для КП та персональних цін і не передаються третім сторонам.</div>
+  </div>`;
+  }
   return `
   <div class="hero">
     <h1>Конфігуратор виробів</h1>
-    <p>Підберіть конфігурацію та матеріал зі складу, отримайте миттєвий розрахунок і комерційну пропозицію.</p>
+    <p>Оберіть напрямок — ціна рахується наживо, КП формується за хвилину.</p>
   </div>
+  <div class="client-chip">👤 <b>${esc(c.name)} ${esc(c.surname)}</b> <span class="tagchip">${esc(c.priceCat)}</span>
+    <button class="btn-sm" data-action="gateEdit">Змінити</button></div>
   <div class="cards">
     <div class="pcard" data-action="openCabins">
       <div class="ico">${ICON_CABIN}</div>
@@ -959,33 +1040,14 @@ function acctBoxHtml(){
   }
   return '';
 }
-function contactStep(mod){
-  const c=state.client;
-  return `<h2>Контактні дані</h2><p class="sub">Вкажіть контакти — за номером телефону чи email знайдемо ваш акаунт і рівень цін.</p>
-    <div class="row">
-      <div class="field"><label>Ім'я <span class="hint">обов'язково</span></label><input class="inp" data-field="client.name" value="${esc(c.name)}" placeholder="Ім'я"></div>
-      <div class="field"><label>Прізвище <span class="hint">обов'язково</span></label><input class="inp" data-field="client.surname" value="${esc(c.surname)}" placeholder="Прізвище"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Номер телефону <span class="hint">обов'язково</span></label><input class="inp" type="tel" data-field="client.phone" data-lookup="1" value="${esc(c.phone)}" placeholder="+380…"></div>
-      <div class="field"><label>Email</label><input class="inp" type="email" data-field="client.email" data-lookup="1" value="${esc(c.email)}" placeholder="email@…"></div>
-    </div>
-    <div id="acctbox">${acctBoxHtml()}</div>
-    <div class="row">
-      <div class="field"><label>Компанія</label><input class="inp" data-field="client.company" value="${esc(c.company)}" placeholder="Назва компанії"></div>
-      <div class="field"><label>Коментар</label><input class="inp" data-field="client.comment" value="${esc(c.comment)}" placeholder="Побажання, терміни…"></div>
-    </div>
-    <div class="note">Демо: акаунти зберігаються локально у браузері. Реальна клієнтська база (155 клієнтів, рівні Прайс 1–5) під'єднається через захищений бекенд — персональні дані не публікуються в коді сайту.</div>`;
-}
 function contactOk(){ const c=state.client; return c.name.trim()&&c.surname.trim()&&normPhone(c.phone).length>=10; }
 
 /* ---------- wizard ---------- */
 function canProceed(mod){
   const c=state[mod];
-  if(c.step===0) return !!contactOk();
-  if(mod==='cabins'&&c.step===2) return c.rooms.length>0&&c.rooms.every(roomDimsValid);
-  if(mod==='cabins'&&c.step===3) return c.rooms.length>0&&c.rooms.every(roomValid);
-  if(mod==='counters'&&c.step===2){
+  if(mod==='cabins'&&c.step===1) return c.rooms.length>0&&c.rooms.every(roomDimsValid);
+  if(mod==='cabins'&&c.step===2) return c.rooms.length>0&&c.rooms.every(roomValid);
+  if(mod==='counters'&&c.step===1){
     const segs=c.segs.slice(0,SHAPES.find(s=>s.id===c.shape).segs);
     return segs.every(s=>s.l>0&&s.w>0);
   }
@@ -1014,8 +1076,7 @@ function viewWizard(mod){
 function cabinStep(c){
   const type=typeBy(c.type);
   switch(c.step){
-    case 0: return contactStep('cabins');
-    case 1: {
+    case 0: {
       const dec=decorBy(c.decor);
       return `<h2>Тип виробу та матеріал</h2><p class="sub">Висота фіксована для типу. Поверхня — FH, ядро залежить від декору.</p>
       <div class="grid c4">${CABIN_TYPES.map(t=>`<div class="opt ${c.type===t.id?'sel':''}" data-action="setCabinType" data-id="${t.id}">
@@ -1037,9 +1098,9 @@ function cabinStep(c){
         <div class="kv"><b>Фурнітура</b>${FITTINGS[c.fittings]||'—'}</div>
       </div>`;
     }
-    case 2: return roomsStepMain(c,type);
-    case 3: return roomsStepDoors(c,type);
-    case 4: return summaryCabins(c);
+    case 1: return roomsStepMain(c,type);
+    case 2: return roomsStepDoors(c,type);
+    case 3: return summaryCabins(c);
   }
 }
 function roomTabs(c){
@@ -1152,33 +1213,44 @@ function summaryCabins(c){
         <div><span>Висота</span><span>${p.type.h} мм</span></div>
         <div><span>Площа деталей</span><span>${x.area.toFixed(2)} м²</span></div>`;
     }
+    const sketch=isCab?`<div class="sr-sketch">${sketchTopView({facade:r.facade,depth:r.depth,vid:r.vid,cabs:cabsOf(r),parts:r.parts,labeled:false})}</div>`:'';
     return `<div class="sumroom">
       <div class="sr-head">
         <div class="sr-title">${esc(r.name)} <span class="sr-tag">${kindName}</span></div>
         <div class="sr-price">${money2(x.cost)}</div>
       </div>
-      <div class="sr-rows">${rows}</div>
+      <div class="sr-body">
+        <div class="sr-rows">${rows}</div>
+        ${sketch}
+      </div>
     </div>`;
   }).join('');
+  const init=((cl.name||'?').trim()[0]||'?').toUpperCase();
   return `<h2>Підсумок розрахунку</h2><p class="sub">Перевірте замовлення перед додаванням до кошторису.</p>
     <div class="sum-h">Клієнт</div>
-    <div class="sumgrid">
-      <div class="sumcard"><b>Ім'я</b><span class="v">${esc(cl.name)} ${esc(cl.surname)}</span></div>
-      <div class="sumcard"><b>Телефон</b><span class="v">${esc(cl.phone||'—')}</span></div>
-      ${cl.email?`<div class="sumcard"><b>Email</b><span class="v">${esc(cl.email)}</span></div>`:''}
-      ${cl.company?`<div class="sumcard"><b>Компанія</b><span class="v">${esc(cl.company)}</span></div>`:''}
-      <div class="sumcard"><b>Цінова категорія</b><span class="v">${esc(cl.priceCat)}</span></div>
+    <div class="sumclient">
+      <div class="ava">${esc(init)}</div>
+      <div class="who"><b>${esc(cl.name)} ${esc(cl.surname)}</b>
+        <span>${esc(cl.phone||'—')}${cl.email?' · '+esc(cl.email):''}${cl.company?' · '+esc(cl.company):''}</span></div>
+      <div class="tags"><span class="tagchip">${esc(cl.priceCat)}</span>${cl.accountId?'<span class="tagchip">постійний клієнт</span>':''}</div>
     </div>
     <div class="sum-h">Виріб та матеріал</div>
-    <div class="sumgrid">
-      <div class="sumcard"><b>Тип виробу</b><span class="v">${p.type.name}</span></div>
-      <div class="sumcard"><b>Фурнітура</b><span class="v">${FITTINGS[c.fittings]}</span></div>
-      <div class="sumcard"><b>Декор</b><span class="v"><span class="dot" style="background:${dec?dec.hex:'#ccc'}"></span>${dec?dec.code+' '+dec.name:'—'}</span></div>
-      <div class="sumcard"><b>Поверхня</b><span class="v">FH</span></div>
-      <div class="sumcard"><b>Колір ядра</b><span class="v">${dec?dec.core:'—'}</span></div>
+    <div class="summat">
+      <div class="bigsw" style="background:${dec?dec.hex:'#ccc'}"><span style="color:${txtOn(dec?dec.hex:'#ccc')}">${dec?dec.code:''}</span></div>
+      <div class="mat-info">
+        <div class="mat-name">${dec?dec.code+' '+dec.name:'—'}</div>
+        <div class="mat-sub">HPL Fundermax · поверхня FH · ${dec?dec.core:'—'}</div>
+        <div class="specs">
+          <span class="spec">Тип: <b>${p.type.name}</b></span>
+          <span class="spec">Фурнітура: <b>${FITTINGS[c.fittings]}</b></span>
+          <span class="spec">Висота: <b>${p.type.h} мм</b></span>
+          <span class="spec">${dec&&dec.stock>0?'В наявності: <b>'+dec.stock+' л.</b>':'Під замовлення'}</span>
+        </div>
+      </div>
     </div>
     <div class="sum-h">Приміщення (${p.rooms.length})</div>
     ${rooms}
+    ${confirmChecks()}
     <div class="totband">
       <div class="tb-l">Разом площа деталей: <b>${p.area.toFixed(2)} м²</b><br>Ставка: <b>${CONFIG.cabins.ratePerM2} €/м²</b></div>
       <div>
@@ -1188,15 +1260,25 @@ function summaryCabins(c){
     </div>`;
 }
 
+/* чекбокси підтвердження (підсумок) */
+function confirmChecks(){
+  const c=state.client;
+  return `<div class="sum-h">Підтвердження та зв'язок</div>
+  <div class="checks">
+    <label class="checkrow"><input type="checkbox" data-field="client.noCall" ${c.noCall?'checked':''}><span class="box"></span><span>Не дзвоніть мені, я впевнений у замовленні</span></label>
+    <label class="checkrow"><input type="checkbox" data-field="client.viaMessenger" ${c.viaMessenger?'checked':''}><span class="box"></span><span>Зв'язатися через месенджери (Telegram, Viber та інші)</span></label>
+    <label class="checkrow"><input type="checkbox" data-field="client.termsOk" ${c.termsOk?'checked':''}><span class="box"></span><span>Я прочитав <a href="https://budzirka.com.ua/" target="_blank" rel="noopener">Умови оформлення замовлення</a> і згоден з умовами</span></label>
+  </div>`;
+}
+
 /* ---------- COUNTERS ---------- */
 function counterStep(c){
   const shape=SHAPES.find(s=>s.id===c.shape);
   switch(c.step){
-    case 0: return contactStep('counters');
-    case 1: return `<h2>Форма стільниці</h2><p class="sub">Виберіть конфігурацію.</p>
+    case 0: return `<h2>Форма стільниці</h2><p class="sub">Виберіть конфігурацію.</p>
       <div class="grid c3">${SHAPES.map(s=>`<div class="opt ${c.shape===s.id?'sel':''}" data-action="setShape" data-id="${s.id}">
         <div class="t">${s.name}</div><div class="d">${s.desc}</div></div>`).join('')}</div>`;
-    case 2:{ let f='';
+    case 1:{ let f='';
       for(let i=0;i<shape.segs;i++){
         f+=`<div class="field"><label>Сегмент СТ${i+1} <span class="hint">довжина × глибина, мм</span></label>
           <div class="row">
@@ -1206,17 +1288,17 @@ function counterStep(c){
       }
       return `<h2>Розміри сегментів</h2><p class="sub">Габарити кожної частини стільниці.</p>${f}
         <div class="note">Сумарна площа: <b>${priceCounters(c).area.toFixed(2)} м²</b> · розкрій у форматах листів (4100×640, 2040×640, 2040×1300) — наступна фаза.</div>`;}
-    case 3: return `<h2>Обробка торця</h2><p class="sub">Реальні ставки обробки з прайсу (за м.п.).</p>
+    case 2: return `<h2>Обробка торця</h2><p class="sub">Реальні ставки обробки з прайсу (за м.п.).</p>
       <div class="grid c3">${EDGES.map(e=>`<div class="opt ${c.edge===e.n?'sel':''}" data-action="setEdge" data-n="${e.n}">
         <div class="t">${e.name}</div><div class="d">${e.desc}</div>
         <div class="d" style="color:var(--brand);margin-top:4px;font-weight:600">${e.rate} €/м.п.</div></div>`).join('')}</div>`;
-    case 4: return `<h2>Вирізи та отвори</h2><p class="sub">Фрезерування під мийку/варильну поверхню та отвори.</p>
+    case 3: return `<h2>Вирізи та отвори</h2><p class="sub">Фрезерування під мийку/варильну поверхню та отвори.</p>
       <div class="row">
         <div class="field"><label>Вирізи (мийка / варильна) <span class="hint">${CONFIG.counters.cutoutFee} € за шт</span></label>${stepper('counters.cutouts',c.cutouts,0,6)}</div>
         <div class="field"><label>Отвори під змішувач <span class="hint">${CONFIG.counters.mixerHoleFee} € за шт</span></label>${stepper('counters.mixer',c.mixer,0,6)}</div>
       </div>`;
-    case 5: return materialStep(c,'counters');
-    case 6: return summaryCounters(c);
+    case 4: return materialStep(c,'counters');
+    case 5: return summaryCounters(c);
   }
 }
 function summaryCounters(c){
@@ -1256,6 +1338,7 @@ function summaryCounters(c){
         <div><span>Отвори під змішувач</span><span>${c.mixer?c.mixer+' шт · '+money2(p.mixCost):'—'}</span></div>
       </div>
     </div>
+    ${confirmChecks()}
     <div class="totband">
       <div class="tb-l">Площа: <b>${p.area.toFixed(2)} м²</b> · Декор: <b>${p.dec?p.dec.code:''}</b></div>
       <div>
@@ -1298,18 +1381,6 @@ function renderAside(mod){
   const c=state[mod];
   const steps=isC?CABIN_STEPS:COUNTER_STEPS;
   const last=c.step===steps.length-1;
-  if(c.step===0){ // контакти: без ціни
-    const ok=canProceed(mod);
-    return `
-    <div class="summary">
-      <div class="plabel">Розрахунок</div>
-      <div class="aside-hint" style="font-size:13.5px;color:var(--ink-soft);margin:10px 0 4px;line-height:1.55">Вартість з'явиться після вибору конфігурації.</div>
-      <div class="nav no-print">
-        <button class="btn primary" data-action="next" data-mod="${mod}" ${ok?'':'disabled'}>Далі →</button>
-      </div>
-      ${!ok?`<div class="note err" role="alert">Вкажіть ім'я, прізвище і телефон.</div>`:''}
-    </div>`;
-  }
   let sketch,lines,subtotal;
   if(isC){
     const p=priceCabins(c);
@@ -1317,7 +1388,7 @@ function renderAside(mod){
     const r=c.rooms[c.active]||c.rooms[0];
     const dec=decorBy(c.decor);
     sketch=sketchRoom(r,p.type,dec?dec.hex:'#9aa3a8');
-    if(r&&r.kind==='каб'&&c.step>=2){
+    if(r&&r.kind==='каб'&&c.step>=1){
       sketch+=`<div class="ttl" style="margin-top:14px">Вид зверху · ${esc((VIDS.find(v=>v.id===r.vid)||VIDS[0]).name)}</div>`
         +sketchTopView({facade:r.facade,depth:r.depth,vid:r.vid,cabs:cabsOf(r),parts:r.parts,labeled:false});
     }
@@ -1333,6 +1404,19 @@ function renderAside(mod){
       ${p.cutCost?`<div class="ln"><span>Вирізи ×${c.cutouts}</span><span>${money(p.cutCost)}</span></div>`:''}
       ${p.mixCost?`<div class="ln"><span>Змішувач ×${c.mixer}</span><span>${money(p.mixCost)}</span></div>`:''}
       <div class="ln tot"><span>За позицію</span><span>${money2(subtotal)}</span></div>`;
+  }
+  if(c.step===0){ // тип/форма: прев'ю без ціни — вартість з кроку «Приміщення»/«Розміри»
+    state._last[mod]=subtotal;
+    const ok0=canProceed(mod);
+    return `
+  <div class="preview"><div class="ttl">Конфігурація</div>${sketch}</div>
+  <div class="summary">
+    <div class="plabel">Розрахунок</div>
+    <div class="aside-hint" style="font-size:13.5px;color:var(--ink-soft);margin:10px 0 4px;line-height:1.55">Орієнтовна вартість з'явиться на кроці «${isC?'Приміщення':'Розміри'}».</div>
+    <div class="nav no-print">
+      <button class="btn primary" data-action="next" data-mod="${mod}" ${ok0?'':'disabled'}>Далі →</button>
+    </div>
+  </div>`;
   }
   const prev=state._last[mod];
   const bump=prev!==undefined&&Math.round(prev)!==Math.round(subtotal)?'bump':'';
@@ -1352,7 +1436,7 @@ function renderAside(mod){
         ? `<button class="btn primary" data-action="addEstimate" data-mod="${mod}">＋ До кошторису</button>`
         : `<button class="btn primary" data-action="next" data-mod="${mod}" ${ok?'':'disabled'}>Далі →</button>`}
     </div>
-    ${!ok?`<div class="note err" role="alert">${c.step===0?"Вкажіть ім'я, прізвище і телефон.":"Перевірте параметри — є помилки."}</div>`:`<div class="note">Ціни з бази CALCULATOR (EUR). Залишки — знімок складу; живий зв'язок з 1С — наступна фаза.</div>`}
+    ${!ok?`<div class="note err" role="alert">Перевірте параметри — є помилки.</div>`:`<div class="note">Ціни з бази CALCULATOR (EUR). Залишки — знімок складу; живий зв'язок з 1С — наступна фаза.</div>`}
   </div>`;
 }
 function refreshAside(mod){ const el=document.getElementById('aside'); if(el){ el.innerHTML=renderAside(mod); animPrice(); } }
@@ -1438,6 +1522,7 @@ function viewQuote(){
         <b>Клієнт:</b> ${esc(((cl.name||'')+' '+(cl.surname||'')).trim()||'—')}${cl.company?' · '+esc(cl.company):''}<br>
         <b>Телефон:</b> ${esc(cl.phone||'—')}${cl.email?' · <b>Email:</b> '+esc(cl.email):''}<br>
         ${cl.manager?'<b>Менеджер:</b> '+esc(cl.manager)+'<br>':''}<b>Цінова категорія:</b> ${esc(cl.priceCat)}${cl.comment?'<br><b>Коментар:</b> '+esc(cl.comment):''}
+        ${(cl.noCall||cl.viaMessenger)?'<br><b>Зв’язок:</b> '+[cl.viaMessenger?'месенджери (Telegram/Viber)':'',cl.noCall?'просив не дзвонити':''].filter(Boolean).join(' · '):''}
       </div>
       <table>
         <thead><tr><th>№</th><th>Найменування / конфігурація</th><th class="r">К-сть</th><th class="r">Ціна</th><th class="r">Сума</th></tr></thead>
@@ -1494,6 +1579,10 @@ document.addEventListener('click',e=>{
   const cb=state.cabins;
   switch(a){
     case 'goHome': state.screen='home'; render(); break;
+    case 'gateGo': if(contactOk()){ state.editGate=false;
+      track('gate_submitted',{returning:!!state.client.accountId}); render(); }
+      else toast("Заповніть ім'я, прізвище і телефон"); break;
+    case 'gateEdit': state.editGate=true; state.screen='home'; render(); break;
     case 'openCabins': state.screen='cabins'; track('product_selected',{product:'cabins'}); render(); break;
     case 'openCounters': state.screen='counters'; track('product_selected',{product:'counters'}); render(); break;
     case 'openEstimate': state.screen='estimate'; render(); break;
@@ -1552,7 +1641,8 @@ function syncParts(path){
 }
 function onField(el){
   const path=el.dataset.field; let v=el.value;
-  if(el.type==='number') v=parseFloat(v)||0;
+  if(el.type==='checkbox') v=!!el.checked;
+  else if(el.type==='number') v=parseFloat(v)||0;
   setPath(state,path,v); save();
   if(el.dataset.lookup){ state.lookup.dismissed=false; refreshAcctBox(); }
   if(path==='client.priceCat'){ render(); return; }
@@ -1560,6 +1650,7 @@ function onField(el){
     const b=document.getElementById('mkq');
     if(b){ b.disabled=!contactOk();
       const note=b.nextElementSibling; if(note) note.textContent=contactOk()?'Готово до формування пропозиції.':"Вкажіть ім'я, прізвище та телефон."; }
+    const g=document.getElementById('gatego'); if(g) g.disabled=!contactOk();
     const aside=document.getElementById('aside'); if(aside){ const mod=state.screen; if(mod==='cabins'||mod==='counters') refreshAside(mod); }
     updateAcct(); return;
   }
