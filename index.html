@@ -248,6 +248,10 @@ input,select,textarea{font-family:inherit;color:inherit}
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(24px);opacity:0;background:var(--ink);color:#fff;padding:13px 22px;border-radius:var(--r-pill);font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:60;transition:.28s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+.only-mobile{display:none}
+.schemebox-d summary{cursor:pointer;font-size:13px;color:var(--brand);font-weight:600;padding:8px 0 2px;user-select:none}
+.qtools{max-width:780px;margin:0 auto 16px;display:flex;gap:10px}
+
 @media (max-width:920px){
   .wizard,.est{grid-template-columns:1fr}
   .cards{grid-template-columns:1fr}
@@ -256,12 +260,102 @@ input,select,textarea{font-family:inherit;color:inherit}
   .hero h1{font-size:27px}
   .acct-chip{display:none}
 }
+
+/* ============ мобільна версія (тачскрін, 360–560px) ============ */
+@media (max-width:560px){
+  .wrap{padding:18px 14px 120px}
+  .topbar{padding:11px 14px}
+  .panel{padding:20px 16px;min-height:0}
+  .panel h2{font-size:19px}
+  .hero h1{font-size:24px}
+  .hero p{font-size:14.5px}
+  .pcard{padding:22px 18px}
+  .only-mobile{display:block}
+
+  /* степер кроків: один рядок зі свайпом */
+  .steps{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+    margin:0 -14px 16px;padding:2px 14px;scroll-snap-type:x proximity}
+  .steps::-webkit-scrollbar{display:none}
+  .steps .st{flex:0 0 auto;scroll-snap-align:start;min-height:40px}
+
+  /* форми в одну колонку (пара "довжина × глибина" сегмента лишається поруч) */
+  .row,.row.c3{grid-template-columns:1fr}
+  .field .row{grid-template-columns:1fr 1fr}
+
+  /* картки вибору */
+  .grid.c3{grid-template-columns:repeat(2,1fr)}
+
+  /* фіксована нижня панель: ціна + CTA в зоні великого пальця */
+  .wizard .aside .summary,.est .aside .summary{
+    position:fixed;left:0;right:0;bottom:0;z-index:45;margin:0;
+    border-radius:18px 18px 0 0;border:none;border-top:1px solid var(--border);
+    box-shadow:0 -8px 30px rgba(21,36,32,.18);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center}
+  .wizard .aside .summary .plabel,.wizard .aside .summary .uah,.wizard .aside .summary .lines{display:none}
+  .wizard .aside .summary .price{grid-column:1;grid-row:1;font-size:21px}
+  .wizard .aside .summary .nav,.summary .aside-nav{grid-column:2;grid-row:1;margin:0}
+  .wizard .aside .summary .note{grid-column:1/-1;margin-top:4px;padding:6px 9px}
+  .wizard .aside .summary .aside-hint{grid-column:1;grid-row:1;font-size:12px;margin:0;line-height:1.3}
+  .est .aside .summary .plabel,.est .aside .summary .field,.est .aside .summary .lines .ln:not(.tot){display:none}
+  .est .aside .summary .lines{margin:0;padding:0;border:none;grid-column:1;grid-row:1;gap:2px}
+  .est .aside .summary .btn{grid-column:2;grid-row:1}
+  .est .aside .summary .note{grid-column:1/-1;margin-top:4px;padding:6px 9px}
+  /* прев'ю лишається у потоці; другий SVG (вид зверху) ховаємо для компактності */
+  .preview div.ttl:nth-of-type(2),.preview svg:nth-of-type(2){display:none}
+
+  /* тач-цілі ≥44px */
+  .chip{padding:11px 16px}
+  .stepper button{height:44px}
+  .stepper input{height:44px}
+  .roomtab{padding:10px 14px}
+  .roomtab .x{padding:6px 8px;margin:-4px -2px}
+  .btn{min-height:48px}
+
+  /* кошторис: рядок позиції у дві лінії */
+  .est-item{flex-wrap:wrap;row-gap:10px;padding:14px 16px}
+  .est-item .ei-main{flex:1 1 100%}
+  .est-item .ei-price{order:3;margin-left:auto}
+  .miniqty{order:2}
+  .miniqty button{width:38px;height:38px}
+  .est-item .rm{order:4;width:38px;height:38px}
+
+  /* КП: документ без горизонтального скролу, таблиця → картки */
+  .quote .qbar{flex-direction:column;gap:10px;padding:18px}
+  .quote .qbar .qn{text-align:left}
+  .quote .qbody{padding:18px 16px 26px}
+  .quote .qtot{font-size:20px}
+  .quote table,.quote thead,.quote tbody,.quote tr,.quote td,.quote tfoot{display:block;width:auto}
+  .quote thead{display:none}
+  .quote tr{border-bottom:1px solid var(--surface-2);padding:10px 0}
+  .quote td{border:none;padding:2px 0;display:flex;justify-content:space-between;gap:14px}
+  .quote td:first-child{display:none}
+  .quote td[data-l]::before{content:attr(data-l);color:var(--ink-mut);font-size:12px}
+  /* панель дій КП — знизу */
+  .qtools{position:fixed;left:0;right:0;bottom:0;z-index:45;max-width:none;margin:0;
+    background:var(--white);border-top:1px solid var(--border);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 30px rgba(21,36,32,.18)}
+  .qtools .btn{flex:1}
+}
+@media (max-width:400px){
+  .grid.c3,.grid.c4{grid-template-columns:1fr}
+  .logo span{display:none}
+}
 @media print{
   .topbar,.no-print{display:none!important}
   body{background:#fff}
   .wrap{padding:0;max-width:none}
   .quote{border:none;box-shadow:none;max-width:none;border-radius:0}
-  .quote .qbar{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .quote .qbar{-webkit-print-color-adjust:exact;print-color-adjust:exact;flex-direction:row}
+  .quote table{display:table;width:100%}
+  .quote thead{display:table-header-group}
+  .quote tbody{display:table-row-group}
+  .quote tfoot{display:table-footer-group}
+  .quote tr{display:table-row;padding:0;border:none}
+  .quote td,.quote th{display:table-cell}
+  .quote td:first-child{display:table-cell}
+  .quote td[data-l]::before{display:none;content:none}
 }
 </style>
 </head>
@@ -715,6 +809,10 @@ function render(){
   else if(state.screen==='estimate') app.innerHTML=viewEstimate();
   else if(state.screen==='quote') app.innerHTML=viewQuote();
   updateCart(); updateAcct(); save();
+  if((state.screen==='cabins'||state.screen==='counters')&&app.querySelector){
+    const ac=app.querySelector('.steps .st.active');
+    if(ac&&ac.scrollIntoView) try{ ac.scrollIntoView({inline:'center',block:'nearest'}); }catch(e){}
+  }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function updateCart(){
@@ -899,7 +997,10 @@ function roomsStepMain(c,type){
     <h4>Вид</h4>
     <div class="grid c3">${VIDS.map(v=>`<div class="opt ${r.vid===v.id?'sel':''}" data-action="roomVid" data-id="${v.id}">
       <div class="t">${v.name}</div><div class="d">${v.desc}</div></div>`).join('')}</div>
-    <div class="schemebox">${explainScheme(r.vid)}</div>
+    <details class="schemebox-d" ${(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:560px)').matches)?'':'open'}>
+      <summary>Схема виду «${(VIDS.find(v=>v.id===r.vid)||VIDS[0]).name}»</summary>
+      <div class="schemebox" style="margin-top:6px">${explainScheme(r.vid)}</div>
+    </details>
     <h4>Розміри</h4>
     <div class="row c3">
       <div class="field"><label>Висота <span class="hint">фіксована типом</span></label><input class="inp" readonly value="${type.h} мм"></div>
@@ -1130,7 +1231,7 @@ function renderAside(mod){
     return `
     <div class="summary">
       <div class="plabel">Розрахунок</div>
-      <div style="font-size:13.5px;color:var(--ink-soft);margin:10px 0 4px;line-height:1.55">Вартість з'явиться після вибору конфігурації на наступних кроках.</div>
+      <div class="aside-hint" style="font-size:13.5px;color:var(--ink-soft);margin:10px 0 4px;line-height:1.55">Вартість з'явиться після вибору конфігурації.</div>
       <div class="nav no-print">
         <button class="btn primary" data-action="next" data-mod="${mod}" ${ok?'':'disabled'}>Далі →</button>
       </div>
@@ -1218,6 +1319,7 @@ function viewEstimate(){
           <div class="field"><label>Компанія</label><input class="inp" data-field="client.company" value="${esc(cl.company)}"></div>
           <div class="field"><label>Менеджер</label><input class="inp" data-field="client.manager" value="${esc(cl.manager)}"></div>
         </div>
+        <div class="field only-mobile"><label>Цінова категорія</label><select class="inp" data-field="client.priceCat">${PRICE_CATS.map(p=>`<option ${cl.priceCat===p?'selected':''}>${p}</option>`).join('')}</select></div>
         <div class="field" style="margin-bottom:0"><label>Коментар</label><textarea class="inp" rows="2" data-field="client.comment">${esc(cl.comment)}</textarea></div>
       </div>
     </div>
@@ -1246,9 +1348,9 @@ function viewQuote(){
   const num='КП-'+new Date().getFullYear()+'/'+String(Math.floor(Math.random()*9000+1000));
   const date=new Date().toLocaleDateString('uk-UA');
   const rows=state.estimate.map((it,i)=>`<tr><td>${i+1}</td><td><b>${esc(it.title)}</b><br><span style="color:var(--ink-soft);font-size:12.5px;white-space:pre-line">${esc(it.meta)}</span></td>
-    <td class="r">${it.qty}</td><td class="r">${money2(it.unitBase)}</td><td class="r">${money2(it.unitBase*it.qty)}</td></tr>`).join('');
+    <td class="r" data-l="К-сть">${it.qty}</td><td class="r" data-l="Ціна">${money2(it.unitBase)}</td><td class="r" data-l="Сума">${money2(it.unitBase*it.qty)}</td></tr>`).join('');
   return `
-  <div class="no-print" style="max-width:780px;margin:0 auto 16px;display:flex;gap:10px">
+  <div class="qtools no-print">
     <button class="btn ghost" data-action="backFromQuote">← Назад до кошторису</button>
     <button class="btn primary" style="flex:0 0 auto" data-action="printQuote">🖨 Друк / Зберегти PDF</button>
   </div>
