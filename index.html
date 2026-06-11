@@ -217,6 +217,31 @@ input,select,textarea{font-family:inherit;color:inherit}
 .quote .quah{text-align:right;font-size:13px;color:var(--ink-mut)}
 .quote .qterms{margin-top:22px;font-size:12px;color:var(--ink-mut);border-top:1px solid var(--surface-2);padding-top:14px;line-height:1.6}
 
+/* ---- summary (підсумок) ---- */
+.sum-h{display:flex;align-items:center;gap:10px;margin:24px 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-mut)}
+.sum-h::after{content:"";flex:1;height:1px;background:var(--border)}
+.sum-h:first-of-type{margin-top:6px}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.sumcard{background:var(--surface);border-radius:var(--r-sm);padding:11px 14px}
+.sumcard b{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-mut);margin-bottom:4px;font-weight:600}
+.sumcard .v{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.dot{width:17px;height:17px;border-radius:5px;display:inline-block;border:1px solid rgba(0,0,0,.1);flex:0 0 auto}
+.sumroom{border:1px solid var(--border);border-radius:var(--r-sm);padding:16px 18px;margin-bottom:11px;background:var(--white);box-shadow:var(--shadow-sm)}
+.sumroom .sr-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:11px}
+.sumroom .sr-title{font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px}
+.sumroom .sr-tag{font-size:11px;font-weight:600;background:var(--brand-soft);color:var(--brand);padding:3px 10px;border-radius:999px}
+.sumroom .sr-price{font-weight:800;font-size:16px;white-space:nowrap}
+.sr-rows{display:grid;grid-template-columns:1fr 1fr;gap:5px 22px;font-size:13px}
+.sr-rows>div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--surface-2);padding:4.5px 0}
+.sr-rows span:first-child{color:var(--ink-soft)}
+.sr-rows span:last-child{font-weight:600}
+.totband{background:var(--brand);color:#fff;border-radius:var(--r-sm);padding:17px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap}
+.totband .tb-l{font-size:13px;color:#cfe0e1;line-height:1.6}
+.totband .tb-l b{color:#fff}
+.totband .tb-sum{font-size:26px;font-weight:800;text-align:right}
+.totband .tb-uah{font-size:12.5px;color:#cfe0e1;text-align:right}
+@media (max-width:560px){ .sr-rows{grid-template-columns:1fr} }
+
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(24px);opacity:0;background:var(--ink);color:#fff;padding:13px 22px;border-radius:var(--r-pill);font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:60;transition:.28s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -351,7 +376,7 @@ const DEMO_ACCOUNTS=[
   {id:'demo2', name:'Олена', surname:'Тестова', company:'ФОП Тестова', phone:'0679998877', email:'olena@test.ua', priceCat:'Прайс 3'},
 ];
 
-const CABIN_STEPS=['Контакти','Тип і матеріал','Приміщення','Підсумок'];
+const CABIN_STEPS=['Контакти','Тип і матеріал','Приміщення','Двері та перегородки','Підсумок'];
 const COUNTER_STEPS=['Контакти','Форма','Розміри','Торець','Вирізи','Матеріал','Підсумок'];
 
 /* ============================================================
@@ -422,6 +447,11 @@ function roomArea(room, type){
   return (room.pn||1)*pw*H;
 }
 function roomCost(room,type){ return roomArea(room,type)*CONFIG.cabins.ratePerM2; }
+function roomDimsValid(room){
+  if(room.kind!=='каб') return (room.pn||0)>=1 && (room.pw||0)>=100;
+  const c=CONFIG.cabins;
+  return room.depth>=c.depthMin&&room.depth<=c.depthMax&&room.facade>=c.cabinMinWidth;
+}
 function roomValid(room){
   if(room.kind!=='каб') return (room.pn||0)>=1 && (room.pw||0)>=100;
   const c=CONFIG.cabins;
@@ -676,7 +706,8 @@ function contactOk(){ const c=state.client; return c.name.trim()&&c.surname.trim
 function canProceed(mod){
   const c=state[mod];
   if(c.step===0) return !!contactOk();
-  if(mod==='cabins'&&c.step===2) return c.rooms.length>0&&c.rooms.every(roomValid);
+  if(mod==='cabins'&&c.step===2) return c.rooms.length>0&&c.rooms.every(roomDimsValid);
+  if(mod==='cabins'&&c.step===3) return c.rooms.length>0&&c.rooms.every(roomValid);
   if(mod==='counters'&&c.step===2){
     const segs=c.segs.slice(0,SHAPES.find(s=>s.id===c.shape).segs);
     return segs.every(s=>s.l>0&&s.w>0);
@@ -729,18 +760,26 @@ function cabinStep(c){
         <div class="kv"><b>Фурнітура</b>${FITTINGS[c.fittings]||'—'}</div>
       </div>`;
     }
-    case 2: return roomsStep(c,type);
-    case 3: return summaryCabins(c);
+    case 2: return roomsStepMain(c,type);
+    case 3: return roomsStepDoors(c,type);
+    case 4: return summaryCabins(c);
   }
 }
-function roomsStep(c,type){
-  const r=c.rooms[c.active];
-  const tabs=c.rooms.map((rm,i)=>`<div class="roomtab ${i===c.active?'sel':''}" data-action="roomSel" data-n="${i}">
+function roomTabs(c){
+  return `<div class="roomtabs">`+c.rooms.map((rm,i)=>`<div class="roomtab ${i===c.active?'sel':''}" data-action="roomSel" data-n="${i}">
       ${esc(rm.name)} ${c.rooms.length>1?`<span class="x" data-action="roomDel" data-n="${i}">✕</span>`:''}</div>`).join('')
-    +`<div class="roomtab add" data-action="roomAdd">＋ Приміщення</div>`;
-  if(!r) return tabs;
+    +`<div class="roomtab add" data-action="roomAdd">＋ Приміщення</div></div>`;
+}
+function roomFooter(r,type){
+  return `<div class="kvrow">
+    <div class="kv"><b>Площа деталей</b>${roomArea(r,type).toFixed(2)} м²</div>
+    <div class="kv"><b>Вартість приміщення</b>${money2(roomCost(r,type))}</div>
+  </div>`;
+}
+function roomsStepMain(c,type){
+  const r=c.rooms[c.active];
+  if(!r) return roomTabs(c);
   const isCab=r.kind==='каб';
-  const prob=roomProblem(r);
   const f='cabins.rooms.'+c.active+'.';
   let body=`
     <div class="row">
@@ -760,7 +799,33 @@ function roomsStep(c,type){
         <input class="inp ${r.depth<CONFIG.cabins.depthMin||r.depth>CONFIG.cabins.depthMax?'bad':''}" type="number" step="50" data-field="${f}depth" value="${r.depth}"></div>
       <div class="field"><label>Довжина фасаду <span class="hint">мм</span></label>
         <input class="inp" type="number" step="100" data-field="${f}facade" value="${r.facade}"></div>
+    </div>`;
+  }else{
+    body+=`
+    <h4>Панелі</h4>
+    <div class="row">
+      <div class="field"><label>Кількість панелей</label>${stepper(f+'pn',r.pn,1,10)}</div>
+      <div class="field"><label>Ширина панелі <span class="hint">мм</span></label>
+        <input class="inp" type="number" step="50" data-field="${f}pw" value="${r.pw}"></div>
     </div>
+    <div class="note">Висота панелі — за типом виробу (${type.h} мм).</div>`;
+  }
+  return `<h2>Приміщення</h2><p class="sub">Одна позиція може містити кілька приміщень — як у поточному калькуляторі.</p>
+    ${roomTabs(c)}${body}${roomFooter(r,type)}`;
+}
+function roomsStepDoors(c,type){
+  const r=c.rooms[c.active];
+  if(!r) return roomTabs(c);
+  const f='cabins.rooms.'+c.active+'.';
+  if(r.kind!=='каб'){
+    return `<h2>Двері та перегородки</h2><p class="sub">${esc(r.name)}: для цього типу двері не передбачені.</p>
+      ${roomTabs(c)}
+      <div class="infocard">Тип «${ROOM_KINDS.find(k=>k.id===r.kind).name}» складається з панелей — їх кількість і ширину задано на кроці «Приміщення».</div>
+      ${roomFooter(r,type)}`;
+  }
+  const prob=roomProblem(r);
+  return `<h2>Двері та перегородки</h2><p class="sub">${esc(r.name)}: мінімальна ширина однієї кабінки — ${CONFIG.cabins.cabinMinWidth} мм.</p>
+    ${roomTabs(c)}
     <h4>Двері · стандарт</h4>
     <div class="row">
       <div class="field"><label>Кількість</label>${stepper(f+'nStd',r.nStd,0,12)}</div>
@@ -775,51 +840,66 @@ function roomsStep(c,type){
     </div>
     <h4>Перегородки</h4>
     <div class="field"><label>Міжкабінні, кількість <span class="hint">зазвичай: кабінок − 1</span></label>${stepper(f+'parts',r.parts,0,20)}</div>
-    ${prob?`<div class="note err">${esc(prob)}</div>`:''}`;
-  }else{
-    body+=`
-    <h4>Панелі</h4>
-    <div class="row">
-      <div class="field"><label>Кількість панелей</label>${stepper(f+'pn',r.pn,1,10)}</div>
-      <div class="field"><label>Ширина панелі <span class="hint">мм</span></label>
-        <input class="inp" type="number" step="50" data-field="${f}pw" value="${r.pw}"></div>
-    </div>
-    <div class="note">Висота панелі — за типом виробу (${type.h} мм).</div>`;
-  }
-  const area=roomArea(r,type);
-  body+=`<div class="kvrow">
-    <div class="kv"><b>Площа деталей</b>${area.toFixed(2)} м²</div>
-    <div class="kv"><b>Вартість приміщення</b>${money2(roomCost(r,type))}</div>
-  </div>`;
-  return `<h2>Приміщення</h2><p class="sub">Одна позиція може містити кілька приміщень — як у поточному калькуляторі.</p>
-    <div class="roomtabs">${tabs}</div>${body}`;
+    ${prob?`<div class="note err">${esc(prob)}</div>`:''}
+    ${roomFooter(r,type)}`;
 }
 function summaryCabins(c){
   const p=priceCabins(c);
   const dec=decorBy(c.decor);
-  const rooms=p.rooms.map((x,i)=>{
+  const cl=state.client;
+  const rooms=p.rooms.map(x=>{
     const r=x.room; const isCab=r.kind==='каб';
-    const det=isCab
-      ? `${VIDS.find(v=>v.id===r.vid).name} · фасад ${r.facade} мм · глибина ${r.depth} мм · двері: ${r.nStd?r.nStd+'×'+r.wStd:''}${r.nStd&&r.nInc?' + ':''}${r.nInc?r.nInc+'×'+r.wInc+' (інклюзив)':''} · перегородок ${r.parts}`
-      : `${ROOM_KINDS.find(k=>k.id===r.kind).name} · ${r.pn} панелей × ${r.pw} мм`;
-    return `<div class="est-item"><div class="ei-main"><div class="ei-title">${esc(r.name)}</div>
-      <div class="ei-meta">${det}\nПлоща деталей: ${x.area.toFixed(2)} м²</div></div>
-      <div class="ei-price">${money2(x.cost)}</div></div>`;
+    const kindName=ROOM_KINDS.find(k=>k.id===r.kind).name;
+    let rows='';
+    if(isCab){
+      rows=`
+        <div><span>Вид</span><span>${VIDS.find(v=>v.id===r.vid).name}</span></div>
+        <div><span>Висота</span><span>${p.type.h} мм</span></div>
+        <div><span>Довжина фасаду</span><span>${r.facade.toLocaleString('uk-UA')} мм</span></div>
+        <div><span>Глибина</span><span>${r.depth.toLocaleString('uk-UA')} мм</span></div>
+        <div><span>Двері стандарт</span><span>${r.nStd?r.nStd+' шт × '+r.wStd+' мм':'—'}</span></div>
+        <div><span>Двері інклюзив</span><span>${r.nInc?r.nInc+' шт × '+r.wInc+' мм':'—'}</span></div>
+        <div><span>Міжкабінні перегородки</span><span>${r.parts} шт</span></div>
+        <div><span>Площа деталей</span><span>${x.area.toFixed(2)} м²</span></div>`;
+    }else{
+      rows=`
+        <div><span>Панелі</span><span>${r.pn} шт × ${r.pw} мм</span></div>
+        <div><span>Висота</span><span>${p.type.h} мм</span></div>
+        <div><span>Площа деталей</span><span>${x.area.toFixed(2)} м²</span></div>`;
+    }
+    return `<div class="sumroom">
+      <div class="sr-head">
+        <div class="sr-title">${esc(r.name)} <span class="sr-tag">${kindName}</span></div>
+        <div class="sr-price">${money2(x.cost)}</div>
+      </div>
+      <div class="sr-rows">${rows}</div>
+    </div>`;
   }).join('');
-  return `<h2>Підсумок розрахунку</h2><p class="sub">Перевірте конфігурацію перед додаванням до кошторису.</p>
-    <div class="kvrow" style="margin-bottom:14px">
-      <div class="kv"><b>Тип</b>${p.type.name}</div>
-      <div class="kv"><b>Фурнітура</b>${FITTINGS[c.fittings]}</div>
-      <div class="kv"><b>Декор</b>${dec?dec.code+' '+dec.name:'—'}</div>
-      <div class="kv"><b>Поверхня</b>FH</div>
-      <div class="kv"><b>Колір ядра</b>${dec?dec.core:'—'}</div>
-      <div class="kv"><b>Клієнт</b>${esc(state.client.name)} ${esc(state.client.surname)}</div>
+  return `<h2>Підсумок розрахунку</h2><p class="sub">Перевірте замовлення перед додаванням до кошторису.</p>
+    <div class="sum-h">Клієнт</div>
+    <div class="sumgrid">
+      <div class="sumcard"><b>Ім'я</b><span class="v">${esc(cl.name)} ${esc(cl.surname)}</span></div>
+      <div class="sumcard"><b>Телефон</b><span class="v">${esc(cl.phone||'—')}</span></div>
+      ${cl.email?`<div class="sumcard"><b>Email</b><span class="v">${esc(cl.email)}</span></div>`:''}
+      ${cl.company?`<div class="sumcard"><b>Компанія</b><span class="v">${esc(cl.company)}</span></div>`:''}
+      <div class="sumcard"><b>Цінова категорія</b><span class="v">${esc(cl.priceCat)}</span></div>
     </div>
-    <div class="est-list">${rooms}</div>
-    <div class="kvrow">
-      <div class="kv"><b>Разом площа</b>${p.area.toFixed(2)} м²</div>
-      <div class="kv"><b>Ставка</b>${CONFIG.cabins.ratePerM2} €/м²</div>
-      <div class="kv"><b>Разом</b>${money2(p.subtotal)} (${uah(p.subtotal)})</div>
+    <div class="sum-h">Виріб та матеріал</div>
+    <div class="sumgrid">
+      <div class="sumcard"><b>Тип виробу</b><span class="v">${p.type.name}</span></div>
+      <div class="sumcard"><b>Фурнітура</b><span class="v">${FITTINGS[c.fittings]}</span></div>
+      <div class="sumcard"><b>Декор</b><span class="v"><span class="dot" style="background:${dec?dec.hex:'#ccc'}"></span>${dec?dec.code+' '+dec.name:'—'}</span></div>
+      <div class="sumcard"><b>Поверхня</b><span class="v">FH</span></div>
+      <div class="sumcard"><b>Колір ядра</b><span class="v">${dec?dec.core:'—'}</span></div>
+    </div>
+    <div class="sum-h">Приміщення (${p.rooms.length})</div>
+    ${rooms}
+    <div class="totband">
+      <div class="tb-l">Разом площа деталей: <b>${p.area.toFixed(2)} м²</b><br>Ставка: <b>${CONFIG.cabins.ratePerM2} €/м²</b></div>
+      <div>
+        <div class="tb-sum">${money2(p.subtotal)}</div>
+        <div class="tb-uah">${uah(p.subtotal)}</div>
+      </div>
     </div>`;
 }
 
@@ -857,23 +937,45 @@ function counterStep(c){
 function summaryCounters(c){
   const p=priceCounters(c);
   const sh=SHAPES.find(x=>x.id===c.shape);
-  return `<h2>Підсумок розрахунку</h2><p class="sub">Перевірте конфігурацію перед додаванням до кошторису.</p>
-    <div class="kvrow" style="margin-bottom:14px">
-      <div class="kv"><b>Форма</b>${sh.name}</div>
-      <div class="kv"><b>Площа</b>${p.area.toFixed(2)} м²</div>
-      <div class="kv"><b>Декор</b>${p.dec?p.dec.code+' '+p.dec.name:'—'}</div>
-      <div class="kv"><b>Поверхня</b>${p.dec?p.dec.surf:'FH'}</div>
-      <div class="kv"><b>Колір ядра</b>${p.dec?p.dec.core:'—'}</div>
-      <div class="kv"><b>Торець</b>${p.edgeName}</div>
-      <div class="kv"><b>Клієнт</b>${esc(state.client.name)} ${esc(state.client.surname)}</div>
+  const cl=state.client;
+  const segs=c.segs.slice(0,sh.segs);
+  const segRows=segs.map((s,i)=>`<div><span>Сегмент СТ${i+1}</span><span>${s.l} × ${s.w} мм</span></div>`).join('');
+  return `<h2>Підсумок розрахунку</h2><p class="sub">Перевірте замовлення перед додаванням до кошторису.</p>
+    <div class="sum-h">Клієнт</div>
+    <div class="sumgrid">
+      <div class="sumcard"><b>Ім'я</b><span class="v">${esc(cl.name)} ${esc(cl.surname)}</span></div>
+      <div class="sumcard"><b>Телефон</b><span class="v">${esc(cl.phone||'—')}</span></div>
+      ${cl.email?`<div class="sumcard"><b>Email</b><span class="v">${esc(cl.email)}</span></div>`:''}
+      ${cl.company?`<div class="sumcard"><b>Компанія</b><span class="v">${esc(cl.company)}</span></div>`:''}
+      <div class="sumcard"><b>Цінова категорія</b><span class="v">${esc(cl.priceCat)}</span></div>
     </div>
-    <div class="summary" style="box-shadow:none;border:1px solid var(--border)">
-      <div class="lines" style="margin-top:0;border-top:none;padding-top:0">
-        <div class="ln"><span>Матеріал (${p.area.toFixed(2)} м² × ${p.m2} €)</span><span>${money2(p.material)}</span></div>
-        <div class="ln"><span>Торець (${p.edgeM.toFixed(2)} м × ${p.edgeRate} €)</span><span>${money2(p.edgeCost)}</span></div>
-        ${p.cutCost?`<div class="ln"><span>Вирізи ×${c.cutouts}</span><span>${money2(p.cutCost)}</span></div>`:''}
-        ${p.mixCost?`<div class="ln"><span>Отвори під змішувач ×${c.mixer}</span><span>${money2(p.mixCost)}</span></div>`:''}
-        <div class="ln tot"><span>Разом</span><span>${money2(p.subtotal)} (${uah(p.subtotal)})</span></div>
+    <div class="sum-h">Виріб та матеріал</div>
+    <div class="sumgrid">
+      <div class="sumcard"><b>Форма</b><span class="v">${sh.name}</span></div>
+      <div class="sumcard"><b>Декор</b><span class="v"><span class="dot" style="background:${p.dec?p.dec.hex:'#ccc'}"></span>${p.dec?p.dec.code+' '+p.dec.name:'—'}</span></div>
+      <div class="sumcard"><b>Поверхня</b><span class="v">${p.dec?p.dec.surf:'FH'}</span></div>
+      <div class="sumcard"><b>Колір ядра</b><span class="v">${p.dec?p.dec.core:'—'}</span></div>
+      <div class="sumcard"><b>Торець</b><span class="v">${p.edgeName}</span></div>
+    </div>
+    <div class="sum-h">Конфігурація</div>
+    <div class="sumroom">
+      <div class="sr-head">
+        <div class="sr-title">Стільниця ${sh.name} <span class="sr-tag">${p.area.toFixed(2)} м²</span></div>
+        <div class="sr-price">${money2(p.subtotal)}</div>
+      </div>
+      <div class="sr-rows">
+        ${segRows}
+        <div><span>Матеріал (${p.area.toFixed(2)} м² × ${p.m2} €)</span><span>${money2(p.material)}</span></div>
+        <div><span>Торець (${p.edgeM.toFixed(2)} м × ${p.edgeRate} €)</span><span>${money2(p.edgeCost)}</span></div>
+        <div><span>Вирізи</span><span>${c.cutouts?c.cutouts+' шт · '+money2(p.cutCost):'—'}</span></div>
+        <div><span>Отвори під змішувач</span><span>${c.mixer?c.mixer+' шт · '+money2(p.mixCost):'—'}</span></div>
+      </div>
+    </div>
+    <div class="totband">
+      <div class="tb-l">Площа: <b>${p.area.toFixed(2)} м²</b> · Декор: <b>${p.dec?p.dec.code:''}</b></div>
+      <div>
+        <div class="tb-sum">${money2(p.subtotal)}</div>
+        <div class="tb-uah">${uah(p.subtotal)}</div>
       </div>
     </div>`;
 }
@@ -911,6 +1013,18 @@ function renderAside(mod){
   const c=state[mod];
   const steps=isC?CABIN_STEPS:COUNTER_STEPS;
   const last=c.step===steps.length-1;
+  if(c.step===0){ // контакти: без ціни
+    const ok=canProceed(mod);
+    return `
+    <div class="summary">
+      <div class="plabel">Розрахунок</div>
+      <div style="font-size:13.5px;color:var(--ink-soft);margin:10px 0 4px;line-height:1.55">Вартість з'явиться після вибору конфігурації на наступних кроках.</div>
+      <div class="nav no-print">
+        <button class="btn primary" data-action="next" data-mod="${mod}" ${ok?'':'disabled'}>Далі →</button>
+      </div>
+      ${!ok?`<div class="note err">Вкажіть ім'я, прізвище і телефон.</div>`:''}
+    </div>`;
+  }
   let sketch,lines,subtotal;
   if(isC){
     const p=priceCabins(c);
