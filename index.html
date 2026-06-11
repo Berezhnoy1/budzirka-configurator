@@ -809,11 +809,17 @@ function render(){
   else if(state.screen==='estimate') app.innerHTML=viewEstimate();
   else if(state.screen==='quote') app.innerHTML=viewQuote();
   updateCart(); updateAcct(); save();
-  if((state.screen==='cabins'||state.screen==='counters')&&app.querySelector){
-    const ac=app.querySelector('.steps .st.active');
-    if(ac&&ac.scrollIntoView) try{ ac.scrollIntoView({inline:'center',block:'nearest'}); }catch(e){}
+  // скрол угору — лише при переході на інший екран/крок, не при виборі опцій
+  const st=state[state.screen];
+  const viewKey=state.screen+':'+(st&&typeof st.step==='number'?st.step:'');
+  if(viewKey!==render._last){
+    render._last=viewKey;
+    if((state.screen==='cabins'||state.screen==='counters')&&app.querySelector){
+      const ac=app.querySelector('.steps .st.active');
+      if(ac&&ac.scrollIntoView) try{ ac.scrollIntoView({inline:'center',block:'nearest'}); }catch(e){}
+    }
+    window.scrollTo({top:0,behavior:'smooth'});
   }
-  window.scrollTo({top:0,behavior:'smooth'});
 }
 function updateCart(){
   const el=document.getElementById('cart'); if(!el) return;
