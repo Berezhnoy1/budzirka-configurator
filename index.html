@@ -12,7 +12,7 @@
 <style>
 :root{
   --brand:#274C4F; --brand-2:#456A6D; --brand-3:#42504b;
-  --ink:#152420; --ink-soft:#3c4a46; --ink-mut:#7c8b86;
+  --ink:#152420; --ink-soft:#3c4a46; --ink-mut:#5f6f6a;
   --bg:#FBFCFC; --surface:#EEF4F5; --surface-2:#E2EDEF; --white:#ffffff;
   --border:#dbe6e6; --border-2:#cddbdb; --brand-soft:#e6f0f0;
   --ok:#2e7d5b; --ok-soft:#e4f2ea; --warn:#9a6b12; --warn-soft:#f4ecda;
@@ -29,6 +29,11 @@ body{font-family:var(--font);color:var(--ink);background:var(--surface);line-hei
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 input,select,textarea{font-family:inherit;color:inherit}
 ::selection{background:var(--brand);color:#fff}
+:focus-visible{outline:2.5px solid var(--brand);outline-offset:2px;border-radius:6px}
+.topbar :focus-visible,.totband :focus-visible{outline-color:#fff}
+.opt:active,.sw:active,.pcard:active,.chip:active,.roomtab:active,.steps .st:active{transform:scale(.985)}
+.summary .price,.summary .lines,.ei-price,.sr-price,.quote td.r,.quote .qtot,.totband .tb-sum{font-variant-numeric:tabular-nums}
+.preview{background-image:radial-gradient(var(--surface-2) 1.1px,transparent 1.1px);background-size:15px 15px}
 
 .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
   background:var(--brand);color:#fff;padding:13px 24px;box-shadow:0 2px 18px rgba(21,36,32,.16)}
@@ -200,7 +205,7 @@ input,select,textarea{font-family:inherit;color:inherit}
 .formcard textarea.inp{resize:vertical;min-height:46px}
 
 .quote{max-width:780px;margin:0 auto;background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
-.quote .qbar{background:var(--brand);color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:flex-start}
+.quote .qbar{background:var(--brand);color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:4px solid var(--brand-2)}
 .quote .qbar .co b{font-size:22px;letter-spacing:.5px}
 .quote .qbar .co div{font-size:12.5px;color:#cfe0e1;margin-top:3px}
 .quote .qbar .qn{text-align:right;font-size:13px}
@@ -477,6 +482,42 @@ const CABIN_STEPS=['Контакти','Тип і матеріал','Приміщ
 const COUNTER_STEPS=['Контакти','Форма','Розміри','Торець','Вирізи','Матеріал','Підсумок'];
 
 /* ============================================================
+   2.5) ЛІДИ ТА АНАЛІТИКА (Supabase, ключ insert-only під RLS)
+   ============================================================ */
+const LEADS_API={
+  url:'https://eymmfzpcuuibufondxfv.supabase.co/rest/v1',
+  key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bW1menBjdXVpYnVmb25keGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNjM0ODMsImV4cCI6MjA5MzYzOTQ4M30.4LqMeLcuCGRBaXcEQJI6T0B01LpL_zTXghdIbV2JY9E'
+};
+const SID=(function(){ try{
+  let s=localStorage.getItem('budzirka_sid');
+  if(!s){ s='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,10); localStorage.setItem('budzirka_sid',s); }
+  return s; }catch(e){ return 's'+Date.now().toString(36); } })();
+function apiPost(table,row){
+  try{
+    if(typeof fetch==='undefined') return;
+    fetch(LEADS_API.url+'/'+table,{ method:'POST', keepalive:true,
+      headers:{ 'Content-Type':'application/json', 'apikey':LEADS_API.key,
+        'Authorization':'Bearer '+LEADS_API.key, 'Prefer':'return=minimal' },
+      body:JSON.stringify(row) }).catch(function(){});
+  }catch(e){}
+}
+function track(event,props){ apiPost('budzirka_events',{session_id:SID,event:event,props:props||{}}); }
+function submitLead(){
+  const c=state.client, t=estimateTotals();
+  apiPost('budzirka_leads',{ session_id:SID, quote_number:state.quoteNum||null,
+    name:c.name||null, surname:c.surname||null, phone:c.phone||null, email:c.email||null,
+    company:c.company||null, manager:c.manager||null, comment:c.comment||null,
+    price_cat:c.priceCat||null, total_eur:Math.round(t.total*100)/100, estimate:state.estimate });
+}
+/* колір тексту на свотчі за яскравістю декору (контраст) */
+function txtOn(hex){
+  const h=String(hex||'').replace('#','');
+  if(h.length<6) return '#fff';
+  const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);
+  return (0.299*r+0.587*g+0.114*b)>165?'#3c4a46':'#ffffff';
+}
+
+/* ============================================================
    3) STATE
    ============================================================ */
 const KEY='budzirka_cfg_v3';
@@ -492,15 +533,16 @@ const defaultState=()=>({
   cabins:{ step:0, type:'standart', fittings:'inox', decor:'0085', rooms:[defaultRoom(1)], active:0 },
   counters:{ step:0, shape:'I', segs:[{l:2000,w:600},{l:1200,w:600},{l:1200,w:600}], edge:1, cutouts:1, mixer:0, decor:'0599' },
   estimate:[],
+  quoteNum:'',
   matFilter:{ search:'', stock:false },
   _last:{},
 });
 let state=defaultState();
-function save(){ try{ const{cabins,counters,client,estimate}=state;
-  localStorage.setItem(KEY,JSON.stringify({cabins,counters,client,estimate})); }catch(e){} }
+function save(){ try{ const{cabins,counters,client,estimate,quoteNum}=state;
+  localStorage.setItem(KEY,JSON.stringify({cabins,counters,client,estimate,quoteNum})); }catch(e){} }
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY));
   if(s){ Object.assign(state.cabins,s.cabins||{}); Object.assign(state.counters,s.counters||{});
-    Object.assign(state.client,s.client||{}); state.estimate=s.estimate||[];
+    Object.assign(state.client,s.client||{}); state.estimate=s.estimate||[]; state.quoteNum=s.quoteNum||'';
     if(!state.cabins.rooms||!state.cabins.rooms.length) state.cabins.rooms=[defaultRoom(1)];
     if(state.cabins.active>=state.cabins.rooms.length) state.cabins.active=0;
     state.cabins.rooms.forEach(r=>{ if(r.corners==null) r.corners=(VIDS.find(v=>v.id===r.vid)||VIDS[0]).sides; }); } }catch(e){} }
@@ -809,17 +851,41 @@ function render(){
   else if(state.screen==='estimate') app.innerHTML=viewEstimate();
   else if(state.screen==='quote') app.innerHTML=viewQuote();
   updateCart(); updateAcct(); save();
+  a11y(); animPrice();
   // скрол угору — лише при переході на інший екран/крок, не при виборі опцій
   const st=state[state.screen];
   const viewKey=state.screen+':'+(st&&typeof st.step==='number'?st.step:'');
   if(viewKey!==render._last){
     render._last=viewKey;
+    if(state.screen==='cabins'||state.screen==='counters') track('step_viewed',{product:state.screen,step:st.step});
+    else track('screen_viewed',{screen:state.screen});
     if((state.screen==='cabins'||state.screen==='counters')&&app.querySelector){
       const ac=app.querySelector('.steps .st.active');
       if(ac&&ac.scrollIntoView) try{ ac.scrollIntoView({inline:'center',block:'nearest'}); }catch(e){}
     }
     window.scrollTo({top:0,behavior:'smooth'});
   }
+}
+/* клавіатурна доступність: усі клікабельні div-и стають фокусованими кнопками */
+function a11y(){
+  if(!app.querySelectorAll) return;
+  app.querySelectorAll('[data-action]:not(button):not(a):not(input):not(select)').forEach(el=>{
+    el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+  });
+}
+/* плавний "доїзд" цифри ціни до нового значення */
+function animPrice(){
+  const a=state._anim; state._anim=null;
+  if(!a||typeof window==='undefined'||!window.requestAnimationFrame||typeof performance==='undefined') return;
+  if(!document.querySelector) return;
+  const el=document.querySelector('#aside .summary .price');
+  if(!el) return;
+  const t0=performance.now(), dur=300;
+  (function tick(t){
+    const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3);
+    el.textContent=money2(a.from+(a.to-a.from)*e);
+    if(k<1) window.requestAnimationFrame(tick);
+  })(t0);
 }
 function updateCart(){
   const el=document.getElementById('cart'); if(!el) return;
@@ -1058,7 +1124,7 @@ function roomsStepDoors(c,type){
       <div class="field"><label>Міжкабінні, кількість <span class="hint">зазвичай: кабінок − 1</span></label>${stepper(f+'parts',r.parts,0,20)}</div>
       <div class="field"><label>Кутові, кількість <span class="hint">за видом: ${(VIDS.find(v=>v.id===r.vid)||VIDS[0]).sides}</span></label>${stepper(f+'corners',r.corners,0,10)}</div>
     </div>
-    ${prob?`<div class="note err">${esc(prob)}</div>`:''}
+    ${prob?`<div class="note err" role="alert">${esc(prob)}</div>`:''}
     ${roomFooter(r,type)}`;
 }
 function summaryCabins(c){
@@ -1206,7 +1272,7 @@ function swGrid(mod){
   if(!list.length) return `<div class="empty">Нічого не знайдено за фільтром.</div>`;
   const c=state[mod];
   return `<div class="swatches">${list.map(x=>`<div class="sw ${c.decor===x.code?'sel':''}" data-action="setDecor" data-mod="${mod}" data-id="${x.code}">
-    <div class="chipc" style="background:${x.hex}">${x.surf!=='FH'?x.surf:''}</div>
+    <div class="chipc" style="background:${x.hex};color:${txtOn(x.hex)};text-shadow:none">${x.surf!=='FH'?x.surf:''}</div>
     <div class="meta"><div class="code">${x.code}</div><div class="nm">${esc(x.name)}</div>
       <span class="badge ${x.stock>0?'in':'out'}">${x.stock>0?'В наявності: '+x.stock+' л.':'Під замовлення'}</span></div></div>`).join('')}</div>`;
 }
@@ -1241,7 +1307,7 @@ function renderAside(mod){
       <div class="nav no-print">
         <button class="btn primary" data-action="next" data-mod="${mod}" ${ok?'':'disabled'}>Далі →</button>
       </div>
-      ${!ok?`<div class="note err">Вкажіть ім'я, прізвище і телефон.</div>`:''}
+      ${!ok?`<div class="note err" role="alert">Вкажіть ім'я, прізвище і телефон.</div>`:''}
     </div>`;
   }
   let sketch,lines,subtotal;
@@ -1268,7 +1334,9 @@ function renderAside(mod){
       ${p.mixCost?`<div class="ln"><span>Змішувач ×${c.mixer}</span><span>${money(p.mixCost)}</span></div>`:''}
       <div class="ln tot"><span>За позицію</span><span>${money2(subtotal)}</span></div>`;
   }
-  const bump=state._last[mod]!==undefined&&Math.round(state._last[mod])!==Math.round(subtotal)?'bump':'';
+  const prev=state._last[mod];
+  const bump=prev!==undefined&&Math.round(prev)!==Math.round(subtotal)?'bump':'';
+  if(bump) state._anim={from:prev,to:subtotal};
   state._last[mod]=subtotal;
   const ok=canProceed(mod);
   return `
@@ -1284,10 +1352,10 @@ function renderAside(mod){
         ? `<button class="btn primary" data-action="addEstimate" data-mod="${mod}">＋ До кошторису</button>`
         : `<button class="btn primary" data-action="next" data-mod="${mod}" ${ok?'':'disabled'}>Далі →</button>`}
     </div>
-    ${!ok?`<div class="note err">${c.step===0?"Вкажіть ім'я, прізвище і телефон.":"Перевірте параметри — є помилки."}</div>`:`<div class="note">Ціни з бази CALCULATOR (EUR). Залишки — знімок складу; живий зв'язок з 1С — наступна фаза.</div>`}
+    ${!ok?`<div class="note err" role="alert">${c.step===0?"Вкажіть ім'я, прізвище і телефон.":"Перевірте параметри — є помилки."}</div>`:`<div class="note">Ціни з бази CALCULATOR (EUR). Залишки — знімок складу; живий зв'язок з 1С — наступна фаза.</div>`}
   </div>`;
 }
-function refreshAside(mod){ const el=document.getElementById('aside'); if(el) el.innerHTML=renderAside(mod); }
+function refreshAside(mod){ const el=document.getElementById('aside'); if(el){ el.innerHTML=renderAside(mod); animPrice(); } }
 
 /* ---------- estimate ---------- */
 function viewEstimate(){
@@ -1351,7 +1419,7 @@ function viewEstimate(){
 function viewQuote(){
   const t=estimateTotals();
   const cl=state.client;
-  const num='КП-'+new Date().getFullYear()+'/'+String(Math.floor(Math.random()*9000+1000));
+  const num=state.quoteNum||'КП-'+new Date().getFullYear()+'/—';
   const date=new Date().toLocaleDateString('uk-UA');
   const rows=state.estimate.map((it,i)=>`<tr><td>${i+1}</td><td><b>${esc(it.title)}</b><br><span style="color:var(--ink-soft);font-size:12.5px;white-space:pre-line">${esc(it.meta)}</span></td>
     <td class="r" data-l="К-сть">${it.qty}</td><td class="r" data-l="Ціна">${money2(it.unitBase)}</td><td class="r" data-l="Сума">${money2(it.unitBase*it.qty)}</td></tr>`).join('');
@@ -1408,6 +1476,7 @@ function addToEstimate(mod){
     unitBase=p.subtotal;
   }
   state.estimate.push({ id:'it'+Date.now()+Math.floor(Math.random()*1000), mod, title, meta, unitBase, qty:1 });
+  track('add_to_estimate',{product:mod,total:Math.round(unitBase)});
   toast('Додано до кошторису ✓');
 }
 let toastTimer=null;
@@ -1425,8 +1494,8 @@ document.addEventListener('click',e=>{
   const cb=state.cabins;
   switch(a){
     case 'goHome': state.screen='home'; render(); break;
-    case 'openCabins': state.screen='cabins'; render(); break;
-    case 'openCounters': state.screen='counters'; render(); break;
+    case 'openCabins': state.screen='cabins'; track('product_selected',{product:'cabins'}); render(); break;
+    case 'openCounters': state.screen='counters'; track('product_selected',{product:'counters'}); render(); break;
     case 'openEstimate': state.screen='estimate'; render(); break;
     case 'setStep':{ const m=el.dataset.mod, n=+el.dataset.n, st=state[m];
       if(n>st.step&&!canProceed(m))break; st.step=n; render(); break; }
@@ -1452,9 +1521,14 @@ document.addEventListener('click',e=>{
     case 'estInc':{ const it=state.estimate.find(x=>x.id===el.dataset.id); if(it){it.qty++; render();} break; }
     case 'estDec':{ const it=state.estimate.find(x=>x.id===el.dataset.id); if(it){it.qty=Math.max(1,it.qty-1); render();} break; }
     case 'removeItem': state.estimate=state.estimate.filter(x=>x.id!==el.dataset.id); render(); break;
-    case 'makeQuote': if(contactOk()){ state.prevScreen='estimate'; state.screen='quote'; render(); } break;
+    case 'makeQuote': if(contactOk()){
+      state.quoteNum='КП-'+new Date().getFullYear()+'/'+String(Math.floor(Math.random()*9000+1000));
+      state.prevScreen='estimate'; state.screen='quote';
+      track('quote_generated',{quote:state.quoteNum,total:Math.round(estimateTotals().total)});
+      submitLead();
+      render(); } break;
     case 'backFromQuote': state.screen='estimate'; render(); break;
-    case 'printQuote': window.print(); break;
+    case 'printQuote': track('quote_printed',{quote:state.quoteNum}); window.print(); break;
     case 'acctYes':{ const acc=getAccounts().find(x=>x.id===el.dataset.id);
       if(acc){ Object.assign(state.client,{name:acc.name,surname:acc.surname||'',phone:acc.phone||state.client.phone,
         email:acc.email||state.client.email,company:acc.company||'',priceCat:acc.priceCat||'Прайс 1',accountId:acc.id});
@@ -1495,8 +1569,13 @@ function onField(el){
 function onFilter(el){
   const f=el.dataset.filter, mod=el.dataset.mod;
   if(f==='stock') state.matFilter.stock=el.checked; else state.matFilter[f]=el.value;
-  const g=document.getElementById('swgrid'); if(g) g.innerHTML=swGrid(mod);
+  const g=document.getElementById('swgrid'); if(g){ g.innerHTML=swGrid(mod); a11y(); }
 }
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.getAttribute&&e.target.getAttribute('role')==='button'){
+    e.preventDefault(); e.target.click();
+  }
+});
 document.addEventListener('input',e=>{ const f=e.target.closest('[data-filter]'); if(f){onFilter(f);return;} const el=e.target.closest('[data-field]'); if(el) onField(el); });
 document.addEventListener('change',e=>{ const f=e.target.closest('[data-filter]'); if(f){onFilter(f);return;} const el=e.target.closest('[data-field]'); if(el) onField(el); });
 
@@ -1505,6 +1584,7 @@ document.addEventListener('change',e=>{ const f=e.target.closest('[data-filter]'
    ============================================================ */
 load();
 render();
+track('session_start',{device:(typeof window!=='undefined'&&window.innerWidth&&window.innerWidth<=560)?'mobile':'desktop'});
 </script>
 </body>
 </html>
