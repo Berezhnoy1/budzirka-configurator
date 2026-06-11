@@ -217,6 +217,9 @@ input,select,textarea{font-family:inherit;color:inherit}
 .quote .quah{text-align:right;font-size:13px;color:var(--ink-mut)}
 .quote .qterms{margin-top:22px;font-size:12px;color:var(--ink-mut);border-top:1px solid var(--surface-2);padding-top:14px;line-height:1.6}
 
+.schemebox{border:1px solid var(--border);border-radius:var(--r-sm);background:var(--white);padding:12px 14px;margin-top:13px;box-shadow:var(--shadow-sm);animation:fade .25s ease}
+.schemebox svg{display:block;width:100%;max-width:430px;height:auto;margin:0 auto}
+
 /* ---- summary (підсумок) ---- */
 .sum-h{display:flex;align-items:center;gap:10px;margin:24px 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-mut)}
 .sum-h::after{content:"";flex:1;height:1px;background:var(--border)}
@@ -386,7 +389,7 @@ const KEY='budzirka_cfg_v3';
 const ACC_KEY='budzirka_accounts_v1';
 function defaultRoom(n){
   return { name:'Приміщення №'+n, kind:'каб', vid:'між', depth:1200, facade:4000,
-    nStd:3, wStd:650, nInc:0, wInc:900, parts:2, pn:3, pw:1000 };
+    nStd:3, wStd:650, nInc:0, wInc:900, parts:2, corners:0, pn:3, pw:1000 };
 }
 const defaultState=()=>({
   screen:'home', prevScreen:'home',
@@ -405,7 +408,8 @@ function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY));
   if(s){ Object.assign(state.cabins,s.cabins||{}); Object.assign(state.counters,s.counters||{});
     Object.assign(state.client,s.client||{}); state.estimate=s.estimate||[];
     if(!state.cabins.rooms||!state.cabins.rooms.length) state.cabins.rooms=[defaultRoom(1)];
-    if(state.cabins.active>=state.cabins.rooms.length) state.cabins.active=0; } }catch(e){} }
+    if(state.cabins.active>=state.cabins.rooms.length) state.cabins.active=0;
+    state.cabins.rooms.forEach(r=>{ if(r.corners==null) r.corners=(VIDS.find(v=>v.id===r.vid)||VIDS[0]).sides; }); } }catch(e){} }
 function getAccounts(){ let loc=[]; try{ loc=JSON.parse(localStorage.getItem(ACC_KEY))||[]; }catch(e){}
   return DEMO_ACCOUNTS.concat(loc); }
 function saveAccount(a){ let loc=[]; try{ loc=JSON.parse(localStorage.getItem(ACC_KEY))||[]; }catch(e){}
@@ -439,8 +443,7 @@ function roomArea(room, type){
   const H=(type?type.h:2100)/1000;
   if(room.kind==='каб'){
     const facade=room.facade/1000, depth=room.depth/1000;
-    const sides=(VIDS.find(v=>v.id===room.vid)||VIDS[0]).sides;
-    return facade*H + (room.parts||0)*depth*H + sides*depth*H;
+    return facade*H + ((room.parts||0)+(room.corners||0))*depth*H;
   }
   // душові/пісуарні: n панелей × (ширина × висота типу)
   const pw=(room.pw||1000)/1000;
@@ -564,6 +567,110 @@ function sketchRoom(room,type,decorHex){
     <line x1="${x0}" y1="${(y0+fh+18).toFixed(1)}" x2="${(x0+fw).toFixed(1)}" y2="${(y0+fh+18).toFixed(1)}" stroke="var(--border-2)" stroke-width="1"/>
     <text x="${(x0+fw/2).toFixed(1)}" y="${(y0+fh+32).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--ink-soft)">довжина фасаду ${room.facade.toLocaleString('uk-UA')} мм</text>
   </svg>`;
+}
+/* Вид зверху (план). labeled=true → велика пояснювальна схема з виносками */
+function cabsOf(r){
+  const cabs=[];
+  for(let i=0;i<(r.nStd||0);i++) cabs.push({door:r.wStd,min:cabinMinW(r.wStd),inc:false});
+  for(let i=0;i<(r.nInc||0);i++) cabs.push({door:r.wInc,min:cabinMinW(r.wInc),inc:true});
+  return cabs;
+}
+function sketchTopView(o){
+  const W=o.labeled?360:340;
+  const padL=o.labeled?64:32, padR=o.labeled?118:32, padT=14, padB=o.labeled?58:36;
+  const sc=Math.min((W-padL-padR)/o.facade,(o.labeled?120:104)/o.depth);
+  const w=o.facade*sc, d=o.depth*sc;
+  const x0=padL, y0=padT+10, yF=y0+d, wt=9;
+  const hasL=o.vid!=='окр', hasR=o.vid==='між';
+  const H=yF+padB;
+  const ink='var(--ink-soft)', mut='var(--ink-mut)';
+  let s=`<defs><pattern id="hch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#eef2f2"/><line x1="0" y1="0" x2="0" y2="6" stroke="#b9c6c6" stroke-width="1.5"/></pattern></defs>`;
+  // стіни (штриховка)
+  const wl=x0-(hasL?wt:0), wr=x0+w+(hasR?wt:0);
+  s+=`<rect x="${wl.toFixed(1)}" y="${(y0-wt).toFixed(1)}" width="${(wr-wl).toFixed(1)}" height="${wt}" fill="url(#hch)" stroke="#aebcbc" stroke-width=".7"/>`;
+  if(hasL) s+=`<rect x="${(x0-wt).toFixed(1)}" y="${y0}" width="${wt}" height="${d.toFixed(1)}" fill="url(#hch)" stroke="#aebcbc" stroke-width=".7"/>`;
+  if(hasR) s+=`<rect x="${(x0+w).toFixed(1)}" y="${y0}" width="${wt}" height="${d.toFixed(1)}" fill="url(#hch)" stroke="#aebcbc" stroke-width=".7"/>`;
+  // кутові перегородки (бічні панелі)
+  if(!hasR) s+=`<line x1="${(x0+w).toFixed(1)}" y1="${y0}" x2="${(x0+w).toFixed(1)}" y2="${yF.toFixed(1)}" stroke="var(--brand)" stroke-width="2.4"/>`;
+  if(!hasL) s+=`<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${yF.toFixed(1)}" stroke="var(--brand)" stroke-width="2.4"/>`;
+  // межі кабін → міжкабінні перегородки
+  let bounds=[];
+  if(o.cabs&&o.cabs.length){
+    const minSum=o.cabs.reduce((a,c)=>a+c.min,0);
+    const extra=Math.max(0,o.facade-minSum)/o.cabs.length;
+    let acc=0;
+    for(let i=0;i<o.cabs.length-1;i++){ acc+=o.cabs[i].min+extra; bounds.push(acc*sc); }
+  }
+  const nParts=Math.min(o.parts==null?bounds.length:o.parts, bounds.length);
+  let partX=null;
+  bounds.forEach((b,i)=>{ if(i<nParts){ const x=x0+b;
+    if(partX===null) partX=x;
+    s+=`<line x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${(yF-2).toFixed(1)}" stroke="var(--brand-3)" stroke-width="2.2"/>`; } });
+  // фасадна лінія + двері (45°)
+  s+=`<line x1="${x0}" y1="${yF.toFixed(1)}" x2="${(x0+w).toFixed(1)}" y2="${yF.toFixed(1)}" stroke="var(--border-2)" stroke-width="1" stroke-dasharray="4 3"/>`;
+  let doorPt=null;
+  if(o.cabs&&o.cabs.length){
+    const minSum=o.cabs.reduce((a,c)=>a+c.min,0);
+    const extra=Math.max(0,o.facade-minSum)/o.cabs.length;
+    let x=x0;
+    o.cabs.forEach(c=>{
+      const cw=(c.min+extra)*sc, dw=c.door*sc, oS=x+(cw-dw)/2;
+      s+=`<line x1="${x.toFixed(1)}" y1="${yF.toFixed(1)}" x2="${oS.toFixed(1)}" y2="${yF.toFixed(1)}" stroke="var(--brand-3)" stroke-width="2.6"/>
+          <line x1="${(oS+dw).toFixed(1)}" y1="${yF.toFixed(1)}" x2="${(x+cw).toFixed(1)}" y2="${yF.toFixed(1)}" stroke="var(--brand-3)" stroke-width="2.6"/>`;
+      const dl=Math.min(dw,d*0.85)*0.74;
+      s+=`<line x1="${oS.toFixed(1)}" y1="${yF.toFixed(1)}" x2="${(oS+dl).toFixed(1)}" y2="${(yF-dl).toFixed(1)}" stroke="var(--brand-2)" stroke-width="1.9"/>`;
+      if(doorPt===null) doorPt={x:oS+dl*0.55,y:yF-dl*0.55};
+      if(c.inc) s+=`<text x="${(x+cw/2).toFixed(1)}" y="${(y0+11).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--brand)">♿</text>`;
+      x+=cw;
+    });
+  }
+  if(o.labeled){
+    const f9='font-size="9.5"';
+    // розмір: глибина (зліва)
+    const xd=wl-13;
+    s+=`<line x1="${xd}" y1="${y0}" x2="${xd}" y2="${yF.toFixed(1)}" stroke="${mut}" stroke-width="1"/>
+        <line x1="${xd-3}" y1="${y0}" x2="${xd+3}" y2="${y0}" stroke="${mut}" stroke-width="1"/>
+        <line x1="${xd-3}" y1="${yF.toFixed(1)}" x2="${xd+3}" y2="${yF.toFixed(1)}" stroke="${mut}" stroke-width="1"/>
+        <text x="${xd-7}" y="${(y0+d/2).toFixed(1)}" ${f9} fill="${ink}" text-anchor="middle" transform="rotate(-90 ${xd-7} ${(y0+d/2).toFixed(1)})">глибина кабінки</text>`;
+    // розмір: фасад (знизу)
+    const yd=yF+20;
+    s+=`<line x1="${x0}" y1="${yd}" x2="${(x0+w).toFixed(1)}" y2="${yd}" stroke="${mut}" stroke-width="1"/>
+        <line x1="${x0}" y1="${yd-3}" x2="${x0}" y2="${yd+3}" stroke="${mut}" stroke-width="1"/>
+        <line x1="${(x0+w).toFixed(1)}" y1="${yd-3}" x2="${(x0+w).toFixed(1)}" y2="${yd+3}" stroke="${mut}" stroke-width="1"/>
+        <text x="${(x0+w/2).toFixed(1)}" y="${yd+12}" ${f9} fill="${ink}" text-anchor="middle">довжина фасаду</text>`;
+    // виноска: міжкабінна перегородка
+    if(partX!==null){
+      const tx=x0+w+(hasR?wt:0)+12, ty=y0+d*0.30;
+      s+=`<line x1="${partX.toFixed(1)}" y1="${(y0+d*0.22).toFixed(1)}" x2="${(tx-4).toFixed(1)}" y2="${ty.toFixed(1)}" stroke="${mut}" stroke-width=".8"/>
+          <text x="${tx}" y="${(ty+3).toFixed(1)}" ${f9} fill="${ink}"><tspan x="${tx}" dy="0">міжкабінна</tspan><tspan x="${tx}" dy="11">перегородка</tspan></text>`;
+    }
+    // виноска: кутова перегородка
+    if(!hasR){
+      const tx=x0+w+12, ty=y0+d*0.66;
+      s+=`<line x1="${(x0+w).toFixed(1)}" y1="${(y0+d*0.58).toFixed(1)}" x2="${(tx-4).toFixed(1)}" y2="${ty.toFixed(1)}" stroke="${mut}" stroke-width=".8"/>
+          <text x="${tx}" y="${(ty+3).toFixed(1)}" ${f9} fill="${ink}"><tspan x="${tx}" dy="0">кутова</tspan><tspan x="${tx}" dy="11">перегородка</tspan></text>`;
+    }
+    // виноска: стіна
+    if(hasL){
+      s+=`<line x1="${(x0-wt/2).toFixed(1)}" y1="${(yF-8).toFixed(1)}" x2="${(wl+10).toFixed(1)}" y2="${(yF+13).toFixed(1)}" stroke="${mut}" stroke-width=".8"/>
+          <text x="${(wl+12).toFixed(1)}" y="${(yF+17).toFixed(1)}" ${f9} fill="${ink}">стіна</text>`;
+    }else{
+      s+=`<line x1="${(x0+w*0.12).toFixed(1)}" y1="${(y0-wt/2).toFixed(1)}" x2="${(x0+w*0.12-14).toFixed(1)}" y2="${(y0-wt-2).toFixed(1)}" stroke="${mut}" stroke-width=".8"/>
+          <text x="${(x0+w*0.12-16).toFixed(1)}" y="${(y0-wt-5).toFixed(1)}" ${f9} fill="${ink}" text-anchor="end">стіна</text>`;
+    }
+    // виноска: двері
+    if(doorPt){
+      s+=`<line x1="${doorPt.x.toFixed(1)}" y1="${doorPt.y.toFixed(1)}" x2="${(doorPt.x+13).toFixed(1)}" y2="${(doorPt.y+11).toFixed(1)}" stroke="${mut}" stroke-width=".8"/>
+          <text x="${(doorPt.x+16).toFixed(1)}" y="${(doorPt.y+15).toFixed(1)}" ${f9} fill="${ink}">двері</text>`;
+    }
+  }else{
+    s+=`<text x="${(x0+w/2).toFixed(1)}" y="${(yF+16).toFixed(1)}" font-size="10" fill="${ink}" text-anchor="middle">${o.facade.toLocaleString('uk-UA')} × ${o.depth.toLocaleString('uk-UA')} мм</text>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H.toFixed(1)}">${s}</svg>`;
+}
+function explainScheme(vid){
+  return sketchTopView({ facade:3000, depth:1200, vid,
+    cabs:[{door:650,min:1500},{door:650,min:1500}], parts:1, labeled:true });
 }
 function sketchCounter(c){
   const shape=SHAPES.find(s=>s.id===c.shape);
@@ -792,6 +899,7 @@ function roomsStepMain(c,type){
     <h4>Вид</h4>
     <div class="grid c3">${VIDS.map(v=>`<div class="opt ${r.vid===v.id?'sel':''}" data-action="roomVid" data-id="${v.id}">
       <div class="t">${v.name}</div><div class="d">${v.desc}</div></div>`).join('')}</div>
+    <div class="schemebox">${explainScheme(r.vid)}</div>
     <h4>Розміри</h4>
     <div class="row c3">
       <div class="field"><label>Висота <span class="hint">фіксована типом</span></label><input class="inp" readonly value="${type.h} мм"></div>
@@ -839,7 +947,10 @@ function roomsStepDoors(c,type){
         <div class="chips">${CONFIG.cabins.doorWidthsInc.map(w=>`<button class="chip ${r.wInc===w?'sel':''}" data-action="roomNum" data-path="${f}wInc" data-v="${w}">${w}</button>`).join('')}</div></div>
     </div>
     <h4>Перегородки</h4>
-    <div class="field"><label>Міжкабінні, кількість <span class="hint">зазвичай: кабінок − 1</span></label>${stepper(f+'parts',r.parts,0,20)}</div>
+    <div class="row">
+      <div class="field"><label>Міжкабінні, кількість <span class="hint">зазвичай: кабінок − 1</span></label>${stepper(f+'parts',r.parts,0,20)}</div>
+      <div class="field"><label>Кутові, кількість <span class="hint">за видом: ${(VIDS.find(v=>v.id===r.vid)||VIDS[0]).sides}</span></label>${stepper(f+'corners',r.corners,0,10)}</div>
+    </div>
     ${prob?`<div class="note err">${esc(prob)}</div>`:''}
     ${roomFooter(r,type)}`;
 }
@@ -860,6 +971,7 @@ function summaryCabins(c){
         <div><span>Двері стандарт</span><span>${r.nStd?r.nStd+' шт × '+r.wStd+' мм':'—'}</span></div>
         <div><span>Двері інклюзив</span><span>${r.nInc?r.nInc+' шт × '+r.wInc+' мм':'—'}</span></div>
         <div><span>Міжкабінні перегородки</span><span>${r.parts} шт</span></div>
+        <div><span>Кутові перегородки</span><span>${r.corners||0} шт</span></div>
         <div><span>Площа деталей</span><span>${x.area.toFixed(2)} м²</span></div>`;
     }else{
       rows=`
@@ -1032,6 +1144,10 @@ function renderAside(mod){
     const r=c.rooms[c.active]||c.rooms[0];
     const dec=decorBy(c.decor);
     sketch=sketchRoom(r,p.type,dec?dec.hex:'#9aa3a8');
+    if(r&&r.kind==='каб'&&c.step>=2){
+      sketch+=`<div class="ttl" style="margin-top:14px">Вид зверху · ${esc((VIDS.find(v=>v.id===r.vid)||VIDS[0]).name)}</div>`
+        +sketchTopView({facade:r.facade,depth:r.depth,vid:r.vid,cabs:cabsOf(r),parts:r.parts,labeled:false});
+    }
     lines=p.rooms.map(x=>`<div class="ln"><span>${esc(x.room.name)} (${x.area.toFixed(2)} м²)</span><span>${money(x.cost)}</span></div>`).join('')
       +`<div class="ln"><span>Ставка</span><span>${CONFIG.cabins.ratePerM2} €/м²</span></div>
         <div class="ln tot"><span>За позицію</span><span>${money2(subtotal)}</span></div>`;
@@ -1219,7 +1335,8 @@ document.addEventListener('click',e=>{
       cb.rooms.splice(n,1); if(!cb.rooms.length)cb.rooms=[defaultRoom(1)];
       cb.active=Math.min(cb.active,cb.rooms.length-1); render(); break; }
     case 'roomAdd': cb.rooms.push(defaultRoom(cb.rooms.length+1)); cb.active=cb.rooms.length-1; render(); break;
-    case 'roomVid': cb.rooms[cb.active].vid=el.dataset.id; render(); break;
+    case 'roomVid':{ const rr=cb.rooms[cb.active]; rr.vid=el.dataset.id;
+      rr.corners=(VIDS.find(v=>v.id===rr.vid)||VIDS[0]).sides; render(); break; }
     case 'roomNum': setPath(state,el.dataset.path,+el.dataset.v); render(); break;
     case 'inc':{ const p=el.dataset.path; setPath(state,p,Math.min(+el.dataset.max||999,(getPath(p)||0)+1)); syncParts(p); render(); break; }
     case 'dec':{ const p=el.dataset.path; setPath(state,p,Math.max(+el.dataset.min||0,(getPath(p)||0)-1)); syncParts(p); render(); break; }
