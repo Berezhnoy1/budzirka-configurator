@@ -156,6 +156,8 @@ input,select,textarea{font-family:inherit;color:inherit}
 .roomtab.add{border-style:dashed;color:var(--brand)}
 
 .infocard{background:var(--surface);border-radius:var(--r-sm);padding:13px 15px;font-size:13px;color:var(--ink-soft);line-height:1.6;margin:14px 0 4px}
+.fset{border:1px solid var(--border);border-radius:13px;padding:16px 18px 8px;margin:0 0 14px;background:var(--bg)}
+.fset>h4{margin:0 0 14px}
 .infocard b{color:var(--ink)}
 .kvrow{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
 .kv{background:var(--surface);border-radius:var(--r-sm);padding:9px 14px;font-size:13px}
@@ -1165,6 +1167,21 @@ function roomFooter(r,type){
     <div class="kv"><b>Площа деталей</b><span id="roomarea">${roomArea(r,type).toFixed(2)} м²</span></div>
   </div>`;
 }
+function roomDimsProblem(r){
+  if(r.kind!=='каб') return ((r.pn||0)>=1&&(r.pw||0)>=100)?'':'Вкажіть кількість панелей і ширину від 100 мм.';
+  const c=CONFIG.cabins;
+  if(r.depth<c.depthMin) return 'Глибина '+r.depth.toLocaleString('uk-UA')+' мм — замала. Допустимо: '+c.depthMin+'–'+c.depthMax+' мм.';
+  if(r.depth>c.depthMax) return 'Глибина '+r.depth.toLocaleString('uk-UA')+' мм — завелика. Допустимо: '+c.depthMin+'–'+c.depthMax+' мм.';
+  if(r.facade<c.cabinMinWidth) return 'Довжина фасаду '+r.facade.toLocaleString('uk-UA')+' мм — менша за мінімальну ширину однієї кабінки ('+c.cabinMinWidth+' мм).';
+  return '';
+}
+function wizardError(mod){
+  const c=state[mod];
+  if(mod==='cabins'&&c.step===1){ const r=c.rooms.find(x=>!roomDimsValid(x)); if(r) return esc(r.name)+': '+roomDimsProblem(r); }
+  if(mod==='cabins'&&c.step===2){ const r=c.rooms.find(x=>!roomValid(x)); if(r) return esc(r.name)+': '+(roomProblem(r)||roomDimsProblem(r)); }
+  if(mod==='counters'&&c.step===1) return 'Вкажіть розміри всіх сегментів (довжина і глибина > 0).';
+  return 'Перевірте параметри — є помилки.';
+}
 function partsRule(vid){
   return vid==='між'?'кількість дверей − 1':vid==='кут'?'дорівнює кількості дверей':'кількість дверей + 1';
 }
@@ -1173,38 +1190,41 @@ function roomsStepMain(c,type){
   if(!r) return roomTabs(c);
   const isCab=r.kind==='каб';
   const f='cabins.rooms.'+c.active+'.';
+  const dimsProb=roomDimsProblem(r);
   let body=`
+    <div class="fset"><h4>Основне</h4>
     <div class="row">
       <div class="field"><label>Назва приміщення</label><input class="inp" data-field="${f}name" value="${esc(r.name)}"></div>
       <div class="field"><label>Тип</label>
         <select class="inp" data-field="${f}kind">${ROOM_KINDS.map(k=>`<option value="${k.id}" ${r.kind===k.id?'selected':''}>${k.name}</option>`).join('')}</select></div>
-    </div>`;
+    </div></div>`;
   if(isCab){
     body+=`
-    <h4>Вид</h4>
+    <div class="fset"><h4>Вид</h4>
     <div class="grid c3">${VIDS.map(v=>`<div class="opt ${r.vid===v.id?'sel':''}" data-action="roomVid" data-id="${v.id}">
       <div class="t">${v.name}</div><div class="d">${v.desc}</div></div>`).join('')}</div>
     <details class="schemebox-d" ${(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:560px)').matches)?'':'open'}>
       <summary>Схема виду «${(VIDS.find(v=>v.id===r.vid)||VIDS[0]).name}»</summary>
       <div class="schemebox" style="margin-top:6px">${explainScheme(r.vid)}</div>
-    </details>
-    <h4>Розміри</h4>
+    </details></div>
+    <div class="fset"><h4>Розміри</h4>
     <div class="row c3">
       <div class="field"><label>Висота <span class="hint">фіксована типом</span></label><input class="inp" readonly value="${type.h} мм"></div>
       <div class="field"><label>Глибина <span class="hint">${CONFIG.cabins.depthMin}–${CONFIG.cabins.depthMax} мм</span></label>
         <input class="inp ${r.depth<CONFIG.cabins.depthMin||r.depth>CONFIG.cabins.depthMax?'bad':''}" type="number" step="50" data-field="${f}depth" value="${r.depth}"></div>
       <div class="field"><label>Довжина фасаду <span class="hint">мм</span></label>
         <input class="inp" type="number" step="100" data-field="${f}facade" value="${r.facade}"></div>
-    </div>`;
+    </div>
+    <div class="note err" id="dimserr" role="alert" style="${dimsProb?'':'display:none'}">${dimsProb}</div></div>`;
   }else{
     body+=`
-    <h4>Панелі</h4>
+    <div class="fset"><h4>Панелі</h4>
     <div class="row">
       <div class="field"><label>Кількість панелей</label>${stepper(f+'pn',r.pn,1,10)}</div>
       <div class="field"><label>Ширина панелі <span class="hint">мм</span></label>
         <input class="inp" type="number" step="50" data-field="${f}pw" value="${r.pw}"></div>
     </div>
-    <div class="note">Висота панелі — за типом виробу (${type.h} мм).</div>`;
+    <div class="note">Висота панелі — за типом виробу (${type.h} мм).</div></div>`;
   }
   return `<h2>Приміщення</h2><p class="sub">Одна позиція може містити кілька приміщень — як у поточному калькуляторі.</p>
     ${roomTabs(c)}${body}${roomFooter(r,type)}`;
@@ -1222,20 +1242,20 @@ function roomsStepDoors(c,type){
   const prob=roomProblem(r);
   return `<h2>Двері та перегородки</h2><p class="sub">${esc(r.name)}: мінімальна ширина однієї кабінки — ${CONFIG.cabins.cabinMinWidth} мм.</p>
     ${roomTabs(c)}
-    <h4>Двері · стандарт</h4>
+    <div class="fset"><h4>Двері · стандарт</h4>
     <div class="row">
       <div class="field"><label>Кількість</label>${stepper(f+'nStd',r.nStd,0,12)}</div>
       <div class="field"><label>Ширина дверей</label>
         <div class="chips">${CONFIG.cabins.doorWidthsStd.map(w=>`<button class="chip ${r.wStd===w?'sel':''}" data-action="roomNum" data-path="${f}wStd" data-v="${w}">${w}</button>`).join('')}</div></div>
-    </div>
-    <h4>Двері · інклюзив</h4>
+    </div></div>
+    <div class="fset"><h4>Двері · інклюзив</h4>
     <div class="row">
       <div class="field"><label>Кількість</label>${stepper(f+'nInc',r.nInc,0,6)}</div>
       <div class="field"><label>Ширина дверей</label>
         <div class="chips">${CONFIG.cabins.doorWidthsInc.map(w=>`<button class="chip ${r.wInc===w?'sel':''}" data-action="roomNum" data-path="${f}wInc" data-v="${w}">${w}</button>`).join('')}</div></div>
-    </div>
-    <h4>Перегородки</h4>
-    <div class="infocard" style="margin-top:0" id="partsinfo">Кількість визначається автоматично — вид «${(VIDS.find(v=>v.id===r.vid)||VIDS[0]).name}»: ${partsRule(r.vid)}. Для цього приміщення: <b>${roomParts(r)} шт</b>.</div>
+    </div></div>
+    <h4 style="margin-top:4px">Перегородки</h4>
+    <div class="infocard" style="margin-top:0" id="partsinfo">Перегородок: <b>${roomParts(r)} шт</b> <span style="color:var(--ink-mut);font-weight:400">— автоматично</span></div>
     ${prob?`<div class="note err" role="alert">${esc(prob)}</div>`:''}
     ${roomFooter(r,type)}`;
 }
@@ -1486,7 +1506,7 @@ function renderAside(mod){
         ? `<button class="btn primary" data-action="addEstimate" data-mod="${mod}">＋ До кошторису</button>`
         : `<button class="btn primary" data-action="next" data-mod="${mod}" ${ok?'':'disabled'}>Далі →</button>`}
     </div>
-    ${!ok?`<div class="note err" role="alert">Перевірте параметри — є помилки.</div>`:`<div class="note">Ціни з бази CALCULATOR (EUR). Залишки — знімок складу; живий зв'язок з 1С — наступна фаза.</div>`}
+    ${!ok?`<div class="note err" role="alert">${wizardError(mod)}</div>`:`<div class="note">Ціни з бази CALCULATOR (EUR). Залишки — знімок складу; живий зв'язок з 1С — наступна фаза.</div>`}
   </div>`;
 }
 function refreshAside(mod){ const el=document.getElementById('aside'); if(el){ el.innerHTML=renderAside(mod); animPrice(); } }
@@ -1699,9 +1719,16 @@ function onField(el){
   const mod=path.split('.')[0];
   if(mod==='cabins'||mod==='counters') refreshAside(mod);
   if(path.indexOf('cabins.rooms.')===0){
+    const t=typeBy(state.cabins.type), r=state.cabins.rooms[state.cabins.active];
     const ra=document.getElementById('roomarea');
-    if(ra){ const t=typeBy(state.cabins.type), r=state.cabins.rooms[state.cabins.active];
-      if(r) ra.textContent=roomArea(r,t).toFixed(2)+' м²'; }
+    if(ra&&r) ra.textContent=roomArea(r,t).toFixed(2)+' м²';
+    const de=document.getElementById('dimserr');
+    if(de&&r){ const pr=roomDimsProblem(r);
+      de.textContent=pr; de.style.display=pr?'':'none'; }
+    if(el.classList){
+      if(/\.depth$/.test(path)) el.classList.toggle('bad', r.depth<CONFIG.cabins.depthMin||r.depth>CONFIG.cabins.depthMax);
+      if(/\.facade$/.test(path)) el.classList.toggle('bad', r.facade<CONFIG.cabins.cabinMinWidth);
+    }
   }
 }
 function onFilter(el){

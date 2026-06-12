@@ -12,7 +12,7 @@
   --brand:#274C4F; --brand-2:#456A6D; --ink:#152420; --ink-soft:#3c4a46; --ink-mut:#5f6f6a;
   --surface:#EEF4F5; --surface-2:#E2EDEF; --white:#fff; --border:#dbe6e6; --border-2:#cddbdb;
   --brand-soft:#e6f0f0; --ok:#2e7d5b; --ok-soft:#e4f2ea; --warn:#9a6b12; --warn-soft:#f4ecda;
-  --err:#a5471f; --err-soft:#f7e8e0;
+  --err:#a5471f; --err-soft:#f7e8e0; --blue:#2c5f8a; --blue-soft:#e3eef7;
   --shadow:0 2px 6px rgba(21,36,32,.06),0 14px 34px rgba(21,36,32,.07);
   --r:14px; --r-sm:10px;
 }
@@ -22,66 +22,115 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 input,select,textarea{font-family:inherit;color:inherit}
 :focus-visible{outline:2.5px solid var(--brand);outline-offset:2px;border-radius:6px}
 
-.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:13px;background:var(--ink);color:#fff;padding:12px 22px}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:13px;background:var(--ink);color:#fff;padding:12px 22px;height:54px}
 .topbar .mark{width:30px;height:30px;border-radius:8px;background:#fff;color:var(--ink);display:grid;place-items:center;font-weight:800}
 .topbar b{font-size:16px;letter-spacing:.4px}
-.topbar span{color:#9fb0ab;font-size:13px}
+.topbar span.tt{color:#9fb0ab;font-size:13px}
 .topbar .spacer{flex:1}
-.rolechip{font-size:12.5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:5px 13px;border-radius:99px}
+.rolechip{font-size:12.5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:5px 13px;border-radius:99px;white-space:nowrap}
 .logout{color:#cdd9d5;font-size:13px;padding:6px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.2)}
 .logout:hover{background:rgba(255,255,255,.12)}
 
-.wrap{max-width:1240px;margin:0 auto;padding:24px 20px 80px}
-.tabs{display:flex;gap:7px;margin-bottom:20px;flex-wrap:wrap}
-.tab{padding:9px 18px;border-radius:99px;font-size:13.5px;font-weight:600;border:1px solid var(--border);background:var(--white);color:var(--ink-mut)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px 120px}
+.tabs{position:sticky;top:54px;z-index:20;display:flex;gap:7px;flex-wrap:wrap;background:var(--surface);padding:14px 0 10px;margin:0 0 10px}
+.tab{padding:9px 18px;border-radius:99px;font-size:13.5px;font-weight:600;border:1px solid var(--border);background:var(--white);color:var(--ink-mut);position:relative}
 .tab.sel{background:var(--brand);border-color:var(--brand);color:#fff}
+.tab .nbadge{position:absolute;top:-5px;right:-4px;background:var(--err);color:#fff;font-size:10px;font-weight:700;min-width:17px;height:17px;border-radius:99px;display:grid;place-items:center;padding:0 4px}
 .card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
 h2{margin:0 0 4px;font-size:19px}
 .sub{margin:0 0 16px;color:var(--ink-soft);font-size:13.5px}
 
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;color:var(--ink-mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1.5px solid var(--border-2);padding:8px 8px}
+th{text-align:left;color:var(--ink-mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1.5px solid var(--border-2);padding:8px;position:sticky;top:116px;background:var(--white);z-index:5}
 td{border-bottom:1px solid var(--surface-2);padding:8px;vertical-align:middle}
 tr:hover td{background:var(--surface)}
-.tin{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 9px;font-size:13px;background:var(--white)}
+.tin{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13.5px;background:var(--white)}
 .tin:focus{outline:none;border-color:var(--brand)}
-.tin.num{width:84px;text-align:right;font-variant-numeric:tabular-nums}
-.tin.clr{width:46px;height:34px;padding:2px;cursor:pointer}
-.sw-dot{width:26px;height:26px;border-radius:7px;border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
-.ph{width:52px;height:38px;border-radius:7px;object-fit:cover;background:var(--surface-2);display:block}
-.ph-btn{font-size:11.5px;color:var(--brand);font-weight:600;padding:3px 0;display:block}
-.toggle{width:40px;height:22px;border-radius:99px;background:var(--border-2);position:relative;transition:.15s;flex:0 0 auto}
-.toggle::after{content:"";position:absolute;top:2.5px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.tin.num{width:88px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.tin.clr{width:46px;height:36px;padding:2px;cursor:pointer}
+.row-dirty td{background:var(--warn-soft)!important}
+.row-dirty td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+
+.phbox{width:64px;height:48px;border-radius:8px;overflow:hidden;display:block;cursor:pointer;position:relative;background:var(--surface-2);border:1.5px dashed var(--border-2)}
+.phbox img{width:100%;height:100%;object-fit:cover;display:block}
+.phbox .cam{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;color:var(--ink-mut)}
+.phbox:hover{border-color:var(--brand)}
+.phbox input{display:none}
+
+.toggle{width:42px;height:24px;border-radius:99px;background:var(--border-2);position:relative;transition:.15s;flex:0 0 auto;display:inline-block;vertical-align:middle}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .toggle.on{background:var(--ok)}
-.toggle.on::after{left:20px}
-.btn{border:1.5px solid var(--border);background:var(--white);color:var(--ink);padding:9px 16px;border-radius:99px;font-size:13px;font-weight:600;transition:.14s;min-height:38px}
+.toggle.on::after{left:21px}
+.btn{border:1.5px solid var(--border);background:var(--white);color:var(--ink);padding:9px 16px;border-radius:99px;font-size:13px;font-weight:600;transition:.14s;min-height:38px;display:inline-flex;align-items:center;gap:6px;justify-content:center;text-decoration:none}
 .btn:hover{border-color:var(--brand);color:var(--brand)}
 .btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
-.btn.pri:hover{background:var(--brand-2)}
+.btn.pri:hover{background:var(--brand-2);color:#fff}
 .btn.sm{padding:6px 13px;min-height:32px;font-size:12.5px}
 .btn.danger:hover{border-color:var(--err);color:var(--err)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.saved{color:var(--ok);font-size:12px;font-weight:600}
-.row-dirty td{background:var(--warn-soft)!important}
+.badge{display:inline-block;font-size:10.5px;font-weight:600;border-radius:99px;padding:3px 9px;white-space:nowrap}
+.badge.in{background:var(--ok-soft);color:var(--ok)}
+.badge.out{background:var(--warn-soft);color:var(--warn)}
+.badge.err{background:var(--err-soft);color:var(--err)}
+.badge.blue{background:var(--blue-soft);color:var(--blue)}
+.badge.gray{background:var(--surface-2);color:var(--ink-soft)}
 
-.login{max-width:420px;margin:9vh auto 0}
-.login .card{padding:30px}
+.fbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.fbar .tin{flex:1;min-width:170px;max-width:340px}
+.chipf{padding:7px 14px;border-radius:99px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--white);color:var(--ink-mut)}
+.chipf.sel{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* ---- CRM-картки лідів ---- */
+.lgrid{display:grid;gap:12px}
+.lead{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 18px}
+.lead .lh{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.lead .lh b{font-size:16px}
+.lead .lmeta{color:var(--ink-soft);font-size:12.5px;white-space:nowrap}
+.lead .lco{color:var(--ink-soft);font-size:12.5px}
+.lead .lsum{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap}
+.lead .leur{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.lead .lact{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.lead details{margin-top:10px}
+.lead summary{cursor:pointer;font-size:12.5px;color:var(--brand);font-weight:600}
+.lead .ldet{margin-top:8px;font-size:12.5px;color:var(--ink-soft);white-space:pre-line}
+.lead .lcrm{display:grid;grid-template-columns:150px 1fr auto;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border-2);align-items:start}
+.lead .lcrm textarea{resize:vertical;min-height:38px}
+.lead.dirty{box-shadow:inset 3px 0 0 var(--warn), var(--shadow)}
+.st-sel{border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--white);font-weight:600;width:100%}
+
+/* skeleton */
+.skel{height:54px;border-radius:10px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface) 50%,var(--surface-2) 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin-bottom:10px}
+@keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* save bar */
+.savebar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;padding:10px 12px 10px 18px;border-radius:99px;box-shadow:0 12px 40px rgba(21,36,32,.35);z-index:40;font-size:13.5px;white-space:nowrap}
+.savebar .dot{width:8px;height:8px;border-radius:50%;background:#e8b341}
+
+.login{max-width:430px;margin:9vh auto 0;padding:0 16px}
+.login .card{padding:32px}
+.login .mark{width:46px;height:46px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:20px;margin-bottom:16px}
 .login h1{margin:0 0 6px;font-size:22px}
 .login p{margin:0 0 18px;color:var(--ink-soft);font-size:14px}
-.login .tin{padding:12px 14px;font-size:15px}
+.login .tin{padding:13px 14px;font-size:15px}
 .lerr{color:var(--err);background:var(--err-soft);border-radius:9px;padding:9px 12px;font-size:13px;margin-top:12px}
+.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--ink-mut);padding:6px}
 
 .kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .kfield label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
-.kfield .hint{color:var(--ink-mut);font-weight:400;font-size:11.5px}
-.lead-meta{font-size:12px;color:var(--ink-soft);white-space:pre-line}
-.badge{display:inline-block;font-size:10.5px;font-weight:600;border-radius:99px;padding:2px 9px}
-.badge.in{background:var(--ok-soft);color:var(--ok)}
-.badge.out{background:var(--warn-soft);color:var(--warn)}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:13.5px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+.kfield .hint{color:var(--ink-soft);font-weight:400;font-size:11.5px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:13.5px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
 .toast.show{opacity:1}
 .tablewrap{overflow-x:auto}
-@media(max-width:700px){ .wrap{padding:16px 10px 60px} .card{padding:14px} }
+@media(max-width:640px){
+  .wrap{padding:0 10px 130px}
+  .card{padding:14px}
+  td:last-child,th:last-child{position:sticky;right:0;background:var(--white);box-shadow:-6px 0 8px -6px rgba(0,0,0,.12)}
+  tr:hover td:last-child{background:var(--surface)}
+  .tin{padding:11px 12px;font-size:15px}
+  .lead .lcrm{grid-template-columns:1fr}
+  th{top:108px}
+  .rolechip{display:none}
+}
 </style>
 </head>
 <body>
@@ -92,13 +141,25 @@ const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6
 const HDR={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY};
 const app=document.getElementById('app');
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cssId=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,'_');
 
-let S={ key:sessionStorage.getItem('bz_key')||'', role:'', name:'', tab:'types',
-  types:[], decors:[], edges:[], settings:null, leads:[], dirty:{}, loading:false, lerr:'' };
+const LEAD_STATUSES=[
+  ['new','Новий','err'],
+  ['work','В роботі','blue'],
+  ['sent','КП надіслано','out'],
+  ['won','Угода','in'],
+  ['lost','Відмова','gray'],
+];
+const stMeta=id=>LEAD_STATUSES.find(s=>s[0]===id)||LEAD_STATUSES[0];
+
+let S={ key:sessionStorage.getItem('bz_key')||'', role:'', name:'', tab:'leads',
+  types:[], decors:[], edges:[], settings:null, leads:[],
+  dirty:{}, leadDirty:{}, loading:false, lerr:'', logging:false,
+  decorQ:'', decorOOS:false, leadQ:'', leadSt:'all' };
 
 async function rpc(fn,args){
   const r=await fetch(API+'/rest/v1/rpc/'+fn,{method:'POST',headers:HDR,body:JSON.stringify(args)});
-  if(!r.ok){ const t=await r.text(); throw new Error(t.slice(0,200)); }
+  if(!r.ok){ const t=await r.text(); throw new Error(t.slice(0,180)); }
   const ct=r.headers.get('content-type')||'';
   return ct.includes('json')?r.json():null;
 }
@@ -106,25 +167,30 @@ async function sel(table,q){ const r=await fetch(API+'/rest/v1/'+table+'?'+q,{he
 
 let toastT=null;
 function toast(m){ let el=document.getElementById('t'); if(!el){el=document.createElement('div');el.id='t';el.className='toast';document.body.appendChild(el);}
-  el.textContent=m; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2000); }
+  el.textContent=m; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2200); }
 
 /* ---------- login ---------- */
 async function tryLogin(key){
-  S.lerr='';
+  S.lerr=''; S.logging=true; render();
   try{
     const res=await rpc('budzirka_auth',{p_key:key});
     if(res&&res.length){ S.key=key; S.role=res[0].role; S.name=res[0].name;
-      sessionStorage.setItem('bz_key',key); await loadAll(); render(); return; }
+      sessionStorage.setItem('bz_key',key); S.logging=false; await loadAll(); render(); return; }
     S.lerr='Невірний ключ доступу.';
   }catch(e){ S.lerr='Помилка з’єднання: '+e.message; }
-  render();
+  S.logging=false; render();
 }
 function viewLogin(){
   return `<div class="login"><div class="card">
+    <div class="mark">B</div>
     <h1>BUDZIRKA · Адмінка</h1>
-    <p>Введіть ключ доступу (адміністратор або менеджер).</p>
-    <input class="tin" id="k" type="password" placeholder="Ключ доступу" value="">
-    <button class="btn pri" style="width:100%;margin-top:12px" onclick="tryLogin(document.getElementById('k').value.trim())">Увійти →</button>
+    <p>Панель керування товарами, цінами та заявками клієнтів.</p>
+    <div style="position:relative">
+      <input class="tin" id="k" type="password" placeholder="Ключ доступу" autocomplete="current-password" aria-label="Ключ доступу">
+      <button class="eye" type="button" aria-label="Показати ключ" onclick="const k=document.getElementById('k');k.type=k.type==='password'?'text':'password'">👁</button>
+    </div>
+    <button class="btn pri" style="width:100%;margin-top:12px" ${S.logging?'disabled':''}
+      onclick="tryLogin(document.getElementById('k').value.trim())">${S.logging?'Перевірка…':'Увійти →'}</button>
     ${S.lerr?`<div class="lerr">${esc(S.lerr)}</div>`:''}
   </div></div>`;
 }
@@ -139,31 +205,40 @@ async function loadAll(){
     sel('budzirka_settings','select=*&id=eq.1'),
   ]);
   S.types=t; S.decors=d; S.edges=e; S.settings=st[0]||null;
-  try{ S.leads=await rpc('budzirka_leads_list',{p_key:S.key,p_limit:200}); }catch(e){ S.leads=[]; }
-  S.loading=false; S.dirty={};
+  try{ S.leads=await rpc('budzirka_leads_list',{p_key:S.key,p_limit:300}); }catch(e){ S.leads=[]; }
+  S.loading=false; S.dirty={}; S.leadDirty={};
 }
+function dirtyCount(){ return Object.keys(S.dirty).length+Object.keys(S.leadDirty).length; }
+function guardTab(id){
+  if(dirtyCount()&&!confirm('Є незбережені зміни. Перейти без збереження?')) return;
+  S.tab=id; render();
+}
+window.addEventListener('beforeunload',e=>{ if(dirtyCount()){ e.preventDefault(); e.returnValue=''; } });
 
-/* ---------- save ---------- */
-function markDirty(kind,id){ S.dirty[kind+':'+id]=true; const tr=document.getElementById('r-'+kind+'-'+cssId(id)); if(tr) tr.classList.add('row-dirty'); }
-const cssId=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,'_');
+/* ---------- edits ---------- */
 function upd(kind,id,field,value){
   const list=kind==='type'?S.types:kind==='decor'?S.decors:S.edges;
-  const keyf=kind==='type'?'id':kind==='decor'?'id':'n';
+  const keyf=kind==='edge'?'n':'id';
   const row=list.find(x=>String(x[keyf])===String(id)); if(!row) return;
-  row[field]=value; markDirty(kind,id);
+  row[field]=value; S.dirty[kind+':'+id]=true;
+  const tr=document.getElementById('r-'+kind+'-'+cssId(id)); if(tr) tr.classList.add('row-dirty');
+  const sb=document.getElementById('s-'+kind+'-'+cssId(id)); if(sb){ sb.disabled=false; sb.classList.add('pri'); }
+  refreshSaveBar();
 }
 async function saveRow(kind,id){
   const btn=document.getElementById('s-'+kind+'-'+cssId(id)); if(btn){btn.disabled=true;btn.textContent='…';}
   try{
-    if(kind==='type'){ const r=S.types.find(x=>x.id===id);
-      await rpc('budzirka_save_type',{p_key:S.key,p:r}); }
-    else if(kind==='decor'){ const r=S.decors.find(x=>String(x.id)===String(id));
-      await rpc('budzirka_save_decor',{p_key:S.key,p:r}); }
-    else if(kind==='edge'){ const r=S.edges.find(x=>String(x.n)===String(id));
-      await rpc('budzirka_save_edge',{p_key:S.key,p:r}); }
+    if(kind==='type'){ const r=S.types.find(x=>x.id===id); await rpc('budzirka_save_type',{p_key:S.key,p:r}); }
+    else if(kind==='decor'){ const r=S.decors.find(x=>String(x.id)===String(id)); await rpc('budzirka_save_decor',{p_key:S.key,p:r}); }
+    else if(kind==='edge'){ const r=S.edges.find(x=>String(x.n)===String(id)); await rpc('budzirka_save_edge',{p_key:S.key,p:r}); }
     delete S.dirty[kind+':'+id];
     toast('Збережено ✓'); render();
   }catch(e){ toast('Помилка: '+e.message); if(btn){btn.disabled=false;btn.textContent='Зберегти';} }
+}
+async function saveAllDirty(){
+  for(const k of Object.keys(S.dirty)){ const i=k.indexOf(':'); await saveRow(k.slice(0,i),k.slice(i+1)); }
+  for(const id of Object.keys(S.leadDirty)){ await saveLead(id); }
+  toast('Усі зміни збережено ✓');
 }
 async function saveSettings(){
   try{ await rpc('budzirka_save_settings',{p_key:S.key,p:S.settings}); toast('Налаштування збережено ✓'); }
@@ -177,58 +252,151 @@ async function delDecor(id){
   catch(e){ toast('Помилка: '+e.message); }
 }
 function addDecor(dir){
-  S.decors.unshift({id:'new'+Date.now(),code:'',dir:dir,name:'',hex:'#9aa3a8',surf:'FH',core:'black core',stock:0,m2_price:null,active:true,photo_url:null,_new:true});
+  S.decors.unshift({id:'new'+Date.now(),code:'',dir:dir,name:'',hex:'#9aa3a8',surf:'FH',core:'black core',stock:0,m2_price:null,active:true,photo_url:null});
   render();
 }
 
-/* ---------- photo upload ---------- */
+/* ---------- CRM: ліди ---------- */
+function updLead(id,field,value){
+  const l=S.leads.find(x=>String(x.id)===String(id)); if(!l) return;
+  l[field]=value; S.leadDirty[id]=true;
+  const c=document.getElementById('lead-'+cssId(id)); if(c) c.classList.add('dirty');
+  const sb=document.getElementById('ls-'+cssId(id)); if(sb){ sb.disabled=false; sb.classList.add('pri'); }
+  refreshSaveBar();
+}
+async function saveLead(id){
+  const l=S.leads.find(x=>String(x.id)===String(id)); if(!l) return;
+  const btn=document.getElementById('ls-'+cssId(id)); if(btn){btn.disabled=true;btn.textContent='…';}
+  try{
+    await rpc('budzirka_update_lead',{p_key:S.key,p_id:l.id,p:{status:l.status||'new',note:l.note||'',assignee:l.assignee||''}});
+    delete S.leadDirty[id];
+    toast('Заявку оновлено ✓'); render();
+  }catch(e){ toast('Помилка: '+e.message); if(btn){btn.disabled=false;btn.textContent='Зберегти';} }
+}
+function relTime(iso){
+  const d=new Date(iso), now=new Date(), day=86400000;
+  const t=d.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'});
+  if(d.toDateString()===now.toDateString()) return 'сьогодні '+t;
+  if(new Date(now-day).toDateString()===d.toDateString()) return 'вчора '+t;
+  return d.toLocaleDateString('uk-UA',{day:'numeric',month:'short'})+' '+t;
+}
+
+/* ---------- photo ---------- */
 async function uploadPhoto(kind,id,input){
   const f=input.files&&input.files[0]; if(!f) return;
   if(f.size>4*1024*1024){ toast('Фото завелике (макс 4 МБ)'); return; }
   const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
   const path=kind+'-'+cssId(id)+'-'+Date.now()+'.'+ext;
-  toast('Завантаження…');
+  toast('Завантаження фото…');
   try{
     const r=await fetch(API+'/storage/v1/object/budzirka-img/'+path,{method:'POST',
       headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':f.type||'image/jpeg'},body:f});
     if(!r.ok) throw new Error(await r.text());
-    const url=API+'/storage/v1/object/public/budzirka-img/'+path;
-    upd(kind,id,'photo_url',url);
+    upd(kind,id,'photo_url',API+'/storage/v1/object/public/budzirka-img/'+path);
     await saveRow(kind,id);
   }catch(e){ toast('Помилка завантаження: '+e.message); }
 }
 
 /* ---------- views ---------- */
 function header(){
-  return `<div class="topbar"><div class="mark">A</div><b>BUDZIRKA</b><span>Адмінка</span>
+  return `<div class="topbar"><div class="mark">A</div><b>BUDZIRKA</b><span class="tt">Адмінка</span>
     <div class="spacer"></div>
     <span class="rolechip">${S.role==='admin'?'👑 Повний контроль':'👤 Менеджер'} · ${esc(S.name)}</span>
     <button class="logout" onclick="sessionStorage.removeItem('bz_key');S.key='';S.role='';render()">Вийти</button>
   </div>`;
 }
 function tabs(){
-  const T=[['types','Товари'],['decors','Декори'],['edges','Обробка'],['leads','Ліди ('+S.leads.length+')']];
+  const newN=S.leads.filter(l=>(l.status||'new')==='new').length;
+  const T=[['leads','Заявки'],['types','Товари'],['decors','Декори'],['edges','Обробка']];
   if(S.role==='admin') T.push(['settings','Налаштування']);
-  return `<div class="tabs">${T.map(([id,l])=>`<button class="tab ${S.tab===id?'sel':''}" onclick="S.tab='${id}';render()">${l}</button>`).join('')}</div>`;
+  return `<div class="tabs">${T.map(([id,l])=>`<button class="tab ${S.tab===id?'sel':''}" onclick="guardTab('${id}')">${l}${id==='leads'&&newN&&!S.loading?`<span class="nbadge">${newN}</span>`:''}</button>`).join('')}</div>`;
 }
 function saveBtn(kind,id){
   const dirty=S.dirty[kind+':'+id];
   return `<button id="s-${kind}-${cssId(id)}" class="btn sm ${dirty?'pri':''}" onclick="saveRow('${kind}','${id}')" ${dirty?'':'disabled'}>Зберегти</button>`;
 }
 function phCell(kind,id,url){
-  return `${url?`<img class="ph" src="${esc(url)}" alt="">`:`<div class="ph"></div>`}
-    <label class="ph-btn">${url?'змінити':'+ фото'}<input type="file" accept="image/*" style="display:none" onchange="uploadPhoto('${kind}','${id}',this)"></label>`;
+  return `<label class="phbox" title="${url?'Змінити фото':'Додати фото'}">
+    ${url?`<img src="${esc(url)}" alt="">`:'<span class="cam">📷</span>'}
+    <input type="file" accept="image/*" onchange="uploadPhoto('${kind}','${id}',this)">
+  </label>`;
 }
-function tgl(kind,id,field,on){
-  return `<div class="toggle ${on?'on':''}" role="switch" tabindex="0" aria-checked="${!!on}"
-    onclick="upd('${kind}','${id}','${field}',${on?'false':'true'});render()"
+function tgl(kind,id,field,on,label){
+  return `<div class="toggle ${on?'on':''}" role="switch" tabindex="0" aria-checked="${!!on}" aria-label="${esc(label||'Активний у конфігураторі')}"
+    onclick="upd('${kind}','${id}','${field}',${on?'false':'true'});this.classList.toggle('on');this.setAttribute('aria-checked',${on?'false':'true'})"
     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"></div>`;
 }
+function saveBar(){
+  const n=dirtyCount(); if(!n) return '';
+  return `<div class="savebar" id="savebar"><span class="dot"></span><b>${n}</b>&nbsp;${n===1?'незбережена зміна':'незбережені зміни'}
+    <button class="btn sm pri" onclick="saveAllDirty()">Зберегти всі</button>
+    <button class="btn sm" style="border-color:rgba(255,255,255,.3);color:#fff" onclick="if(confirm('Скасувати всі зміни?'))loadAll().then(render)">Скасувати</button>
+  </div>`;
+}
+function refreshSaveBar(){
+  const ex=document.getElementById('savebar');
+  const html=saveBar();
+  if(ex){ if(html){ ex.outerHTML=html; } else ex.remove(); }
+  else if(html){ const d=document.createElement('div'); d.innerHTML=html; document.body.appendChild(d.firstChild); }
+}
 
+function skeletons(){ return '<div class="skel"></div>'.repeat(4); }
+
+/* ----- Заявки (CRM) ----- */
+function viewLeads(){
+  let list=S.leads.slice();
+  if(S.leadSt!=='all') list=list.filter(l=>(l.status||'new')===S.leadSt);
+  if(S.leadQ){ const q=S.leadQ.toLowerCase();
+    list=list.filter(l=>((l.name||'')+' '+(l.surname||'')+' '+(l.phone||'')+' '+(l.company||'')+' '+(l.quote_number||'')).toLowerCase().includes(q)); }
+  const counts={all:S.leads.length};
+  LEAD_STATUSES.forEach(([id])=>counts[id]=S.leads.filter(l=>(l.status||'new')===id).length);
+  const chips=[['all','Усі']].concat(LEAD_STATUSES.map(s=>[s[0],s[1]]));
+  return `
+  <div class="fbar">
+    <input class="tin" placeholder="🔍 Пошук: ім'я, телефон, компанія, № КП" aria-label="Пошук заявок"
+      value="${esc(S.leadQ)}" oninput="S.leadQ=this.value;render();">
+    ${chips.map(([id,l])=>`<button class="chipf ${S.leadSt===id?'sel':''}" onclick="S.leadSt='${id}';render()">${l} ${counts[id]?'('+counts[id]+')':''}</button>`).join('')}
+  </div>
+  ${!list.length?`<div class="card"><h2>Заявки</h2><p class="sub">${S.leads.length?'Нічого не знайдено за фільтром.':'Поки що немає заявок — вони з’являться тут після формування КП у конфігураторі.'}</p></div>`:
+  `<div class="lgrid">${list.map(l=>{
+    const id=String(l.id), st=stMeta(l.status||'new');
+    const est=(l.estimate||[]).map(i=>(i.qty>1?i.qty+'× ':'')+i.title+' — '+Math.round(i.unitBase*i.qty).toLocaleString('uk-UA')+' €');
+    return `<div class="lead ${S.leadDirty[id]?'dirty':''}" id="lead-${cssId(id)}">
+      <div class="lh">
+        <b>${esc(((l.name||'')+' '+(l.surname||'')).trim()||'Без імені')}</b>
+        <span class="lmeta">${esc(l.quote_number||'—')} · ${relTime(l.created_at)}</span>
+      </div>
+      ${l.company?`<div class="lco">${esc(l.company)}</div>`:''}
+      <div class="lsum">
+        <span class="leur">${(+l.total_eur||0).toLocaleString('uk-UA')} €</span>
+        <span class="badge ${st[2]}">${st[1]}</span>
+        ${l.price_cat?`<span class="badge gray">${esc(l.price_cat)}</span>`:''}
+        ${l.no_call?'<span class="badge out">не дзвонити</span>':''}
+        ${l.via_messenger?'<span class="badge blue">месенджер</span>':''}
+        ${l.terms_ok?'<span class="badge in">умови ✓</span>':''}
+      </div>
+      <div class="lact">
+        ${l.phone&&!l.no_call?`<a class="btn pri sm" href="tel:${esc(l.phone)}">📞 ${esc(l.phone)}</a>`:l.phone?`<span class="btn sm" style="cursor:default">📵 ${esc(l.phone)}</span>`:''}
+        ${l.email?`<a class="btn sm" href="mailto:${esc(l.email)}">✉ ${esc(l.email)}</a>`:''}
+      </div>
+      ${l.comment?`<div class="lco" style="margin-top:8px">💬 ${esc(l.comment)}</div>`:''}
+      ${est.length?`<details><summary>Склад КП (${est.length})</summary><div class="ldet">${est.map(esc).join('\n')}</div></details>`:''}
+      <div class="lcrm">
+        <select class="st-sel" aria-label="Статус заявки" onchange="updLead('${id}','status',this.value)">
+          ${LEAD_STATUSES.map(s=>`<option value="${s[0]}" ${(l.status||'new')===s[0]?'selected':''}>${s[1]}</option>`).join('')}
+        </select>
+        <textarea class="tin" rows="1" placeholder="Нотатка (домовленість, наступний крок…)" aria-label="Нотатка"
+          oninput="updLead('${id}','note',this.value)">${esc(l.note||'')}</textarea>
+        <button id="ls-${cssId(id)}" class="btn sm ${S.leadDirty[id]?'pri':''}" ${S.leadDirty[id]?'':'disabled'} onclick="saveLead('${id}')">Зберегти</button>
+      </div>
+    </div>`;}).join('')}</div>`}`;
+}
+
+/* ----- Товари ----- */
 function viewTypes(){
-  return `<div class="card"><h2>Товари — типи кабін</h2><p class="sub">Назва, опис, висота, фото, статус. Фурнітура: inox = нержавіюча сталь, alu = анодований алюміній (через кому).</p>
+  return `<div class="card"><h2>Товари — типи кабін</h2><p class="sub">Фото, назва, опис, висота, статус. Фурнітура: inox = нержавіюча сталь, alu = анодований алюміній (через кому).</p>
   <div class="tablewrap"><table>
-    <thead><tr><th>Фото</th><th>Назва</th><th>Опис</th><th style="width:80px">Висота</th><th style="width:110px">Фурнітура</th><th>Активний</th><th></th></tr></thead>
+    <thead><tr><th>Фото</th><th>Назва</th><th>Опис</th><th style="width:84px">Висота</th><th style="width:110px">Фурнітура</th><th>Активний</th><th></th></tr></thead>
     <tbody>${S.types.map(t=>`
       <tr id="r-type-${cssId(t.id)}" class="${S.dirty['type:'+t.id]?'row-dirty':''}">
         <td>${phCell('type',t.id,t.photo_url)}</td>
@@ -241,35 +409,54 @@ function viewTypes(){
       </tr>`).join('')}</tbody>
   </table></div></div>`;
 }
+
+/* ----- Декори ----- */
+function filterDecors(list){
+  const q=S.decorQ.trim().toLowerCase();
+  return list.filter(d=>(!q||((d.code||'')+' '+(d.name||'')).toLowerCase().includes(q))&&(!S.decorOOS||(+d.stock||0)<=0));
+}
+function stockBadge(d){ const oos=(+d.stock||0)<=0;
+  return `<span class="badge ${oos?'out':'in'}" id="bdg-${cssId(d.id)}">${oos?'немає':'є'}</span>`; }
+function refreshBadge(id){
+  const d=S.decors.find(x=>String(x.id)===String(id)); const el=document.getElementById('bdg-'+cssId(id));
+  if(!d||!el) return; const oos=(+d.stock||0)<=0;
+  el.className='badge '+(oos?'out':'in'); el.textContent=oos?'немає':'є';
+}
 function viewDecors(){
+  const ctl=`<div class="fbar">
+    <input class="tin" placeholder="🔍 Пошук за кодом або назвою" aria-label="Пошук декорів"
+      value="${esc(S.decorQ)}" oninput="S.decorQ=this.value;render()">
+    <button class="chipf ${S.decorOOS?'sel':''}" onclick="S.decorOOS=!S.decorOOS;render()">Немає в наявності</button>
+  </div>`;
   const dirs=[['cabins','Сантехнічні кабіни'],['counters','Стільниці']];
-  return dirs.map(([dir,label])=>{
-    const list=S.decors.filter(d=>d.dir===dir);
-    return `<div class="card"><h2>Декори — ${label} <span style="color:var(--ink-mut);font-size:13px">(${list.length})</span></h2>
-    <p class="sub">Код, назва, колір, наявність (листів), ціна €/м² (для стільниць), статус.</p>
+  return ctl+dirs.map(([dir,label])=>{
+    const list=filterDecors(S.decors.filter(d=>d.dir===dir));
+    return `<div class="card"><h2>${label} <span style="color:var(--ink-mut);font-size:13px">(${list.length})</span></h2>
     <div class="tablewrap"><table>
-      <thead><tr><th>Колір</th><th style="width:90px">Код</th><th>Назва</th><th style="width:70px">Поверхня</th><th style="width:90px">Наявність</th><th style="width:90px">Ціна €/м²</th><th>Активний</th><th></th></tr></thead>
+      <thead><tr><th>Колір</th><th style="width:92px">Код</th><th>Назва</th><th style="width:130px">Наявність, л.</th><th style="width:92px">Ціна €/м²</th><th>Активний</th><th></th></tr></thead>
       <tbody>${list.map(d=>`
         <tr id="r-decor-${cssId(d.id)}" class="${S.dirty['decor:'+d.id]?'row-dirty':''}">
-          <td><input class="tin clr" type="color" value="${esc(d.hex)}" oninput="upd('decor','${d.id}','hex',this.value)"></td>
+          <td><input class="tin clr" type="color" aria-label="Колір декору" value="${esc(d.hex)}" oninput="upd('decor','${d.id}','hex',this.value)"></td>
           <td><input class="tin" value="${esc(d.code)}" oninput="upd('decor','${d.id}','code',this.value)"></td>
           <td><input class="tin" value="${esc(d.name)}" oninput="upd('decor','${d.id}','name',this.value)"></td>
-          <td><input class="tin" value="${esc(d.surf)}" oninput="upd('decor','${d.id}','surf',this.value)"></td>
-          <td><input class="tin num" type="number" step="0.5" value="${d.stock}" oninput="upd('decor','${d.id}','stock',+this.value)"></td>
+          <td><div style="display:flex;align-items:center;gap:7px">
+            <input class="tin num" style="width:64px" type="number" step="0.5" value="${d.stock}" oninput="upd('decor','${d.id}','stock',+this.value);refreshBadge('${d.id}')">
+            ${stockBadge(d)}</div></td>
           <td><input class="tin num" type="number" step="1" value="${d.m2_price==null?'':d.m2_price}" placeholder="—" oninput="upd('decor','${d.id}','m2_price',this.value===''?null:+this.value)"></td>
           <td>${tgl('decor',d.id,'active',d.active)}</td>
-          <td style="white-space:nowrap">${saveBtn('decor',d.id)}
-            ${S.role==='admin'?`<button class="btn sm danger" onclick="delDecor('${d.id}')">✕</button>`:''}</td>
+          <td style="white-space:nowrap">${saveBtn('decor',d.id)}${S.role==='admin'?` <button class="btn sm danger" aria-label="Видалити" onclick="delDecor('${d.id}')">✕</button>`:''}</td>
         </tr>`).join('')}</tbody>
     </table></div>
     <button class="btn sm" style="margin-top:10px" onclick="addDecor('${dir}')">＋ Додати декор</button>
     </div>`;
   }).join('');
 }
+
+/* ----- Обробка ----- */
 function viewEdges(){
   return `<div class="card"><h2>Обробка торців</h2><p class="sub">Ставки за метр погонний (€/м.п.) для стільниць.</p>
   <div class="tablewrap"><table>
-    <thead><tr><th style="width:90px">№</th><th>Назва</th><th>Опис</th><th style="width:100px">Ставка €/м.п.</th><th>Активний</th><th></th></tr></thead>
+    <thead><tr><th style="width:70px">№</th><th>Назва</th><th>Опис</th><th style="width:104px">Ставка</th><th>Активний</th><th></th></tr></thead>
     <tbody>${S.edges.map(e=>`
       <tr id="r-edge-${e.n}" class="${S.dirty['edge:'+e.n]?'row-dirty':''}">
         <td><b>№${e.n}</b></td>
@@ -281,32 +468,12 @@ function viewEdges(){
       </tr>`).join('')}</tbody>
   </table></div></div>`;
 }
-function viewLeads(){
-  if(!S.leads.length) return `<div class="card"><h2>Ліди</h2><p class="sub">Поки що порожньо.</p></div>`;
-  return `<div class="card"><h2>Ліди / заявки <span style="color:var(--ink-mut);font-size:13px">(${S.leads.length})</span></h2>
-  <p class="sub">Заявки з конфігуратора — формування КП.</p>
-  <div class="tablewrap"><table>
-    <thead><tr><th>Дата</th><th>Клієнт</th><th>Телефон</th><th>КП</th><th style="text-align:right">Сума €</th><th>Зв'язок</th><th>Склад</th></tr></thead>
-    <tbody>${S.leads.map(l=>{
-      const est=(l.estimate||[]).map(i=>(i.qty>1?i.qty+'× ':'')+i.title).join('; ');
-      const com=[l.via_messenger?'месенджер':'',l.no_call?'не дзвонити':'',l.terms_ok?'умови ✓':''].filter(Boolean).join(', ');
-      return `<tr>
-        <td style="white-space:nowrap">${new Date(l.created_at).toLocaleString('uk-UA',{dateStyle:'short',timeStyle:'short'})}</td>
-        <td><b>${esc((l.name||'')+' '+(l.surname||''))}</b>${l.company?'<br><span style="color:var(--ink-mut);font-size:11.5px">'+esc(l.company)+'</span>':''}</td>
-        <td>${esc(l.phone||'—')}${l.email?'<br><span style="font-size:11.5px">'+esc(l.email)+'</span>':''}</td>
-        <td>${esc(l.quote_number||'—')}<br><span class="badge in">${esc(l.price_cat||'')}</span></td>
-        <td style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums">${(+l.total_eur||0).toLocaleString('uk-UA')}</td>
-        <td style="font-size:11.5px">${esc(com||'—')}</td>
-        <td class="lead-meta">${esc(est)}</td>
-      </tr>`;}).join('')}</tbody>
-  </table></div></div>`;
-}
+
+/* ----- Налаштування ----- */
 function viewSettings(){
   const s=S.settings||{};
-  function f(label,field,hint){
-    return `<div class="kfield"><label>${label} ${hint?`<span class="hint">${hint}</span>`:''}</label>
+  const f=(label,field,hint)=>`<div class="kfield"><label>${label} ${hint?`<span class="hint">${hint}</span>`:''}</label>
       <input class="tin" type="number" step="0.01" value="${s[field]??''}" oninput="S.settings.${field}=+this.value"></div>`;
-  }
   return `<div class="card"><h2>Налаштування цін</h2><p class="sub">Глобальні ставки. Доступно лише адміністратору.</p>
     <div class="kgrid">
       ${f('Ставка кабін, €/м²','rate_per_m2','база розрахунку')}
@@ -320,19 +487,20 @@ function viewSettings(){
 }
 
 function render(){
-  if(!S.role){ app.innerHTML=viewLogin(); const k=document.getElementById('k');
-    if(k) k.addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(k.value.trim()); }); return; }
+  if(!S.role){ app.innerHTML=viewLogin();
+    const k=document.getElementById('k');
+    if(k){ k.focus(); k.addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(k.value.trim()); }); }
+    return; }
   let body='';
-  if(S.loading) body='<div class="card">Завантаження…</div>';
+  if(S.loading) body=skeletons();
+  else if(S.tab==='leads') body=viewLeads();
   else if(S.tab==='types') body=viewTypes();
   else if(S.tab==='decors') body=viewDecors();
   else if(S.tab==='edges') body=viewEdges();
-  else if(S.tab==='leads') body=viewLeads();
   else if(S.tab==='settings'&&S.role==='admin') body=viewSettings();
-  app.innerHTML=header()+`<div class="wrap">${tabs()}${body}</div>`;
+  app.innerHTML=header()+`<div class="wrap" ${S.loading?'aria-busy="true"':''}>${tabs()}${body}</div>`+saveBar();
 }
 
-/* init */
 if(S.key) tryLogin(S.key); else render();
 </script>
 </body>
