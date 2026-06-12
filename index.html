@@ -96,6 +96,10 @@ input,select,textarea{font-family:inherit;color:inherit}
 .opt .t{font-weight:600;font-size:14.5px}
 .opt .d{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.35}
 .opt.dis{opacity:.45;pointer-events:none}
+.opt .opt-ph{height:96px;border-radius:8px;overflow:hidden;margin-bottom:9px;background:var(--surface)}
+.opt .opt-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.qsk{max-width:330px;margin-top:8px}
+.qsk svg{width:100%;height:auto;display:block}
 
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{border:1.5px solid var(--border);background:var(--white);border-radius:var(--r-pill);padding:8px 16px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.14s}
@@ -443,7 +447,7 @@ const CONFIG = {
    2) ДОВІДНИКИ (з Google-таблиці CALCULATOR)
    ============================================================ */
 // Тип_кабінок: висота фіксована типом; фурнітура залежить від типу
-const CABIN_TYPES=[
+let CABIN_TYPES=[
   {id:'standart', name:'MAX Standart', h:2100, fit:['inox'],        rooms:true,  desc:'Класична сантехнічна кабіна'},
   {id:'tube',     name:'Max Tube',     h:2100, fit:['inox','alu'],  rooms:true,  desc:'Трубчаста опорна система'},
   {id:'top',      name:'Max Top',      h:2100, fit:['inox'],        rooms:true,  desc:'Стельова, приховане кріплення'},
@@ -469,7 +473,7 @@ const ROOM_KINDS=[
 const NAMES={'0027':'Prado Agate Grey','0048':'Cognac Oak','0074':'Pastel Grey','0075':'Dark Grey','0075 AP':'Dark Grey AP','0077':'Charcoal','0080':'Black','0085':'White','0260':'Loft','0328':'Riverstone','0331':'Patina Bronze','0344':'River Cherry','0386':'Blues','0394':'Moonwalk','0421':'Venato','0426':'Loft Grey','0427':'Skyline','0428':'Cave','0497':'Stone Grey','0528':'Salisbury','0540':'Graphite','0565':'Polaris','0566':'Kara','0581':'Lentos','0585':'Terra','0599':'Orca','0606 AP':'Arctic White','0670':'Basalt','0733':'Ivory','0741':'Night SX','0755':'Steel SX','0793':'Patina Tin','0794':'Patina Bronze','0833':'Umber','0834':'Taupe','0877':'Nut','0920':'Natural Silver Fir','4037':'Maryland','5171':'Polar Oak','Wood':'Creek 0927'};
 const HEX={'0027':'#b9bbbd','0048':'#8a5a2b','0074':'#c7c7c1','0075':'#6e7174','0075 AP':'#6e7174','0077':'#4b4f52','0080':'#1d1d1f','0085':'#f1efe9','0260':'#a98a5f','0328':'#8d9094','0331':'#7a5c3e','0344':'#5e6a72','0386':'#2f3b45','0394':'#5a5e60','0421':'#c9c2b6','0426':'#6b7077','0427':'#9aa0a6','0428':'#3e444b','0497':'#b5ada0','0528':'#8b3a2f','0540':'#4e5458','0565':'#d9d6ce','0566':'#ddd8cd','0581':'#cfc6b6','0585':'#c96a2e','0599':'#20242a','0606 AP':'#ece9e1','0670':'#56514b','0733':'#e7e3da','0741':'#2b2e33','0755':'#7e8388','0793':'#8a8f8b','0794':'#7d6e5c','0833':'#4a423a','0834':'#6d675f','0877':'#8c6f4f','0920':'#b9a88a','4037':'#7d8a8f','5171':'#c8a877','Wood':'#9c7b52','0942 GA':'#88929a','0953 GA':'#a7afb4','0956 GA':'#717a82','0962 SX':'#5a6166','0963 SX':'#83898e','0964 SX':'#b3b8bb','0965 SX':'#454b50','0985 GA':'#9aa29f','0989 SX':'#33383c','0990 SX':'#c5c9ca','2206 GA':'#d3d5d2','2289 GA':'#7e8584','Y102 AS':'#c8cdd1','Y112 AS':'#8e979e'};
 function D(code,dir,surf,core,stock){ return {code,name:NAMES[code]||code,hex:HEX[code]||'#9aa3a8',dir,surf,core,stock}; }
-const DECORS=[
+let DECORS=[
   // напрямок «Сантехнічні кабінки» (4 реальні)
   D('0074','cabins','FH','black core',2.5), D('0077','cabins','FH','black core',7.5),
   D('0080','cabins','FH','grey core',4),    D('0085','cabins','FH','black core',9),
@@ -501,7 +505,7 @@ const SHAPES=[
   {id:'U',name:'П-подібна',segs:3,desc:'3 сегменти'},
 ];
 // Торці №1–9 з реальними ставками з аркуша «Обробка» (EUR/м.п.)
-const EDGES=[
+let EDGES=[
   {n:1,name:'Торець №1',desc:'Різ без шліфування',rate:3},
   {n:2,name:'Торець №2',desc:'Різ 45° без шліфування',rate:10},
   {n:3,name:'Торець №3',desc:'Зріз 45°, паз під чужий шип',rate:25},
@@ -558,6 +562,43 @@ function txtOn(hex){
   if(h.length<6) return '#fff';
   const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);
   return (0.299*r+0.587*g+0.114*b)>165?'#3c4a46':'#ffffff';
+}
+/* відтінок: shade('#aabbcc',-0.25) → темніший на 25% */
+function shade(hex,p){
+  const h=String(hex||'#9aa3a8').replace('#','');
+  if(h.length<6) return hex;
+  const n=i=>Math.max(0,Math.min(255,Math.round(parseInt(h.substr(i,2),16)*(1+p))));
+  return '#'+[0,2,4].map(i=>n(i).toString(16).padStart(2,'0')).join('');
+}
+const fitText=t=>((t&&t.fit)||['inox']).map(f=>FITTINGS[f]||f).join(' та ');
+
+/* ---- каталог із бази (керується адмінкою; знімок у коді — резерв) ---- */
+async function loadCatalog(){
+  try{
+    if(typeof fetch==='undefined') return;
+    const h={apikey:LEADS_API.key,Authorization:'Bearer '+LEADS_API.key};
+    const u=LEADS_API.url;
+    const [st,t,d,e]=await Promise.all([
+      fetch(u+'/budzirka_settings?select=*&id=eq.1',{headers:h}).then(r=>r.json()),
+      fetch(u+'/budzirka_cabin_types?select=*&active=eq.true&order=sort',{headers:h}).then(r=>r.json()),
+      fetch(u+'/budzirka_decors?select=*&active=eq.true&order=code',{headers:h}).then(r=>r.json()),
+      fetch(u+'/budzirka_edges?select=*&active=eq.true&order=n',{headers:h}).then(r=>r.json()),
+    ]);
+    if(Array.isArray(t)&&t.length) CABIN_TYPES=t.map(x=>({id:x.id,name:x.name,desc:x.descr||'',h:x.h||2100,
+      fit:String(x.fit||'inox').split(',').map(s=>s.trim()).filter(Boolean),rooms:!!x.rooms,photo:x.photo_url||''}));
+    if(Array.isArray(d)&&d.length) DECORS=d.map(x=>({code:x.code,dir:x.dir,name:x.name||x.code,hex:x.hex||'#9aa3a8',
+      surf:x.surf||'FH',core:x.core||'black core',stock:+x.stock||0,m2:x.m2_price!=null?+x.m2_price:null}));
+    if(Array.isArray(e)&&e.length) EDGES=e.map(x=>({n:x.n,name:x.name,desc:x.descr||'',rate:+x.rate||0}));
+    const s=Array.isArray(st)&&st[0];
+    if(s){ CONFIG.cabins.ratePerM2=+s.rate_per_m2||170; CONFIG.eurUah=+s.eur_uah||52.06;
+      CONFIG.counters.cutoutFee=+s.cutout_fee||15; CONFIG.counters.mixerHoleFee=+s.mixer_fee||5;
+      CONFIG.counters.defaultM2Price=+s.default_m2||135; }
+    if(!typeBy(state.cabins.type)&&CABIN_TYPES[0]) state.cabins.type=CABIN_TYPES[0].id;
+    if(!decorBy(state.cabins.decor)&&decorsFor('cabins')[0]) state.cabins.decor=decorsFor('cabins')[0].code;
+    if(!decorBy(state.counters.decor)&&decorsFor('counters')[0]) state.counters.decor=decorsFor('counters')[0].code;
+    if(!EDGES.find(x=>x.n===state.counters.edge)&&EDGES[0]) state.counters.edge=EDGES[0].n;
+    render();
+  }catch(e){}
 }
 
 /* ============================================================
@@ -622,11 +663,17 @@ function cabinMinW(doorW){ return Math.max(CONFIG.cabins.cabinMinWidth, doorW + 
 function maxDoors(room){ // скільки кабінок влазить у фасад
   return Math.floor(room.facade / cabinMinW(room.wStd||650));
 }
+/* перегородки — автоматично за видом: міжстінна = дверей−1, кутова = дверей, окрема = дверей+1 */
+function roomParts(room){
+  const doors=(room.nStd||0)+(room.nInc||0);
+  const sides=(VIDS.find(v=>v.id===room.vid)||VIDS[0]).sides;
+  return Math.max(0, doors-1+sides);
+}
 function roomArea(room, type){
   const H=(type?type.h:2100)/1000;
   if(room.kind==='каб'){
     const facade=room.facade/1000, depth=room.depth/1000;
-    return facade*H + ((room.parts||0)+(room.corners||0))*depth*H;
+    return facade*H + roomParts(room)*depth*H;
   }
   // душові/пісуарні: n панелей × (ширина × висота типу)
   const pw=(room.pw||1000)/1000;
@@ -669,7 +716,7 @@ function priceCounters(c){
   const segs=c.segs.slice(0,SHAPES.find(s=>s.id===c.shape).segs);
   const area=segs.reduce((a,s)=>a+(s.l*s.w)/1e6,0);
   const dec=decorBy(c.decor);
-  const m2=CONFIG.counters.m2Price[c.decor]||CONFIG.counters.defaultM2Price;
+  const m2=(dec&&dec.m2!=null)?dec.m2:(CONFIG.counters.m2Price[c.decor]||CONFIG.counters.defaultM2Price);
   const material=area*m2;
   const edgeM=segs.reduce((a,s)=>a+s.l/1000,0);
   const edge=EDGES.find(e=>e.n===c.edge)||EDGES[0];
@@ -701,7 +748,7 @@ function sketchRoom(room,type,decorHex){
     let s='';
     for(let i=0;i<n;i++){
       const x=x0+i*(pw+gap)*sc;
-      s+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${(pw*sc).toFixed(1)}" height="${ph.toFixed(1)}" rx="3" fill="${decorHex}" fill-opacity=".30" stroke="var(--brand)" stroke-width="1.6"/>
+      s+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${(pw*sc).toFixed(1)}" height="${ph.toFixed(1)}" rx="3" fill="${decorHex}" fill-opacity=".85" stroke="${shade(decorHex,-0.32)}" stroke-width="1.4"/>
           <rect x="${(x+pw*sc/2-2).toFixed(1)}" y="${(y0+ph).toFixed(1)}" width="4" height="9" fill="var(--brand-3)"/>`;
     }
     return `<svg viewBox="0 0 ${W} ${y0+H*sc+34}">
@@ -726,20 +773,21 @@ function sketchRoom(room,type,decorHex){
     const minSum=cabs.reduce((a,c)=>a+c.min,0);
     const extra=Math.max(0,facade-minSum)/cabs.length;
     let x=x0;
+    const dk=shade(decorHex,-0.32), hndl=txtOn(decorHex);
     cabs.forEach((c,i)=>{
       const cw=(c.min+extra)*sc;
-      // панель кабіни
-      body+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}" fill-opacity=".16" stroke="var(--border-2)" stroke-width="1"/>`;
-      // двері (центр кабіни), знизу зазор ~150мм
-      const dw=c.door*sc, dx=x+(cw-dw)/2, dgap=150*sc;
-      body+=`<rect x="${dx.toFixed(1)}" y="${(y0+3).toFixed(1)}" width="${dw.toFixed(1)}" height="${(fh-dgap-3).toFixed(1)}" rx="2" fill="${decorHex}" fill-opacity=".42" stroke="var(--brand)" stroke-width="1.5"/>
-        <circle cx="${(dx+dw-7).toFixed(1)}" cy="${(y0+(fh-dgap)/2).toFixed(1)}" r="2.4" fill="var(--brand)"/>`;
-      if(c.inc) body+=`<text x="${(x+cw/2).toFixed(1)}" y="${(y0+fh-dgap-8).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--brand)">♿</text>`;
+      // панель кабіни — у кольорі декору
+      body+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}" fill-opacity=".55" stroke="${dk}" stroke-width="1"/>`;
+      // двері на всю висоту, без рамки зверху/знизу
+      const dw=c.door*sc, dx=x+(cw-dw)/2;
+      body+=`<rect x="${dx.toFixed(1)}" y="${y0}" width="${dw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}" stroke="${dk}" stroke-width="1.4"/>
+        <circle cx="${(dx+dw-7).toFixed(1)}" cy="${(y0+fh/2).toFixed(1)}" r="2.4" fill="${hndl}" fill-opacity=".85"/>`;
+      if(c.inc) body+=`<text x="${(x+cw/2).toFixed(1)}" y="${(y0+14).toFixed(1)}" text-anchor="middle" font-size="9" fill="${hndl}">♿</text>`;
       // ніжки
       body+=`<rect x="${(x+4).toFixed(1)}" y="${(y0+fh).toFixed(1)}" width="3.5" height="9" fill="var(--brand-3)"/>`;
       x+=cw;
       // межа кабін = перегородка
-      if(i<cabs.length-1) body+=`<line x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${(y0+fh).toFixed(1)}" stroke="var(--brand-3)" stroke-width="2"/>`;
+      if(i<cabs.length-1) body+=`<line x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${(y0+fh).toFixed(1)}" stroke="${dk}" stroke-width="2"/>`;
     });
     body+=`<rect x="${(x0+fw-8).toFixed(1)}" y="${(y0+fh).toFixed(1)}" width="3.5" height="9" fill="var(--brand-3)"/>`;
   }
@@ -767,6 +815,9 @@ function sketchTopView(o){
   const hasL=o.vid!=='окр', hasR=o.vid==='між';
   const H=yF+padB;
   const ink='var(--ink-soft)', mut='var(--ink-mut)';
+  const colMain=o.hex?shade(o.hex,-0.28):'var(--brand)';
+  const colDark=o.hex?shade(o.hex,-0.42):'var(--brand-3)';
+  const colDoor=o.hex?shade(o.hex,-0.15):'var(--brand-2)';
   let s=`<defs><pattern id="hch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#eef2f2"/><line x1="0" y1="0" x2="0" y2="6" stroke="#b9c6c6" stroke-width="1.5"/></pattern></defs>`;
   // стіни (штриховка)
   const wl=x0-(hasL?wt:0), wr=x0+w+(hasR?wt:0);
@@ -774,8 +825,8 @@ function sketchTopView(o){
   if(hasL) s+=`<rect x="${(x0-wt).toFixed(1)}" y="${y0}" width="${wt}" height="${d.toFixed(1)}" fill="url(#hch)" stroke="#aebcbc" stroke-width=".7"/>`;
   if(hasR) s+=`<rect x="${(x0+w).toFixed(1)}" y="${y0}" width="${wt}" height="${d.toFixed(1)}" fill="url(#hch)" stroke="#aebcbc" stroke-width=".7"/>`;
   // кутові перегородки (бічні панелі)
-  if(!hasR) s+=`<line x1="${(x0+w).toFixed(1)}" y1="${y0}" x2="${(x0+w).toFixed(1)}" y2="${yF.toFixed(1)}" stroke="var(--brand)" stroke-width="2.4"/>`;
-  if(!hasL) s+=`<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${yF.toFixed(1)}" stroke="var(--brand)" stroke-width="2.4"/>`;
+  if(!hasR) s+=`<line x1="${(x0+w).toFixed(1)}" y1="${y0}" x2="${(x0+w).toFixed(1)}" y2="${yF.toFixed(1)}" stroke="${colMain}" stroke-width="2.4"/>`;
+  if(!hasL) s+=`<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${yF.toFixed(1)}" stroke="${colMain}" stroke-width="2.4"/>`;
   // межі кабін → міжкабінні перегородки
   let bounds=[];
   if(o.cabs&&o.cabs.length){
@@ -788,7 +839,7 @@ function sketchTopView(o){
   let partX=null;
   bounds.forEach((b,i)=>{ if(i<nParts){ const x=x0+b;
     if(partX===null) partX=x;
-    s+=`<line x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${(yF-2).toFixed(1)}" stroke="var(--brand-3)" stroke-width="2.2"/>`; } });
+    s+=`<line x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${(yF-2).toFixed(1)}" stroke="${colDark}" stroke-width="2.2"/>`; } });
   // фасадна лінія + двері (45°)
   s+=`<line x1="${x0}" y1="${yF.toFixed(1)}" x2="${(x0+w).toFixed(1)}" y2="${yF.toFixed(1)}" stroke="var(--border-2)" stroke-width="1" stroke-dasharray="4 3"/>`;
   let doorPt=null;
@@ -798,10 +849,10 @@ function sketchTopView(o){
     let x=x0;
     o.cabs.forEach(c=>{
       const cw=(c.min+extra)*sc, dw=c.door*sc, oS=x+(cw-dw)/2;
-      s+=`<line x1="${x.toFixed(1)}" y1="${yF.toFixed(1)}" x2="${oS.toFixed(1)}" y2="${yF.toFixed(1)}" stroke="var(--brand-3)" stroke-width="2.6"/>
-          <line x1="${(oS+dw).toFixed(1)}" y1="${yF.toFixed(1)}" x2="${(x+cw).toFixed(1)}" y2="${yF.toFixed(1)}" stroke="var(--brand-3)" stroke-width="2.6"/>`;
+      s+=`<line x1="${x.toFixed(1)}" y1="${yF.toFixed(1)}" x2="${oS.toFixed(1)}" y2="${yF.toFixed(1)}" stroke="${colDark}" stroke-width="2.6"/>
+          <line x1="${(oS+dw).toFixed(1)}" y1="${yF.toFixed(1)}" x2="${(x+cw).toFixed(1)}" y2="${yF.toFixed(1)}" stroke="${colDark}" stroke-width="2.6"/>`;
       const dl=Math.min(dw,d*0.85)*0.74;
-      s+=`<line x1="${oS.toFixed(1)}" y1="${yF.toFixed(1)}" x2="${(oS+dl).toFixed(1)}" y2="${(yF-dl).toFixed(1)}" stroke="var(--brand-2)" stroke-width="1.9"/>`;
+      s+=`<line x1="${oS.toFixed(1)}" y1="${yF.toFixed(1)}" x2="${(oS+dl).toFixed(1)}" y2="${(yF-dl).toFixed(1)}" stroke="${colDoor}" stroke-width="1.9"/>`;
       if(doorPt===null) doorPt={x:oS+dl*0.55,y:yF-dl*0.55};
       if(c.inc) s+=`<text x="${(x+cw/2).toFixed(1)}" y="${(y0+11).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--brand)">♿</text>`;
       x+=cw;
@@ -1080,10 +1131,11 @@ function cabinStep(c){
       const dec=decorBy(c.decor);
       return `<h2>Тип виробу та матеріал</h2><p class="sub">Висота фіксована для типу. Поверхня — FH, ядро залежить від декору.</p>
       <div class="grid c4">${CABIN_TYPES.map(t=>`<div class="opt ${c.type===t.id?'sel':''}" data-action="setCabinType" data-id="${t.id}">
+        ${t.photo?`<div class="opt-ph"><img src="${esc(t.photo)}" loading="lazy" alt="${esc(t.name)}"></div>`:''}
         <div class="t">${t.name}</div><div class="d">${t.desc}</div></div>`).join('')}</div>
       <div class="infocard"><b>Стандарти / обмеження:</b><br>Максимальна висота кабінки — <b>${type.h} мм</b>.<br>Довжина — згідно проєкту. Глибина — згідно проєкту.</div>
       <h4>Фурнітура</h4>
-      <div class="chips">${type.fit.map(f=>`<button class="chip ${c.fittings===f?'sel':''}" data-action="setCabinFittings" data-id="${f}">${FITTINGS[f]}</button>`).join('')}</div>
+      <div class="infocard" style="margin-top:0">Виготовляється з: <b>${fitText(type)}</b>${type.fit.length>1?' — використовуються обидва матеріали.':'.'}</div>
       <h4>Декор (HPL Fundermax)</h4>
       <div class="swatches">${decorsFor('cabins').map(x=>`
         <div class="sw ${c.decor===x.code?'sel':''}" data-action="setDecor" data-mod="cabins" data-id="${x.code}">
@@ -1095,7 +1147,7 @@ function cabinStep(c){
         <div class="kv"><b>Поверхня</b>FH</div>
         <div class="kv"><b>Колір ядра</b>${dec?dec.core:'—'}</div>
         <div class="kv"><b>Висота</b>${type.h} мм</div>
-        <div class="kv"><b>Фурнітура</b>${FITTINGS[c.fittings]||'—'}</div>
+        <div class="kv"><b>Фурнітура</b>${fitText(type)}</div>
       </div>`;
     }
     case 1: return roomsStepMain(c,type);
@@ -1110,9 +1162,11 @@ function roomTabs(c){
 }
 function roomFooter(r,type){
   return `<div class="kvrow">
-    <div class="kv"><b>Площа деталей</b>${roomArea(r,type).toFixed(2)} м²</div>
-    <div class="kv"><b>Вартість приміщення</b>${money2(roomCost(r,type))}</div>
+    <div class="kv"><b>Площа деталей</b><span id="roomarea">${roomArea(r,type).toFixed(2)} м²</span></div>
   </div>`;
+}
+function partsRule(vid){
+  return vid==='між'?'кількість дверей − 1':vid==='кут'?'дорівнює кількості дверей':'кількість дверей + 1';
 }
 function roomsStepMain(c,type){
   const r=c.rooms[c.active];
@@ -1181,10 +1235,7 @@ function roomsStepDoors(c,type){
         <div class="chips">${CONFIG.cabins.doorWidthsInc.map(w=>`<button class="chip ${r.wInc===w?'sel':''}" data-action="roomNum" data-path="${f}wInc" data-v="${w}">${w}</button>`).join('')}</div></div>
     </div>
     <h4>Перегородки</h4>
-    <div class="row">
-      <div class="field"><label>Міжкабінні, кількість <span class="hint">зазвичай: кабінок − 1</span></label>${stepper(f+'parts',r.parts,0,20)}</div>
-      <div class="field"><label>Кутові, кількість <span class="hint">за видом: ${(VIDS.find(v=>v.id===r.vid)||VIDS[0]).sides}</span></label>${stepper(f+'corners',r.corners,0,10)}</div>
-    </div>
+    <div class="infocard" style="margin-top:0" id="partsinfo">Кількість визначається автоматично — вид «${(VIDS.find(v=>v.id===r.vid)||VIDS[0]).name}»: ${partsRule(r.vid)}. Для цього приміщення: <b>${roomParts(r)} шт</b>.</div>
     ${prob?`<div class="note err" role="alert">${esc(prob)}</div>`:''}
     ${roomFooter(r,type)}`;
 }
@@ -1204,8 +1255,7 @@ function summaryCabins(c){
         <div><span>Глибина</span><span>${r.depth.toLocaleString('uk-UA')} мм</span></div>
         <div><span>Двері стандарт</span><span>${r.nStd?r.nStd+' шт × '+r.wStd+' мм':'—'}</span></div>
         <div><span>Двері інклюзив</span><span>${r.nInc?r.nInc+' шт × '+r.wInc+' мм':'—'}</span></div>
-        <div><span>Міжкабінні перегородки</span><span>${r.parts} шт</span></div>
-        <div><span>Кутові перегородки</span><span>${r.corners||0} шт</span></div>
+        <div><span>Перегородки (авто)</span><span>${roomParts(r)} шт</span></div>
         <div><span>Площа деталей</span><span>${x.area.toFixed(2)} м²</span></div>`;
     }else{
       rows=`
@@ -1213,7 +1263,7 @@ function summaryCabins(c){
         <div><span>Висота</span><span>${p.type.h} мм</span></div>
         <div><span>Площа деталей</span><span>${x.area.toFixed(2)} м²</span></div>`;
     }
-    const sketch=isCab?`<div class="sr-sketch">${sketchTopView({facade:r.facade,depth:r.depth,vid:r.vid,cabs:cabsOf(r),parts:r.parts,labeled:false})}</div>`:'';
+    const sketch=isCab?`<div class="sr-sketch">${sketchTopView({facade:r.facade,depth:r.depth,vid:r.vid,cabs:cabsOf(r),parts:Math.max(0,((r.nStd||0)+(r.nInc||0))-1),hex:dec?dec.hex:null,labeled:false})}</div>`:'';
     return `<div class="sumroom">
       <div class="sr-head">
         <div class="sr-title">${esc(r.name)} <span class="sr-tag">${kindName}</span></div>
@@ -1242,7 +1292,7 @@ function summaryCabins(c){
         <div class="mat-sub">HPL Fundermax · поверхня FH · ${dec?dec.core:'—'}</div>
         <div class="specs">
           <span class="spec">Тип: <b>${p.type.name}</b></span>
-          <span class="spec">Фурнітура: <b>${FITTINGS[c.fittings]}</b></span>
+          <span class="spec">Фурнітура: <b>${fitText(p.type)}</b></span>
           <span class="spec">Висота: <b>${p.type.h} мм</b></span>
           <span class="spec">${dec&&dec.stock>0?'В наявності: <b>'+dec.stock+' л.</b>':'Під замовлення'}</span>
         </div>
@@ -1390,7 +1440,7 @@ function renderAside(mod){
     sketch=sketchRoom(r,p.type,dec?dec.hex:'#9aa3a8');
     if(r&&r.kind==='каб'&&c.step>=1){
       sketch+=`<div class="ttl" style="margin-top:14px">Вид зверху · ${esc((VIDS.find(v=>v.id===r.vid)||VIDS[0]).name)}</div>`
-        +sketchTopView({facade:r.facade,depth:r.depth,vid:r.vid,cabs:cabsOf(r),parts:r.parts,labeled:false});
+        +sketchTopView({facade:r.facade,depth:r.depth,vid:r.vid,cabs:cabsOf(r),parts:Math.max(0,((r.nStd||0)+(r.nInc||0))-1),hex:dec?dec.hex:null,labeled:false});
     }
     lines=p.rooms.map(x=>`<div class="ln"><span>${esc(x.room.name)} (${x.area.toFixed(2)} м²)</span><span>${money(x.cost)}</span></div>`).join('')
       +`<div class="ln"><span>Ставка</span><span>${CONFIG.cabins.ratePerM2} €/м²</span></div>
@@ -1405,11 +1455,11 @@ function renderAside(mod){
       ${p.mixCost?`<div class="ln"><span>Змішувач ×${c.mixer}</span><span>${money(p.mixCost)}</span></div>`:''}
       <div class="ln tot"><span>За позицію</span><span>${money2(subtotal)}</span></div>`;
   }
-  if(c.step===0){ // тип/форма: прев'ю без ціни — вартість з кроку «Приміщення»/«Розміри»
+  if(c.step===0){ // тип/форма: без ціни; для кабін — і без прев'ю (з'явиться на «Приміщенні»)
     state._last[mod]=subtotal;
     const ok0=canProceed(mod);
     return `
-  <div class="preview"><div class="ttl">Конфігурація</div>${sketch}</div>
+  ${isC?'':`<div class="preview"><div class="ttl">Конфігурація</div>${sketch}</div>`}
   <div class="summary">
     <div class="plabel">Розрахунок</div>
     <div class="aside-hint" style="font-size:13.5px;color:var(--ink-soft);margin:10px 0 4px;line-height:1.55">Орієнтовна вартість з'явиться на кроці «${isC?'Приміщення':'Розміри'}».</div>
@@ -1473,10 +1523,7 @@ function viewEstimate(){
           <div class="field"><label>Телефон</label><input class="inp" type="tel" data-field="client.phone" value="${esc(cl.phone)}"></div>
           <div class="field"><label>Email</label><input class="inp" type="email" data-field="client.email" value="${esc(cl.email)}"></div>
         </div>
-        <div class="row">
-          <div class="field"><label>Компанія</label><input class="inp" data-field="client.company" value="${esc(cl.company)}"></div>
-          <div class="field"><label>Менеджер</label><input class="inp" data-field="client.manager" value="${esc(cl.manager)}"></div>
-        </div>
+        <div class="field"><label>Компанія</label><input class="inp" data-field="client.company" value="${esc(cl.company)}"></div>
         <div class="field only-mobile"><label>Цінова категорія</label><select class="inp" data-field="client.priceCat">${PRICE_CATS.map(p=>`<option ${cl.priceCat===p?'selected':''}>${p}</option>`).join('')}</select></div>
         <div class="field" style="margin-bottom:0"><label>Коментар</label><textarea class="inp" rows="2" data-field="client.comment">${esc(cl.comment)}</textarea></div>
       </div>
@@ -1505,7 +1552,7 @@ function viewQuote(){
   const cl=state.client;
   const num=state.quoteNum||'КП-'+new Date().getFullYear()+'/—';
   const date=new Date().toLocaleDateString('uk-UA');
-  const rows=state.estimate.map((it,i)=>`<tr><td>${i+1}</td><td><b>${esc(it.title)}</b><br><span style="color:var(--ink-soft);font-size:12.5px;white-space:pre-line">${esc(it.meta)}</span></td>
+  const rows=state.estimate.map((it,i)=>`<tr><td>${i+1}</td><td><b>${esc(it.title)}</b><br><span style="color:var(--ink-soft);font-size:12.5px;white-space:pre-line">${esc(it.meta)}</span>${it.sketch?`<div class="qsk">${it.sketch}</div>`:''}</td>
     <td class="r" data-l="К-сть">${it.qty}</td><td class="r" data-l="Ціна">${money2(it.unitBase)}</td><td class="r" data-l="Сума">${money2(it.unitBase*it.qty)}</td></tr>`).join('');
   return `
   <div class="qtools no-print">
@@ -1521,7 +1568,7 @@ function viewQuote(){
       <div class="qmeta">
         <b>Клієнт:</b> ${esc(((cl.name||'')+' '+(cl.surname||'')).trim()||'—')}${cl.company?' · '+esc(cl.company):''}<br>
         <b>Телефон:</b> ${esc(cl.phone||'—')}${cl.email?' · <b>Email:</b> '+esc(cl.email):''}<br>
-        ${cl.manager?'<b>Менеджер:</b> '+esc(cl.manager)+'<br>':''}<b>Цінова категорія:</b> ${esc(cl.priceCat)}${cl.comment?'<br><b>Коментар:</b> '+esc(cl.comment):''}
+        <b>Цінова категорія:</b> ${esc(cl.priceCat)}${cl.comment?'<br><b>Коментар:</b> '+esc(cl.comment):''}
         ${(cl.noCall||cl.viaMessenger)?'<br><b>Зв’язок:</b> '+[cl.viaMessenger?'месенджери (Telegram/Viber)':'',cl.noCall?'просив не дзвонити':''].filter(Boolean).join(' · '):''}
       </div>
       <table>
@@ -1547,20 +1594,23 @@ function addToEstimate(mod){
     const c=state.cabins;
     const p=priceCabins(c); const dec=decorBy(c.decor);
     title=p.type.name;
+    const hx=dec?dec.hex:'#9aa3a8';
+    var sk=p.rooms.map(x=>sketchRoom(x.room,p.type,hx)).join('');
     meta=p.rooms.map(x=>{
       const r=x.room;
       if(r.kind==='каб') return `${r.name}: фасад ${r.facade}×${r.depth} мм, двері ${r.nStd?r.nStd+'×'+r.wStd:''}${r.nStd&&r.nInc?'+':''}${r.nInc?r.nInc+'×'+r.wInc+' інкл.':''}, ${x.area.toFixed(2)} м²`;
       return `${r.name}: ${r.pn}×${r.pw} мм, ${x.area.toFixed(2)} м²`;
-    }).join('\n')+`\n${dec?dec.code+' '+dec.name:''} · FH · ${dec?dec.core:''} · ${FITTINGS[c.fittings]}`;
+    }).join('\n')+`\n${dec?dec.code+' '+dec.name:''} · FH · ${dec?dec.core:''} · ${fitText(p.type)}`;
     unitBase=p.subtotal;
   }else{
     const c=state.counters;
     const p=priceCounters(c); const sh=SHAPES.find(x=>x.id===c.shape);
     title='Стільниця '+sh.name;
+    var sk=sketchCounter(c);
     meta=`${p.area.toFixed(2)} м² · ${p.edgeName} · вирізів ${c.cutouts}${c.mixer?' · змішувач '+c.mixer:''} · ${p.dec?p.dec.code+' '+p.dec.name:''}`;
     unitBase=p.subtotal;
   }
-  state.estimate.push({ id:'it'+Date.now()+Math.floor(Math.random()*1000), mod, title, meta, unitBase, qty:1 });
+  state.estimate.push({ id:'it'+Date.now()+Math.floor(Math.random()*1000), mod, title, meta, unitBase, qty:1, sketch:sk||'' });
   track('add_to_estimate',{product:mod,total:Math.round(unitBase)});
   toast('Додано до кошторису ✓');
 }
@@ -1592,7 +1642,6 @@ document.addEventListener('click',e=>{
     case 'prev': state[mod].step=Math.max(0,state[mod].step-1); render(); break;
     case 'setCabinType':{ cb.type=el.dataset.id;
       const t=typeBy(cb.type); if(!t.fit.includes(cb.fittings)) cb.fittings=t.fit[0]; render(); break; }
-    case 'setCabinFittings': cb.fittings=el.dataset.id; render(); break;
     case 'setShape': state.counters.shape=el.dataset.id; render(); break;
     case 'setEdge': state.counters.edge=+el.dataset.n; render(); break;
     case 'setDecor': state[el.dataset.mod].decor=el.dataset.id; render(); break;
@@ -1604,8 +1653,8 @@ document.addEventListener('click',e=>{
     case 'roomVid':{ const rr=cb.rooms[cb.active]; rr.vid=el.dataset.id;
       rr.corners=(VIDS.find(v=>v.id===rr.vid)||VIDS[0]).sides; render(); break; }
     case 'roomNum': setPath(state,el.dataset.path,+el.dataset.v); render(); break;
-    case 'inc':{ const p=el.dataset.path; setPath(state,p,Math.min(+el.dataset.max||999,(getPath(p)||0)+1)); syncParts(p); render(); break; }
-    case 'dec':{ const p=el.dataset.path; setPath(state,p,Math.max(+el.dataset.min||0,(getPath(p)||0)-1)); syncParts(p); render(); break; }
+    case 'inc':{ const p=el.dataset.path; setPath(state,p,Math.min(+el.dataset.max||999,(getPath(p)||0)+1)); render(); break; }
+    case 'dec':{ const p=el.dataset.path; setPath(state,p,Math.max(+el.dataset.min||0,(getPath(p)||0)-1)); render(); break; }
     case 'addEstimate': addToEstimate(mod); state.screen='estimate'; render(); break;
     case 'estInc':{ const it=state.estimate.find(x=>x.id===el.dataset.id); if(it){it.qty++; render();} break; }
     case 'estDec':{ const it=state.estimate.find(x=>x.id===el.dataset.id); if(it){it.qty=Math.max(1,it.qty-1); render();} break; }
@@ -1632,13 +1681,6 @@ document.addEventListener('click',e=>{
       saveAccount(acc); c.accountId=acc.id; toast('Акаунт зареєстровано ✓'); refreshAcctBox(); break; }
   }
 });
-// авто-перегородки: кабінок − 1
-function syncParts(path){
-  const m=path.match(/^cabins\.rooms\.(\d+)\.(nStd|nInc)$/);
-  if(!m) return;
-  const r=state.cabins.rooms[+m[1]];
-  if(r) r.parts=Math.max(0,(r.nStd||0)+(r.nInc||0)-1);
-}
 function onField(el){
   const path=el.dataset.field; let v=el.value;
   if(el.type==='checkbox') v=!!el.checked;
@@ -1656,6 +1698,11 @@ function onField(el){
   }
   const mod=path.split('.')[0];
   if(mod==='cabins'||mod==='counters') refreshAside(mod);
+  if(path.indexOf('cabins.rooms.')===0){
+    const ra=document.getElementById('roomarea');
+    if(ra){ const t=typeBy(state.cabins.type), r=state.cabins.rooms[state.cabins.active];
+      if(r) ra.textContent=roomArea(r,t).toFixed(2)+' м²'; }
+  }
 }
 function onFilter(el){
   const f=el.dataset.filter, mod=el.dataset.mod;
@@ -1675,6 +1722,7 @@ document.addEventListener('change',e=>{ const f=e.target.closest('[data-filter]'
    ============================================================ */
 load();
 render();
+loadCatalog();
 track('session_start',{device:(typeof window!=='undefined'&&window.innerWidth&&window.innerWidth<=560)?'mobile':'desktop'});
 </script>
 </body>

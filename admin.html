@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<title>BUDZIRKA · Адмінка</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23152420'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#274C4F; --brand-2:#456A6D; --ink:#152420; --ink-soft:#3c4a46; --ink-mut:#5f6f6a;
+  --surface:#EEF4F5; --surface-2:#E2EDEF; --white:#fff; --border:#dbe6e6; --border-2:#cddbdb;
+  --brand-soft:#e6f0f0; --ok:#2e7d5b; --ok-soft:#e4f2ea; --warn:#9a6b12; --warn-soft:#f4ecda;
+  --err:#a5471f; --err-soft:#f7e8e0;
+  --shadow:0 2px 6px rgba(21,36,32,.06),0 14px 34px rgba(21,36,32,.07);
+  --r:14px; --r-sm:10px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--surface);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;color:inherit}
+:focus-visible{outline:2.5px solid var(--brand);outline-offset:2px;border-radius:6px}
+
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:13px;background:var(--ink);color:#fff;padding:12px 22px}
+.topbar .mark{width:30px;height:30px;border-radius:8px;background:#fff;color:var(--ink);display:grid;place-items:center;font-weight:800}
+.topbar b{font-size:16px;letter-spacing:.4px}
+.topbar span{color:#9fb0ab;font-size:13px}
+.topbar .spacer{flex:1}
+.rolechip{font-size:12.5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:5px 13px;border-radius:99px}
+.logout{color:#cdd9d5;font-size:13px;padding:6px 12px;border-radius:99px;border:1px solid rgba(255,255,255,.2)}
+.logout:hover{background:rgba(255,255,255,.12)}
+
+.wrap{max-width:1240px;margin:0 auto;padding:24px 20px 80px}
+.tabs{display:flex;gap:7px;margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:9px 18px;border-radius:99px;font-size:13.5px;font-weight:600;border:1px solid var(--border);background:var(--white);color:var(--ink-mut)}
+.tab.sel{background:var(--brand);border-color:var(--brand);color:#fff}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+h2{margin:0 0 4px;font-size:19px}
+.sub{margin:0 0 16px;color:var(--ink-soft);font-size:13.5px}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--ink-mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1.5px solid var(--border-2);padding:8px 8px}
+td{border-bottom:1px solid var(--surface-2);padding:8px;vertical-align:middle}
+tr:hover td{background:var(--surface)}
+.tin{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 9px;font-size:13px;background:var(--white)}
+.tin:focus{outline:none;border-color:var(--brand)}
+.tin.num{width:84px;text-align:right;font-variant-numeric:tabular-nums}
+.tin.clr{width:46px;height:34px;padding:2px;cursor:pointer}
+.sw-dot{width:26px;height:26px;border-radius:7px;border:1px solid rgba(0,0,0,.12);display:inline-block;vertical-align:middle}
+.ph{width:52px;height:38px;border-radius:7px;object-fit:cover;background:var(--surface-2);display:block}
+.ph-btn{font-size:11.5px;color:var(--brand);font-weight:600;padding:3px 0;display:block}
+.toggle{width:40px;height:22px;border-radius:99px;background:var(--border-2);position:relative;transition:.15s;flex:0 0 auto}
+.toggle::after{content:"";position:absolute;top:2.5px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.toggle.on{background:var(--ok)}
+.toggle.on::after{left:20px}
+.btn{border:1.5px solid var(--border);background:var(--white);color:var(--ink);padding:9px 16px;border-radius:99px;font-size:13px;font-weight:600;transition:.14s;min-height:38px}
+.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{background:var(--brand-2)}
+.btn.sm{padding:6px 13px;min-height:32px;font-size:12.5px}
+.btn.danger:hover{border-color:var(--err);color:var(--err)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.saved{color:var(--ok);font-size:12px;font-weight:600}
+.row-dirty td{background:var(--warn-soft)!important}
+
+.login{max-width:420px;margin:9vh auto 0}
+.login .card{padding:30px}
+.login h1{margin:0 0 6px;font-size:22px}
+.login p{margin:0 0 18px;color:var(--ink-soft);font-size:14px}
+.login .tin{padding:12px 14px;font-size:15px}
+.lerr{color:var(--err);background:var(--err-soft);border-radius:9px;padding:9px 12px;font-size:13px;margin-top:12px}
+
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.kfield label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+.kfield .hint{color:var(--ink-mut);font-weight:400;font-size:11.5px}
+.lead-meta{font-size:12px;color:var(--ink-soft);white-space:pre-line}
+.badge{display:inline-block;font-size:10.5px;font-weight:600;border-radius:99px;padding:2px 9px}
+.badge.in{background:var(--ok-soft);color:var(--ok)}
+.badge.out{background:var(--warn-soft);color:var(--warn)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:13.5px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+.toast.show{opacity:1}
+.tablewrap{overflow-x:auto}
+@media(max-width:700px){ .wrap{padding:16px 10px 60px} .card{padding:14px} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const API='https://eymmfzpcuuibufondxfv.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bW1menBjdXVpYnVmb25keGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNjM0ODMsImV4cCI6MjA5MzYzOTQ4M30.4LqMeLcuCGRBaXcEQJI6T0B01LpL_zTXghdIbV2JY9E';
+const HDR={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY};
+const app=document.getElementById('app');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let S={ key:sessionStorage.getItem('bz_key')||'', role:'', name:'', tab:'types',
+  types:[], decors:[], edges:[], settings:null, leads:[], dirty:{}, loading:false, lerr:'' };
+
+async function rpc(fn,args){
+  const r=await fetch(API+'/rest/v1/rpc/'+fn,{method:'POST',headers:HDR,body:JSON.stringify(args)});
+  if(!r.ok){ const t=await r.text(); throw new Error(t.slice(0,200)); }
+  const ct=r.headers.get('content-type')||'';
+  return ct.includes('json')?r.json():null;
+}
+async function sel(table,q){ const r=await fetch(API+'/rest/v1/'+table+'?'+q,{headers:HDR}); return r.json(); }
+
+let toastT=null;
+function toast(m){ let el=document.getElementById('t'); if(!el){el=document.createElement('div');el.id='t';el.className='toast';document.body.appendChild(el);}
+  el.textContent=m; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2000); }
+
+/* ---------- login ---------- */
+async function tryLogin(key){
+  S.lerr='';
+  try{
+    const res=await rpc('budzirka_auth',{p_key:key});
+    if(res&&res.length){ S.key=key; S.role=res[0].role; S.name=res[0].name;
+      sessionStorage.setItem('bz_key',key); await loadAll(); render(); return; }
+    S.lerr='Невірний ключ доступу.';
+  }catch(e){ S.lerr='Помилка з’єднання: '+e.message; }
+  render();
+}
+function viewLogin(){
+  return `<div class="login"><div class="card">
+    <h1>BUDZIRKA · Адмінка</h1>
+    <p>Введіть ключ доступу (адміністратор або менеджер).</p>
+    <input class="tin" id="k" type="password" placeholder="Ключ доступу" value="">
+    <button class="btn pri" style="width:100%;margin-top:12px" onclick="tryLogin(document.getElementById('k').value.trim())">Увійти →</button>
+    ${S.lerr?`<div class="lerr">${esc(S.lerr)}</div>`:''}
+  </div></div>`;
+}
+
+/* ---------- data ---------- */
+async function loadAll(){
+  S.loading=true; render();
+  const [t,d,e,st]=await Promise.all([
+    sel('budzirka_cabin_types','select=*&order=sort'),
+    sel('budzirka_decors','select=*&order=dir,code'),
+    sel('budzirka_edges','select=*&order=n'),
+    sel('budzirka_settings','select=*&id=eq.1'),
+  ]);
+  S.types=t; S.decors=d; S.edges=e; S.settings=st[0]||null;
+  try{ S.leads=await rpc('budzirka_leads_list',{p_key:S.key,p_limit:200}); }catch(e){ S.leads=[]; }
+  S.loading=false; S.dirty={};
+}
+
+/* ---------- save ---------- */
+function markDirty(kind,id){ S.dirty[kind+':'+id]=true; const tr=document.getElementById('r-'+kind+'-'+cssId(id)); if(tr) tr.classList.add('row-dirty'); }
+const cssId=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,'_');
+function upd(kind,id,field,value){
+  const list=kind==='type'?S.types:kind==='decor'?S.decors:S.edges;
+  const keyf=kind==='type'?'id':kind==='decor'?'id':'n';
+  const row=list.find(x=>String(x[keyf])===String(id)); if(!row) return;
+  row[field]=value; markDirty(kind,id);
+}
+async function saveRow(kind,id){
+  const btn=document.getElementById('s-'+kind+'-'+cssId(id)); if(btn){btn.disabled=true;btn.textContent='…';}
+  try{
+    if(kind==='type'){ const r=S.types.find(x=>x.id===id);
+      await rpc('budzirka_save_type',{p_key:S.key,p:r}); }
+    else if(kind==='decor'){ const r=S.decors.find(x=>String(x.id)===String(id));
+      await rpc('budzirka_save_decor',{p_key:S.key,p:r}); }
+    else if(kind==='edge'){ const r=S.edges.find(x=>String(x.n)===String(id));
+      await rpc('budzirka_save_edge',{p_key:S.key,p:r}); }
+    delete S.dirty[kind+':'+id];
+    toast('Збережено ✓'); render();
+  }catch(e){ toast('Помилка: '+e.message); if(btn){btn.disabled=false;btn.textContent='Зберегти';} }
+}
+async function saveSettings(){
+  try{ await rpc('budzirka_save_settings',{p_key:S.key,p:S.settings}); toast('Налаштування збережено ✓'); }
+  catch(e){ toast('Помилка: '+e.message); }
+}
+async function delDecor(id){
+  const r=S.decors.find(x=>String(x.id)===String(id)); if(!r) return;
+  if(!confirm('Видалити декор '+r.code+' ('+r.dir+')?')) return;
+  try{ await rpc('budzirka_delete_decor',{p_key:S.key,p_code:r.code,p_dir:r.dir});
+    S.decors=S.decors.filter(x=>x!==r); toast('Видалено'); render(); }
+  catch(e){ toast('Помилка: '+e.message); }
+}
+function addDecor(dir){
+  S.decors.unshift({id:'new'+Date.now(),code:'',dir:dir,name:'',hex:'#9aa3a8',surf:'FH',core:'black core',stock:0,m2_price:null,active:true,photo_url:null,_new:true});
+  render();
+}
+
+/* ---------- photo upload ---------- */
+async function uploadPhoto(kind,id,input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  if(f.size>4*1024*1024){ toast('Фото завелике (макс 4 МБ)'); return; }
+  const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+  const path=kind+'-'+cssId(id)+'-'+Date.now()+'.'+ext;
+  toast('Завантаження…');
+  try{
+    const r=await fetch(API+'/storage/v1/object/budzirka-img/'+path,{method:'POST',
+      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':f.type||'image/jpeg'},body:f});
+    if(!r.ok) throw new Error(await r.text());
+    const url=API+'/storage/v1/object/public/budzirka-img/'+path;
+    upd(kind,id,'photo_url',url);
+    await saveRow(kind,id);
+  }catch(e){ toast('Помилка завантаження: '+e.message); }
+}
+
+/* ---------- views ---------- */
+function header(){
+  return `<div class="topbar"><div class="mark">A</div><b>BUDZIRKA</b><span>Адмінка</span>
+    <div class="spacer"></div>
+    <span class="rolechip">${S.role==='admin'?'👑 Повний контроль':'👤 Менеджер'} · ${esc(S.name)}</span>
+    <button class="logout" onclick="sessionStorage.removeItem('bz_key');S.key='';S.role='';render()">Вийти</button>
+  </div>`;
+}
+function tabs(){
+  const T=[['types','Товари'],['decors','Декори'],['edges','Обробка'],['leads','Ліди ('+S.leads.length+')']];
+  if(S.role==='admin') T.push(['settings','Налаштування']);
+  return `<div class="tabs">${T.map(([id,l])=>`<button class="tab ${S.tab===id?'sel':''}" onclick="S.tab='${id}';render()">${l}</button>`).join('')}</div>`;
+}
+function saveBtn(kind,id){
+  const dirty=S.dirty[kind+':'+id];
+  return `<button id="s-${kind}-${cssId(id)}" class="btn sm ${dirty?'pri':''}" onclick="saveRow('${kind}','${id}')" ${dirty?'':'disabled'}>Зберегти</button>`;
+}
+function phCell(kind,id,url){
+  return `${url?`<img class="ph" src="${esc(url)}" alt="">`:`<div class="ph"></div>`}
+    <label class="ph-btn">${url?'змінити':'+ фото'}<input type="file" accept="image/*" style="display:none" onchange="uploadPhoto('${kind}','${id}',this)"></label>`;
+}
+function tgl(kind,id,field,on){
+  return `<div class="toggle ${on?'on':''}" role="switch" tabindex="0" aria-checked="${!!on}"
+    onclick="upd('${kind}','${id}','${field}',${on?'false':'true'});render()"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"></div>`;
+}
+
+function viewTypes(){
+  return `<div class="card"><h2>Товари — типи кабін</h2><p class="sub">Назва, опис, висота, фото, статус. Фурнітура: inox = нержавіюча сталь, alu = анодований алюміній (через кому).</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Фото</th><th>Назва</th><th>Опис</th><th style="width:80px">Висота</th><th style="width:110px">Фурнітура</th><th>Активний</th><th></th></tr></thead>
+    <tbody>${S.types.map(t=>`
+      <tr id="r-type-${cssId(t.id)}" class="${S.dirty['type:'+t.id]?'row-dirty':''}">
+        <td>${phCell('type',t.id,t.photo_url)}</td>
+        <td><input class="tin" value="${esc(t.name)}" oninput="upd('type','${t.id}','name',this.value)"></td>
+        <td><input class="tin" value="${esc(t.descr)}" oninput="upd('type','${t.id}','descr',this.value)"></td>
+        <td><input class="tin num" type="number" value="${t.h}" oninput="upd('type','${t.id}','h',+this.value)"></td>
+        <td><input class="tin" value="${esc(t.fit)}" oninput="upd('type','${t.id}','fit',this.value)"></td>
+        <td>${tgl('type',t.id,'active',t.active)}</td>
+        <td>${saveBtn('type',t.id)}</td>
+      </tr>`).join('')}</tbody>
+  </table></div></div>`;
+}
+function viewDecors(){
+  const dirs=[['cabins','Сантехнічні кабіни'],['counters','Стільниці']];
+  return dirs.map(([dir,label])=>{
+    const list=S.decors.filter(d=>d.dir===dir);
+    return `<div class="card"><h2>Декори — ${label} <span style="color:var(--ink-mut);font-size:13px">(${list.length})</span></h2>
+    <p class="sub">Код, назва, колір, наявність (листів), ціна €/м² (для стільниць), статус.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Колір</th><th style="width:90px">Код</th><th>Назва</th><th style="width:70px">Поверхня</th><th style="width:90px">Наявність</th><th style="width:90px">Ціна €/м²</th><th>Активний</th><th></th></tr></thead>
+      <tbody>${list.map(d=>`
+        <tr id="r-decor-${cssId(d.id)}" class="${S.dirty['decor:'+d.id]?'row-dirty':''}">
+          <td><input class="tin clr" type="color" value="${esc(d.hex)}" oninput="upd('decor','${d.id}','hex',this.value)"></td>
+          <td><input class="tin" value="${esc(d.code)}" oninput="upd('decor','${d.id}','code',this.value)"></td>
+          <td><input class="tin" value="${esc(d.name)}" oninput="upd('decor','${d.id}','name',this.value)"></td>
+          <td><input class="tin" value="${esc(d.surf)}" oninput="upd('decor','${d.id}','surf',this.value)"></td>
+          <td><input class="tin num" type="number" step="0.5" value="${d.stock}" oninput="upd('decor','${d.id}','stock',+this.value)"></td>
+          <td><input class="tin num" type="number" step="1" value="${d.m2_price==null?'':d.m2_price}" placeholder="—" oninput="upd('decor','${d.id}','m2_price',this.value===''?null:+this.value)"></td>
+          <td>${tgl('decor',d.id,'active',d.active)}</td>
+          <td style="white-space:nowrap">${saveBtn('decor',d.id)}
+            ${S.role==='admin'?`<button class="btn sm danger" onclick="delDecor('${d.id}')">✕</button>`:''}</td>
+        </tr>`).join('')}</tbody>
+    </table></div>
+    <button class="btn sm" style="margin-top:10px" onclick="addDecor('${dir}')">＋ Додати декор</button>
+    </div>`;
+  }).join('');
+}
+function viewEdges(){
+  return `<div class="card"><h2>Обробка торців</h2><p class="sub">Ставки за метр погонний (€/м.п.) для стільниць.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th style="width:90px">№</th><th>Назва</th><th>Опис</th><th style="width:100px">Ставка €/м.п.</th><th>Активний</th><th></th></tr></thead>
+    <tbody>${S.edges.map(e=>`
+      <tr id="r-edge-${e.n}" class="${S.dirty['edge:'+e.n]?'row-dirty':''}">
+        <td><b>№${e.n}</b></td>
+        <td><input class="tin" value="${esc(e.name)}" oninput="upd('edge','${e.n}','name',this.value)"></td>
+        <td><input class="tin" value="${esc(e.descr)}" oninput="upd('edge','${e.n}','descr',this.value)"></td>
+        <td><input class="tin num" type="number" step="0.5" value="${e.rate}" oninput="upd('edge','${e.n}','rate',+this.value)"></td>
+        <td>${tgl('edge',e.n,'active',e.active)}</td>
+        <td>${saveBtn('edge',e.n)}</td>
+      </tr>`).join('')}</tbody>
+  </table></div></div>`;
+}
+function viewLeads(){
+  if(!S.leads.length) return `<div class="card"><h2>Ліди</h2><p class="sub">Поки що порожньо.</p></div>`;
+  return `<div class="card"><h2>Ліди / заявки <span style="color:var(--ink-mut);font-size:13px">(${S.leads.length})</span></h2>
+  <p class="sub">Заявки з конфігуратора — формування КП.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Дата</th><th>Клієнт</th><th>Телефон</th><th>КП</th><th style="text-align:right">Сума €</th><th>Зв'язок</th><th>Склад</th></tr></thead>
+    <tbody>${S.leads.map(l=>{
+      const est=(l.estimate||[]).map(i=>(i.qty>1?i.qty+'× ':'')+i.title).join('; ');
+      const com=[l.via_messenger?'месенджер':'',l.no_call?'не дзвонити':'',l.terms_ok?'умови ✓':''].filter(Boolean).join(', ');
+      return `<tr>
+        <td style="white-space:nowrap">${new Date(l.created_at).toLocaleString('uk-UA',{dateStyle:'short',timeStyle:'short'})}</td>
+        <td><b>${esc((l.name||'')+' '+(l.surname||''))}</b>${l.company?'<br><span style="color:var(--ink-mut);font-size:11.5px">'+esc(l.company)+'</span>':''}</td>
+        <td>${esc(l.phone||'—')}${l.email?'<br><span style="font-size:11.5px">'+esc(l.email)+'</span>':''}</td>
+        <td>${esc(l.quote_number||'—')}<br><span class="badge in">${esc(l.price_cat||'')}</span></td>
+        <td style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums">${(+l.total_eur||0).toLocaleString('uk-UA')}</td>
+        <td style="font-size:11.5px">${esc(com||'—')}</td>
+        <td class="lead-meta">${esc(est)}</td>
+      </tr>`;}).join('')}</tbody>
+  </table></div></div>`;
+}
+function viewSettings(){
+  const s=S.settings||{};
+  function f(label,field,hint){
+    return `<div class="kfield"><label>${label} ${hint?`<span class="hint">${hint}</span>`:''}</label>
+      <input class="tin" type="number" step="0.01" value="${s[field]??''}" oninput="S.settings.${field}=+this.value"></div>`;
+  }
+  return `<div class="card"><h2>Налаштування цін</h2><p class="sub">Глобальні ставки. Доступно лише адміністратору.</p>
+    <div class="kgrid">
+      ${f('Ставка кабін, €/м²','rate_per_m2','база розрахунку')}
+      ${f('Курс €→грн','eur_uah','')}
+      ${f('Виріз (мийка), €','cutout_fee','стільниці')}
+      ${f('Отвір змішувача, €','mixer_fee','стільниці')}
+      ${f('Ціна м² за замовч., €','default_m2','декори без ціни')}
+    </div>
+    <button class="btn pri" style="margin-top:18px" onclick="saveSettings()">Зберегти налаштування</button>
+  </div>`;
+}
+
+function render(){
+  if(!S.role){ app.innerHTML=viewLogin(); const k=document.getElementById('k');
+    if(k) k.addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(k.value.trim()); }); return; }
+  let body='';
+  if(S.loading) body='<div class="card">Завантаження…</div>';
+  else if(S.tab==='types') body=viewTypes();
+  else if(S.tab==='decors') body=viewDecors();
+  else if(S.tab==='edges') body=viewEdges();
+  else if(S.tab==='leads') body=viewLeads();
+  else if(S.tab==='settings'&&S.role==='admin') body=viewSettings();
+  app.innerHTML=header()+`<div class="wrap">${tabs()}${body}</div>`;
+}
+
+/* init */
+if(S.key) tryLogin(S.key); else render();
+</script>
+</body>
+</html>
