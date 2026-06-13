@@ -556,8 +556,7 @@ function submitLead(){
     name:c.name||null, surname:c.surname||null, phone:c.phone||null, email:c.email||null,
     company:c.company||null, manager:c.manager||null, comment:c.comment||null,
     price_cat:c.priceCat||null, total_eur:Math.round(t.total*100)/100, estimate:state.estimate,
-    no_call:!!c.noCall, via_messenger:!!c.viaMessenger, terms_ok:!!c.termsOk,
-    viewer_url:(state.estimate.some(i=>i.mod==='cabins')?viewerLink():null) });
+    no_call:!!c.noCall, via_messenger:!!c.viaMessenger, terms_ok:!!c.termsOk });
 }
 /* колір тексту на свотчі за яскравістю декору (контраст) */
 function txtOn(hex){
@@ -1332,7 +1331,6 @@ function summaryCabins(c){
     <div class="sum-h">Приміщення (${p.rooms.length})</div>
     ${rooms}
     ${confirmChecks()}
-    <div class="no-print" style="margin:8px 0 14px"><a class="btn ghost" style="display:inline-flex;text-decoration:none" href="${viewerLink()}" target="_blank" rel="noopener">🧊 Переглянути у 3D →</a></div>
     <div class="totband">
       <div class="tb-l">Разом площа деталей: <b>${p.area.toFixed(2)} м²</b><br>Ставка: <b>${CONFIG.cabins.ratePerM2} €/м²</b></div>
       <div>
