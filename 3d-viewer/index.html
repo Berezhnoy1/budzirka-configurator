@@ -132,6 +132,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
   <a class="btn primary" id="orderBtn" href="https://budzirka.com.ua/" target="_blank" rel="noopener">Замовити</a>
 </div>
 
+<script>
+window.addEventListener('error',function(e){ var l=document.getElementById('loader');
+  if(l&&!window.__ready){ l.innerHTML='<div class="box" style="padding:0 24px;max-width:360px"><div class="mk" style="background:#fff;animation:none">!</div><p style="color:#fff">Не вдалося відкрити 3D<br><span style="font-size:11px;color:#cfe0e1;word-break:break-word">'+((e.message||e.error&&e.error.message||'')+(e.filename?(' — '+String(e.filename).split('/').pop()):''))+'</span></p></div>'; } });
+setTimeout(function(){ var l=document.getElementById('loader'); if(l&&!window.__ready){ l.querySelector('p').textContent='Завантаження триває… (повільний CDN?)'; } },10000);
+</script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -199,9 +204,9 @@ const hemi=new THREE.HemisphereLight(0xffffff,0xdfe7e8,0.85); scene.add(hemi);
 const key=new THREE.DirectionalLight(0xffffff,2.1); key.position.set(4.5,7.5,5.5); key.castShadow=true;
 key.shadow.mapSize.set(2048,2048); key.shadow.bias=-0.0002; key.shadow.normalBias=0.02;
 key.shadow.camera.near=1; key.shadow.camera.far=40;
-Object.assign(key.shadow.camera,{left:-8,right:8,top:8,bottom:-8}); scene.add(key);
-scene.add(Object.assign(new THREE.DirectionalLight(0xffffff,0.5),{position:new THREE.Vector3(-6,4,-3)}));
-scene.add(Object.assign(new THREE.DirectionalLight(0xeaf2f3,0.6),{position:new THREE.Vector3(-2,5,-7)}));
+key.shadow.camera.left=-8; key.shadow.camera.right=8; key.shadow.camera.top=8; key.shadow.camera.bottom=-8; key.shadow.camera.updateProjectionMatrix(); scene.add(key);
+{ const fl=new THREE.DirectionalLight(0xffffff,0.5); fl.position.set(-6,4,-3); scene.add(fl); }
+{ const rl=new THREE.DirectionalLight(0xeaf2f3,0.6); rl.position.set(-2,5,-7); scene.add(rl); }
 
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60), new THREE.ShadowMaterial({opacity:0.20}));
 ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
@@ -219,6 +224,7 @@ function panel(w,h,d){ const g=new THREE.BoxGeometry(w,h,d); const m=new THREE.M
   m.castShadow=true; m.receiveShadow=true; m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),coreEdge)); return m; }
 function tube(len,r,mat,horiz){ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,20),mat); m.castShadow=true; if(horiz) m.rotation.z=Math.PI/2; return m; }
 function cabinMinW(door){ return Math.max(1.1, door/1000+0.4); }
+function at(o,x,y,z){ o.position.set(x,y,z); return o; }
 
 /* ============ модель ============ */
 const root=new THREE.Group(); scene.add(root);
@@ -244,7 +250,7 @@ function buildCabins(cfg){
   partAt.forEach(i=>{
     const p=panel(THICK,H,D); p.position.set(X(bx[i]),H/2,offZ+D/2); root.add(p);
     [offZ+0.06,offZ+D-0.06].forEach(z=>{
-      root.add(Object.assign(tube(0.085,0.013,chrome),{position:new THREE.Vector3(X(bx[i]),0.043,z)}));
+      root.add(at(tube(0.085,0.013,chrome),X(bx[i]),0.043,z));
       const foot=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.034,0.018,18),chrome);
       foot.position.set(X(bx[i]),0.009,z); foot.castShadow=true; root.add(foot);
     });
@@ -266,9 +272,9 @@ function buildCabins(cfg){
 
   if(cfg.t==='standart'||cfg.t==='tube'||cfg.t===undefined){
     const railY=H+0.03, railZ=offZ+D-0.02;
-    root.add(Object.assign(tube(total+0.16,0.016,chrome,true),{position:new THREE.Vector3(X(total/2),railY,railZ)}));
+    root.add(at(tube(total+0.16,0.016,chrome,true),X(total/2),railY,railZ));
     const posts=new Set([...partAt]); posts.add(0); posts.add(n);
-    posts.forEach(i=> root.add(Object.assign(tube(0.10,0.012,chrome),{position:new THREE.Vector3(X(bx[i]),H,railZ)})));
+    posts.forEach(i=> root.add(at(tube(0.10,0.012,chrome),X(bx[i]),H,railZ)));
   }
   buildDims(total,H,D,offZ,cfg);
   return new THREE.Box3().setFromObject(root);
@@ -277,11 +283,11 @@ function buildPanels(cfg){
   const H=(cfg.h||2100)/1000, pw=(cfg.pw||1000)/1000, pn=cfg.pn||3, gap=0.9;
   const total=pn*pw+(pn-1)*gap, offX=-total/2;
   for(let i=0;i<pn;i++){ const x=offX+i*(pw+gap)+pw/2;
-    root.add(Object.assign(panel(pw,H,THICK),{position:new THREE.Vector3(x,H/2,0)}));
-    [-pw/2+0.08,pw/2-0.08].forEach(dx=> root.add(Object.assign(tube(0.09,0.013,chrome),{position:new THREE.Vector3(x+dx,0.045,0)})));
-    root.add(Object.assign(tube(0.10,0.012,chrome),{position:new THREE.Vector3(x,H,0)}));
+    root.add(at(panel(pw,H,THICK),x,H/2,0));
+    [-pw/2+0.08,pw/2-0.08].forEach(dx=> root.add(at(tube(0.09,0.013,chrome),x+dx,0.045,0)));
+    root.add(at(tube(0.10,0.012,chrome),x,H,0));
   }
-  root.add(Object.assign(tube(total+0.4,0.016,chrome,true),{position:new THREE.Vector3(0,H+0.03,0)}));
+  root.add(at(tube(total+0.4,0.016,chrome,true),0,H+0.03,0));
   buildDims(total,H,0.05,-0.025,cfg);
   return new THREE.Box3().setFromObject(root);
 }
@@ -435,7 +441,7 @@ function loop(){
 }
 loop();
 requestAnimationFrame(()=>requestAnimationFrame(()=>{
-  const l=document.getElementById('loader'); if(l){ l.classList.add('hide'); setTimeout(()=>l.remove(),700); }
+  window.__ready=true; const l=document.getElementById('loader'); if(l){ l.classList.add('hide'); setTimeout(()=>l.remove(),700); }
   track('loaded',{type:CFG.t,decor:CFG.dc});
 }));
 </script>
