@@ -556,7 +556,8 @@ function submitLead(){
     name:c.name||null, surname:c.surname||null, phone:c.phone||null, email:c.email||null,
     company:c.company||null, manager:c.manager||null, comment:c.comment||null,
     price_cat:c.priceCat||null, total_eur:Math.round(t.total*100)/100, estimate:state.estimate,
-    no_call:!!c.noCall, via_messenger:!!c.viaMessenger, terms_ok:!!c.termsOk });
+    no_call:!!c.noCall, via_messenger:!!c.viaMessenger, terms_ok:!!c.termsOk,
+    viewer_url:(state.estimate.some(i=>i.mod==='cabins')?viewerLink():null) });
 }
 /* колір тексту на свотчі за яскравістю декору (контраст) */
 function txtOn(hex){
@@ -573,6 +574,16 @@ function shade(hex,p){
   return '#'+[0,2,4].map(i=>n(i).toString(16).padStart(2,'0')).join('');
 }
 const fitText=t=>((t&&t.fit)||['inox']).map(f=>FITTINGS[f]||f).join(' та ');
+/* ---- 3D-переглядач: посилання з конфігурацією ---- */
+function b64urlEncode(o){ const j=JSON.stringify(o); const by=new TextEncoder().encode(j); let bin='';
+  by.forEach(b=>bin+=String.fromCharCode(b)); return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function viewerCfg(){ const c=state.cabins, t=typeBy(c.type), r=(c.rooms&&c.rooms[c.active])||c.rooms[0]||{}, dec=decorBy(c.decor)||{};
+  return { t:c.type, tn:t?t.name:'', kind:r.kind||'каб', h:t?t.h:2100, d:r.depth, f:r.facade, v:r.vid,
+    dc:c.decor, dn:dec.name, hex:dec.hex, ns:r.nStd, ws:r.wStd, ni:r.nInc, wi:r.wInc, pn:r.pn, pw:r.pw,
+    fit:fitText(t), core:dec.core, price:Math.round(priceCabins(c).subtotal), cur:CONFIG.cur, sid:SID,
+    tel:state.client.phone||'' }; }
+function viewerLink(){ const o=(location.origin&&location.origin.indexOf('http')===0)?location.origin.replace(/\/$/,''):'https://budzirka-configurator.vercel.app';
+  return o+'/3d#cfg='+b64urlEncode(viewerCfg()); }
 
 /* ---- каталог із бази (керується адмінкою; знімок у коді — резерв) ---- */
 async function loadCatalog(){
@@ -1321,6 +1332,7 @@ function summaryCabins(c){
     <div class="sum-h">Приміщення (${p.rooms.length})</div>
     ${rooms}
     ${confirmChecks()}
+    <div class="no-print" style="margin:8px 0 14px"><a class="btn ghost" style="display:inline-flex;text-decoration:none" href="${viewerLink()}" target="_blank" rel="noopener">🧊 Переглянути у 3D →</a></div>
     <div class="totband">
       <div class="tb-l">Разом площа деталей: <b>${p.area.toFixed(2)} м²</b><br>Ставка: <b>${CONFIG.cabins.ratePerM2} €/м²</b></div>
       <div>
