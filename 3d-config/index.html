@@ -12,7 +12,7 @@
 :root{
   --brand:#274C4F; --brand-2:#456A6D; --brand-3:#42504b; --ink:#152420; --ink-soft:#3c4a46; --ink-mut:#5f6f6a;
   --bg:#FBFCFC; --surface:#EEF4F5; --surface-2:#E2EDEF; --white:#fff; --border:#dbe6e6; --border-2:#cddbdb;
-  --brand-soft:#e6f0f0; --ok:#2e7d5b; --ok-soft:#e4f2ea; --err:#a5471f; --err-soft:#f7e8e0;
+  --brand-soft:#e6f0f0; --ok:#2e7d5b; --ok-soft:#e4f2ea; --warn:#9a6b12; --warn-soft:#f4ecda; --err:#a5471f; --err-soft:#f7e8e0;
   --shadow:0 2px 6px rgba(21,36,32,.06),0 14px 34px rgba(21,36,32,.10);
   --shadow-lg:0 24px 70px rgba(21,36,32,.18);
   --r:16px; --r-sm:11px; --r-pill:100px; --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
@@ -21,6 +21,8 @@
 html,body{margin:0;height:100%;overflow:hidden;font-family:var(--font);color:var(--ink);
   background:radial-gradient(125% 100% at 38% 0%, #ffffff 0%, #f1f6f7 55%, #e2edf0 100%)}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
+:focus-visible{outline:2.5px solid var(--brand);outline-offset:2px;border-radius:7px}
+.topbar :focus-visible{outline-color:#fff}
 #stage{position:fixed;inset:0}
 #stage canvas{display:block;touch-action:none}
 #labels{position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden}
@@ -31,90 +33,120 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .logo .mark{width:32px;height:32px;border-radius:9px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:var(--shadow)}
 .logo b{font-size:17px;letter-spacing:.5px}.logo span{color:var(--ink-mut);font-size:13px;margin-left:2px}
 
-/* панель керування */
-.panel{position:fixed;top:0;right:0;bottom:0;width:392px;z-index:5;background:rgba(255,255,255,.9);
+/* панель */
+.panel{position:fixed;top:0;right:0;bottom:0;width:392px;z-index:5;background:rgba(255,255,255,.92);
   backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
-  border-left:1px solid var(--border);box-shadow:-20px 0 60px rgba(21,36,32,.08);
-  display:flex;flex-direction:column;overflow:hidden}
-.panel .ph{padding:18px 22px 12px}
+  border-left:1px solid var(--border);box-shadow:-20px 0 60px rgba(21,36,32,.08);display:flex;flex-direction:column;overflow:hidden}
+.grab{display:none}
+.panel .ph{padding:18px 22px 10px;flex:0 0 auto}
 .panel .ph .pl{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-mut);font-weight:700}
 .panel .ph h1{margin:4px 0 0;font-size:21px;letter-spacing:-.3px}
-.panel .body{flex:1;overflow-y:auto;padding:6px 22px 16px}
+.panel .body{flex:1;overflow-y:auto;padding:4px 22px 16px}
 .panel .body::-webkit-scrollbar{width:8px}.panel .body::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:9px}
 
-.sect{margin:16px 0 0}
+.sect{margin:15px 0 0}
 .sect h4{margin:0 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-mut);font-weight:700}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
-.chip{border:1.5px solid var(--border);background:var(--white);border-radius:var(--r-pill);padding:8px 15px;font-size:13px;font-weight:600;color:var(--ink-soft);transition:.14s}
-.chip:hover{border-color:var(--brand-2)}
-.chip.sel{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip{border:1.5px solid var(--border);background:var(--white);border-radius:var(--r-pill);padding:8px 15px;font-size:13px;font-weight:600;color:var(--ink-soft);transition:.14s;min-height:38px}
+.chip:hover{border-color:var(--brand-2)}.chip.sel{background:var(--brand);border-color:var(--brand);color:#fff}
 .optgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .opt{border:1.5px solid var(--border);background:var(--white);border-radius:var(--r-sm);padding:11px 10px;text-align:left;transition:.14s}
-.opt:hover{border-color:var(--brand-2)}
-.opt.sel{border-color:var(--brand);background:var(--brand-soft)}
+.opt:hover{border-color:var(--brand-2)}.opt.sel{border-color:var(--brand);background:var(--brand-soft)}
 .opt .t{font-weight:600;font-size:13px}.opt .d{font-size:11px;color:var(--ink-soft);margin-top:2px}
 
 .fld{margin:12px 0 0}
 .fld .lab{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:600;margin-bottom:7px}
-.fld .lab span{color:var(--ink-mut);font-weight:600;font-variant-numeric:tabular-nums}
+.fld .lab .hint{color:var(--ink-mut);font-weight:400;font-size:11.5px}
+.fld .lab .v{color:var(--brand);font-weight:700;font-variant-numeric:tabular-nums}
 .rng{display:flex;align-items:center;gap:11px}
-.rng input[type=range]{flex:1;-webkit-appearance:none;height:5px;border-radius:9px;background:var(--surface-2);outline:none}
-.rng input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--brand);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);border:2.5px solid #fff}
+.rng input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:9px;outline:none;
+  background:linear-gradient(var(--brand),var(--brand)) 0/var(--fill,50%) 100% no-repeat, var(--surface-2)}
+.rng input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--brand);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);border:2.5px solid #fff;transition:box-shadow .12s}
+.rng input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px var(--brand-soft)}
 .rng input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--brand);cursor:pointer;border:2.5px solid #fff}
-.rng .num{width:78px;border:1.5px solid var(--border);border-radius:9px;padding:8px 9px;font-size:13.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
-.rng .num:focus{outline:none;border-color:var(--brand)}
+.rng .num{width:80px;border:1.5px solid var(--border);border-radius:9px;padding:8px 9px;font-size:13.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.rng .num:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
 .ro{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:9px 11px;font-size:13.5px;color:var(--ink-soft);font-weight:600}
 
 .stepper{display:inline-flex;border:1.5px solid var(--border);border-radius:9px;overflow:hidden}
-.stepper button{width:38px;height:38px;background:var(--surface);font-size:18px;color:var(--brand)}
+.stepper button{width:40px;height:40px;background:var(--surface);font-size:18px;color:var(--brand)}
 .stepper button:hover{background:var(--brand-soft)}
-.stepper input{width:50px;border:none;text-align:center;font-weight:600;font-size:14.5px}
+.stepper input{width:52px;border:none;text-align:center;font-weight:600;font-size:14.5px}
 .stepper input:focus{outline:none}
 .row2{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
 
-.sws{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:8px}
-.sw{border:2px solid transparent;border-radius:10px;overflow:hidden;cursor:pointer;transition:.14s;background:var(--white);box-shadow:0 1px 2px rgba(0,0,0,.06)}
-.sw .c{height:42px}
-.sw .n{font-size:9.5px;font-weight:700;padding:3px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-soft)}
-.sw.sel{border-color:var(--brand)}
-.sw .badge{display:block;font-size:8.5px;color:var(--ok)}.sw .badge.out{color:var(--err)}
-.info{background:var(--surface);border-radius:9px;padding:10px 12px;font-size:12.5px;color:var(--ink-soft);line-height:1.5}
-.info b{color:var(--ink)}
-.errmsg{background:var(--err-soft);color:var(--err);border-radius:9px;padding:9px 12px;font-size:12.5px;margin-top:10px;font-weight:500}
+.matbar{margin-bottom:11px}
+.matbar input{width:100%;border:1.5px solid var(--border);border-radius:var(--r-pill);padding:9px 14px;font-size:13px;background:var(--white)}
+.matbar input:focus{outline:none;border-color:var(--brand)}
+.sws{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:9px}
+.sw{border:2px solid transparent;border-radius:11px;overflow:hidden;cursor:pointer;transition:.14s;background:var(--white);box-shadow:0 1px 2px rgba(0,0,0,.06);text-align:left;padding:0}
+.sw .c{height:50px}
+.sw .m{padding:5px 7px}
+.sw .code{font-size:11px;font-weight:700}
+.sw .badge{display:inline-block;font-size:9.5px;font-weight:600;padding:1px 7px;border-radius:99px;margin-top:3px}
+.sw .badge.in{background:var(--ok-soft);color:var(--ok)}.sw .badge.out{background:var(--warn-soft);color:var(--warn)}
+.sw.sel{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
+.empty{padding:16px;text-align:center;color:var(--ink-mut);font-size:13px}
 
-/* підвал з ціною */
-.foot{border-top:1px solid var(--border);padding:14px 22px calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.7)}
-.foot .price{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:11px}
-.foot .price .pl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-mut);font-weight:700}
-.foot .price .pv{font-size:30px;font-weight:800;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
-.foot .price .pv.bump{animation:bump .25s ease}
+.specs{background:var(--surface);border-radius:var(--r-sm);padding:13px 15px;margin-top:16px}
+.specs .r{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);padding:4px 0}
+.specs .r b{color:var(--ink)}
+
+/* підвал */
+.foot{flex:0 0 auto;border-top:1px solid var(--border);padding:13px 22px calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.78)}
+.trust{display:flex;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--ink-mut);font-weight:600;margin-bottom:10px}
+.trust span{background:var(--surface);border-radius:99px;padding:3px 10px}
+.footerr{display:none;background:var(--err-soft);color:var(--err);border-radius:9px;padding:8px 11px;font-size:12px;margin-bottom:10px;font-weight:500}
+.price{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:3px}
+.price .pl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-mut);font-weight:700}
+.price .pv{font-size:30px;font-weight:800;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.price .pv.bump{animation:bump .25s ease}
 @keyframes bump{0%{transform:scale(1)}45%{transform:scale(1.05)}100%{transform:scale(1)}}
-.foot .uah{font-size:12.5px;color:var(--ink-mut);font-variant-numeric:tabular-nums}
-.btn{width:100%;border:1.5px solid var(--brand);background:var(--brand);color:#fff;padding:14px;border-radius:var(--r-pill);font-size:15px;font-weight:700;transition:.15s;min-height:50px}
+.price .pcap{font-size:11px;color:var(--ink-mut);text-align:right;font-variant-numeric:tabular-nums}
+.stockline{font-size:12px;margin:4px 0 12px;display:flex;align-items:center;gap:6px}
+.stockline.in{color:var(--ok)}.stockline.out{color:var(--warn)}
+.cta-row{display:flex;gap:9px}
+.btn{border:1.5px solid var(--brand);background:var(--brand);color:#fff;padding:14px;border-radius:var(--r-pill);font-size:15px;font-weight:700;transition:.15s;min-height:50px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.flex{flex:1}
 .btn:hover{background:var(--brand-2);border-color:var(--brand-2)}
 .btn.ghost{background:var(--white);color:var(--ink);border-color:var(--border)}
 .btn.ghost:hover{border-color:var(--brand);color:var(--brand)}
+.btn.icon{flex:0 0 auto;width:50px;padding:0;font-size:19px}
+.btn.email{width:100%;margin-top:9px;font-size:13.5px;font-weight:600;min-height:44px;color:var(--brand);background:var(--white);border-color:var(--border)}
+.btn:disabled,.btn[disabled]{background:var(--surface-2);border-color:var(--border);color:var(--ink-mut);cursor:not-allowed}
+.btn:disabled:hover{background:var(--surface-2);border-color:var(--border);color:var(--ink-mut)}
 
-/* 3D міні-контролі */
-.vctrl{position:fixed;left:22px;bottom:22px;z-index:6;display:flex;gap:6px;background:rgba(255,255,255,.84);
+/* 3D-контролі */
+.vctrl{position:fixed;left:22px;bottom:22px;z-index:6;display:flex;gap:5px;background:rgba(255,255,255,.86);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.6);border-radius:var(--r-pill);box-shadow:var(--shadow);padding:6px}
-.vbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--ink-soft);transition:.14s;position:relative}
-.vbtn:hover{background:var(--brand-soft);color:var(--brand)}.vbtn.on{background:var(--brand);color:#fff}
+.vbtn{height:44px;padding:0 10px;border-radius:var(--r-pill);display:inline-flex;align-items:center;gap:7px;color:var(--ink-soft);transition:.14s;position:relative;font-size:13px;font-weight:600}
+.vbtn:hover{background:var(--brand-soft);color:var(--brand)}.vbtn.on{background:var(--brand);color:#fff;box-shadow:0 0 0 2px var(--brand-soft),var(--shadow)}
 .vbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.vbtn .lbl{display:none}
 .vbtn .tip{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:11px;padding:4px 9px;border-radius:7px;white-space:nowrap;opacity:0;transition:.15s;pointer-events:none}
 .vbtn:hover .tip{opacity:1}
 
-/* модалка заявки */
-.modal{position:fixed;inset:0;z-index:30;background:rgba(21,36,32,.4);display:none;place-items:center;padding:18px}
-.modal.show{display:grid}
-.modal .m{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-lg);max-width:420px;width:100%;padding:26px}
-.modal h3{margin:0 0 4px;font-size:20px}.modal p{margin:0 0 16px;color:var(--ink-soft);font-size:13.5px}
-.modal .f{margin-bottom:12px}.modal label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
-.modal .in{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-size:14.5px}
-.modal .in:focus{outline:none;border-color:var(--brand)}
-.modal .x{float:right;font-size:20px;color:var(--ink-mut);margin:-6px -6px 0 0}
+.coach{position:fixed;left:22px;bottom:78px;z-index:7;background:var(--ink);color:#fff;font-size:12.5px;padding:9px 15px;border-radius:var(--r-pill);box-shadow:var(--shadow-lg);transition:opacity .4s;max-width:300px}
 
-.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:#fff;padding:13px 22px;border-radius:var(--r-pill);font-size:14px;box-shadow:var(--shadow-lg);z-index:40;transition:.28s;pointer-events:none}
+/* модалка */
+.modal{position:fixed;inset:0;z-index:30;background:rgba(21,36,32,.42);display:none;place-items:center;padding:18px}
+.modal.show{display:grid}
+.modal .m{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-lg);max-width:430px;width:100%;padding:26px;animation:pop .25s cubic-bezier(.2,.7,.3,1)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.modal h3{margin:0 0 4px;font-size:20px}.modal p{margin:0 0 14px;color:var(--ink-soft);font-size:13.5px;line-height:1.5}
+.modal .x{float:right;font-size:20px;color:var(--ink-mut);margin:-6px -6px 0 0;width:34px;height:34px;border-radius:50%}
+.modal .x:hover{background:var(--surface)}
+.recap{background:var(--surface);border-radius:var(--r-sm);padding:13px 15px;margin-bottom:16px;font-size:12.5px;color:var(--ink-soft);line-height:1.5}
+.recap .sw-d{width:34px;height:34px;border-radius:8px;border:1px solid rgba(0,0,0,.1);float:left;margin:0 11px 2px 0}
+.recap .big{font-size:21px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.4px;display:block;margin-top:3px}
+.modal .f{margin-bottom:11px}.modal label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+.modal .in{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-size:14.5px}
+.modal .in:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.modal .in.bad{border-color:var(--err)}
+.modal .hint{font-size:11.5px;color:var(--ink-mut);margin-top:5px}
+.modal .merr{display:none;background:var(--err-soft);color:var(--err);border-radius:9px;padding:9px 12px;font-size:12.5px;margin-top:10px;font-weight:500}
+
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:#fff;padding:13px 22px;border-radius:var(--r-pill);font-size:14px;box-shadow:var(--shadow-lg);z-index:40;transition:.28s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .loader{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--brand);color:#fff;transition:opacity .6s}
@@ -126,13 +158,19 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 @keyframes ld{0%{margin-left:-32%}100%{margin-left:100%}}
 .loader p{margin:16px 0 0;color:#cfe0e1;font-size:13.5px}
 
+@media (prefers-reduced-motion: reduce){ *{animation:none!important} }
+
 @media (max-width:860px){
-  .panel{top:auto;left:0;right:0;bottom:0;width:auto;max-height:56vh;border-left:none;border-top:1px solid var(--border);border-radius:20px 20px 0 0}
-  .panel .ph{padding:12px 18px 6px}.panel .ph h1{font-size:18px}
+  .panel{top:auto;left:0;right:0;bottom:0;width:auto;max-height:80vh;border-left:none;border-top:1px solid var(--border);border-radius:20px 20px 0 0;transition:max-height .3s cubic-bezier(.2,.7,.3,1)}
+  .panel.peek{max-height:none}
+  .panel.peek .body{display:none}
+  .grab{display:block;height:5px;width:42px;border-radius:99px;background:var(--border-2);margin:9px auto 2px;flex:0 0 auto}
+  .panel .ph{padding:6px 18px 4px;cursor:pointer}.panel .ph h1{font-size:18px}
   .panel .body{padding:4px 18px 12px}
-  .optgrid{grid-template-columns:1fr 1fr 1fr}
-  .vctrl{bottom:auto;top:64px;left:12px}
-  .topbar span{display:none}
+  .topbar{padding:12px 16px}.topbar span{display:none}
+  .vctrl{bottom:auto;top:60px;left:10px;right:10px;overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start}
+  .vbtn .lbl{display:inline}.vbtn .tip{display:none}
+  .coach{top:112px;bottom:auto;left:10px;right:10px;max-width:none}
 }
 </style>
 </head>
@@ -141,29 +179,39 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <div class="loader" id="loader"><div style="text-align:center"><div class="mk">B</div><div class="bar"><i></i></div><p>Завантажуємо 3D-конфігуратор…</p></div></div>
 
 <div class="topbar"><div class="logo"><div class="mark">B</div><b>BUDZIRKA</b><span>3D-конфігуратор</span></div></div>
-
 <div class="vctrl" id="vctrl"></div>
+<div class="coach" id="coach" style="display:none"></div>
 
-<aside class="panel">
-  <div class="ph"><div class="pl">Конфігуратор</div><h1>Сантехнічна кабіна</h1></div>
+<aside class="panel" id="panel">
+  <div class="grab" id="grab"></div>
+  <div class="ph" id="ph"><div class="pl">Конфігуратор</div><h1>Сантехнічна кабіна</h1></div>
   <div class="body" id="body"></div>
   <div class="foot">
-    <div class="price"><div><div class="pl">Орієнтовна вартість</div><div class="pv" id="priceV">—</div><div class="uah" id="priceU"></div></div></div>
-    <div style="display:flex;gap:9px">
-      <button class="btn ghost" style="flex:0 0 auto;width:auto;padding:14px 18px" id="resetBtn">↺</button>
-      <button class="btn" id="orderBtn">Сформувати заявку →</button>
+    <div class="trust"><span>Постачаємо</span><span>оброблюємо</span><span>монтуємо</span><span>HPL Fundermax</span></div>
+    <div class="footerr" id="footerr" role="alert"></div>
+    <div class="price"><div><div class="pl">Орієнтовна вартість</div><div class="pv" id="priceV">—</div></div>
+      <div class="pcap" id="priceCap"></div></div>
+    <div class="stockline" id="stockLine"></div>
+    <div class="cta-row">
+      <button class="btn ghost icon" id="resetBtn" aria-label="Скинути конфігурацію">↺</button>
+      <button class="btn ghost icon" id="shareBtn" aria-label="Поділитися конфігурацією">⤴</button>
+      <button class="btn flex" id="orderBtn">Зафіксувати ціну →</button>
     </div>
+    <button class="btn email" id="emailBtn">✉ Надіслати кошторис на email</button>
   </div>
 </aside>
 
-<div class="modal" id="modal"><div class="m">
-  <button class="x" onclick="closeModal()">✕</button>
-  <h3>Залиште контакти</h3><p>Менеджер підтвердить наявність і зафіксує ціну.</p>
-  <div class="f"><label>Ім'я *</label><input class="in" id="mName" placeholder="Ім'я"></div>
-  <div class="f"><label>Телефон *</label><input class="in" id="mPhone" type="tel" placeholder="+380…"></div>
-  <div class="f"><label>Email</label><input class="in" id="mEmail" type="email" placeholder="email@…"></div>
-  <button class="btn" id="mSend">Надіслати заявку</button>
-  <div class="errmsg" id="mErr" style="display:none"></div>
+<div class="modal" id="modal"><div class="m" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <button class="x" id="mClose" aria-label="Закрити">✕</button>
+  <h3 id="mTitle">Зафіксуємо ціну та наявність</h3>
+  <p id="mSub">Менеджер підтвердить наявність декору і зафіксує цю ціну на 14 днів. Без дзвінків-нав'язувань.</p>
+  <div class="recap" id="recap"></div>
+  <div class="f" id="fName"><label>Ім'я *</label><input class="in" id="mName" autocomplete="name" placeholder="Ім'я"></div>
+  <div class="f" id="fPhone"><label>Телефон *</label><input class="in" id="mPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+380…">
+    <div class="hint">Подзвонимо лише щоб уточнити проєкт — без спаму.</div></div>
+  <div class="f" id="fEmail"><label>Email <span style="color:var(--ink-mut);font-weight:400">— надішлемо кошторис</span></label><input class="in" id="mEmail" type="email" inputmode="email" autocomplete="email" placeholder="email@…"></div>
+  <button class="btn" id="mSend" style="width:100%">Отримати фіксовану ціну →</button>
+  <div class="merr" id="mErr" role="alert"></div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -184,7 +232,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-/* ============ дані (fallback; каталог тягнемо з бази) ============ */
+/* ============ дані ============ */
 const SB={ url:'https://eymmfzpcuuibufondxfv.supabase.co',
   key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bW1menBjdXVpYnVmb25keGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNjM0ODMsImV4cCI6MjA5MzYzOTQ4M30.4LqMeLcuCGRBaXcEQJI6T0B01LpL_zTXghdIbV2JY9E' };
 let TYPES=[
@@ -202,19 +250,25 @@ let DECORS=[
 let SET={ rate:170, eurUah:52.06 };
 const FIT={inox:'нержавіюча сталь',alu:'анодований алюміній'};
 const VIDS=[{id:'між',name:'міжстінна',sides:0,desc:'Між двома стінами'},{id:'кут',name:'кутова',sides:1,desc:'Одна бічна панель'},{id:'окр',name:'окрема',sides:2,desc:'Дві бічні панелі'}];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobile=()=>innerWidth<=860;
 
 /* ============ стан ============ */
 const S={ type:'standart', vid:'кут', depth:1200, facade:4000, nStd:3, wStd:650, nInc:0, wInc:900,
-  decor:'0077', doorsOpen:false, dims:false, auto:true };
-const DEPTH_MIN=1200,DEPTH_MAX=1500,CABIN_MIN=1100,SIDE=200;
-function typeBy(id){ return TYPES.find(t=>t.id===id)||TYPES[0]; }
-function decorBy(c){ return DECORS.find(d=>d.code===c)||DECORS[0]; }
-function fitText(t){ return (t.fit||['inox']).map(f=>FIT[f]||f).join(' та '); }
-function cabinMinW(door){ return Math.max(CABIN_MIN, door+2*SIDE); }
-function parts(){ const sides=(VIDS.find(v=>v.id===S.vid)||VIDS[0]).sides; return Math.max(0,(S.nStd+S.nInc)-1+sides); }
-function area(){ const t=typeBy(S.type), H=t.h/1000; return (S.facade/1000)*H + parts()*(S.depth/1000)*H; }
-function price(){ return area()*SET.rate; }
+  decor:'0077', q:'', doorsOpen:false, dims:false, auto:!reduce };
+const DEPTH_MIN=1200,DEPTH_MAX=1500,FACADE_MIN=1100,FACADE_MAX=8000,CABIN_MIN=1100,SIDE=200;
+const typeBy=id=>TYPES.find(t=>t.id===id)||TYPES[0];
+const decorBy=c=>DECORS.find(d=>d.code===c)||DECORS[0];
+const fitText=t=>(t.fit||['inox']).map(f=>FIT[f]||f).join(' та ');
+const cabinMinW=door=>Math.max(CABIN_MIN, door+2*SIDE);
+const parts=()=>{ const s=(VIDS.find(v=>v.id===S.vid)||VIDS[0]).sides; return Math.max(0,(S.nStd+S.nInc)-1+s); };
+const area=()=>{ const t=typeBy(S.type),H=t.h/1000; return (S.facade/1000)*H + parts()*(S.depth/1000)*H; };
+const price=()=>area()*SET.rate;
+const clampN=(v,lo,hi,d)=>{ v=+v; if(!isFinite(v))return d; return Math.max(lo,Math.min(hi,v)); };
+function clampState(){ S.depth=clampN(S.depth,DEPTH_MIN,DEPTH_MAX,1200); S.facade=clampN(S.facade,FACADE_MIN,FACADE_MAX,4000);
+  S.nStd=clampN(Math.floor(S.nStd),0,12,0); S.nInc=clampN(Math.floor(S.nInc),0,6,0); }
 function dimsErr(){
+  if((S.nStd+S.nInc)<1) return 'Додайте хоча б одні двері.';
   if(S.depth<DEPTH_MIN||S.depth>DEPTH_MAX) return 'Глибина '+S.depth+' мм — поза межами '+DEPTH_MIN+'–'+DEPTH_MAX+' мм.';
   const need=S.nStd*cabinMinW(S.wStd)+S.nInc*cabinMinW(S.wInc);
   if(need>S.facade) return 'Не вміщується: '+(S.nStd+S.nInc)+' кабін потребують ≥ '+need.toLocaleString('uk-UA')+' мм, фасад '+S.facade.toLocaleString('uk-UA')+' мм.';
@@ -223,19 +277,21 @@ function dimsErr(){
 
 /* ============ сцена ============ */
 const stage=document.getElementById('stage');
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
-renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; stage.appendChild(renderer.domElement);
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate=false;
+stage.appendChild(renderer.domElement);
 const labelR=new CSS2DRenderer(); labelR.setSize(innerWidth,innerHeight);
 Object.assign(labelR.domElement.style,{position:'fixed',top:'0',left:'0',pointerEvents:'none'}); document.getElementById('labels').appendChild(labelR.domElement);
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,0.05,200);
-scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),0.04).texture;
+const pmrem=new THREE.PMREMGenerator(renderer); const roomEnv=new RoomEnvironment();
+scene.environment=pmrem.fromScene(roomEnv,0.04).texture; if(roomEnv.dispose)roomEnv.dispose(); pmrem.dispose();
 scene.add(new THREE.HemisphereLight(0xffffff,0xdfe7e8,0.85));
 const key=new THREE.DirectionalLight(0xffffff,2.1); key.position.set(4.5,7.5,5.5); key.castShadow=true;
-key.shadow.mapSize.set(2048,2048); key.shadow.bias=-0.0002; key.shadow.normalBias=0.02;
-key.shadow.camera.near=1; key.shadow.camera.far=60; key.shadow.camera.left=-12; key.shadow.camera.right=12; key.shadow.camera.top=12; key.shadow.camera.bottom=-12; key.shadow.camera.updateProjectionMatrix(); scene.add(key);
+key.shadow.mapSize.set(1024,1024); key.shadow.bias=-0.0002; key.shadow.normalBias=0.02;
+key.shadow.camera.near=1; key.shadow.camera.far=60; scene.add(key);
 const fl=new THREE.DirectionalLight(0xffffff,0.5); fl.position.set(-6,4,-3); scene.add(fl);
 const rl=new THREE.DirectionalLight(0xeaf2f3,0.6); rl.position.set(-2,5,-7); scene.add(rl);
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.ShadowMaterial({opacity:0.20})); ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
@@ -247,22 +303,26 @@ const coreEdge=new THREE.LineBasicMaterial({color:0x14181b,transparent:true,opac
 const incMat=new THREE.MeshStandardMaterial({color:0x2c5f8a,roughness:0.5});
 const colorTarget=new THREE.Color(decorBy(S.decor).hex);
 const THICK=0.012;
+const _edgeCache=new Map();
+function edgesFor(g,w,h,d){ const k=w.toFixed(4)+','+h.toFixed(4)+','+d.toFixed(4);
+  let e=_edgeCache.get(k); if(!e){ e=new THREE.EdgesGeometry(g); _edgeCache.set(k,e); } return e; }
 function at(o,x,y,z){ o.position.set(x,y,z); return o; }
-function panel(w,h,d){ const g=new THREE.BoxGeometry(w,h,d); const m=new THREE.Mesh(g,decorMat); m.castShadow=true; m.receiveShadow=true; m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),coreEdge)); return m; }
+function panel(w,h,d){ const g=new THREE.BoxGeometry(w,h,d); const m=new THREE.Mesh(g,decorMat); m.castShadow=true; m.receiveShadow=true;
+  const ls=new THREE.LineSegments(edgesFor(g,w,h,d),coreEdge); ls.userData.sharedEdges=true; m.add(ls); return m; }
 function tube(len,r,mat,horiz){ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,20),mat); m.castShadow=true; if(horiz) m.rotation.z=Math.PI/2; return m; }
 
 let root=new THREE.Group(); scene.add(root);
-let doorPivots=[], dimsGroup=null, firstBuild=true;
+let doorPivots=[], dimsGroup=null, firstBuild=true, needsRender=true;
 function clearRoot(){ root.traverse(o=>{
     if(o.isCSS2DObject&&o.element&&o.element.parentNode) o.element.parentNode.removeChild(o.element);
-    if(o.geometry&&o!==ground&&o.geometry.dispose) o.geometry.dispose(); });
+    if(o.geometry&&o!==ground&&!o.userData.sharedEdges&&o.geometry.dispose) o.geometry.dispose(); });
   scene.remove(root); root=new THREE.Group(); scene.add(root); doorPivots=[]; dimsGroup=null; }
 function dimLabel(t,x,y,z){ const d=document.createElement('div'); d.className='dimlabel'; d.textContent=t; const o=new CSS2DObject(d); o.position.set(x,y,z); return o; }
 function dimLine(a,b){ return new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),new THREE.LineBasicMaterial({color:0x9fb0ab})); }
 
-function build(){
-  clearRoot();
-  const t=typeBy(S.type), H=t.h/1000, D=S.depth/1000, F=Math.max(S.facade/1000,0.6);
+function build(reframe){
+  clampState(); clearRoot();
+  const t=typeBy(S.type), H=t.h/1000, D=clampN(S.depth,DEPTH_MIN,DEPTH_MAX,1200)/1000, F=Math.max(clampN(S.facade,FACADE_MIN,FACADE_MAX,4000)/1000,0.6);
   const sides=(VIDS.find(v=>v.id===S.vid)||VIDS[0]).sides;
   const cabs=[]; for(let i=0;i<S.nStd;i++) cabs.push({door:S.wStd,inc:false}); for(let i=0;i<S.nInc;i++) cabs.push({door:S.wInc,inc:true});
   if(!cabs.length) cabs.push({door:S.wStd,inc:false});
@@ -270,7 +330,7 @@ function build(){
   const extra=Math.max(0,(F-mins.reduce((a,b)=>a+b,0)))/n, widths=mins.map(m=>m+extra), bx=[0];
   widths.forEach(w=>bx.push(bx[bx.length-1]+w));
   const total=bx[bx.length-1], offX=-total/2, offZ=-D/2, X=x=>x+offX;
-  root.add(at(panel(total,H,THICK),X(total/2),H/2,offZ)); // задня панель
+  root.add(at(panel(total,H,THICK),X(total/2),H/2,offZ));
   const partAt=new Set(); for(let i=1;i<n;i++) partAt.add(i); if(sides>=1) partAt.add(n); if(sides>=2) partAt.add(0);
   partAt.forEach(i=>{ root.add(at(panel(THICK,H,D),X(bx[i]),H/2,offZ+D/2));
     [offZ+0.06,offZ+D-0.06].forEach(z=>{ root.add(at(tube(0.085,0.013,chrome),X(bx[i]),0.043,z));
@@ -286,148 +346,215 @@ function build(){
     root.add(at(tube(total+0.16,0.016,chrome,true),X(total/2),railY,railZ));
     const posts=new Set([...partAt]); posts.add(0); posts.add(n);
     posts.forEach(i=> root.add(at(tube(0.10,0.012,chrome),X(bx[i]),H,railZ))); }
-  // dims — лише коли увімкнено
-  if(S.dims){
-    dimsGroup=new THREE.Group(); root.add(dimsGroup);
+  if(S.dims){ dimsGroup=new THREE.Group(); root.add(dimsGroup);
     const hx=total/2, fz=offZ+D;
     dimsGroup.add(dimLine(new THREE.Vector3(-hx,0.01,fz+0.14),new THREE.Vector3(hx,0.01,fz+0.14)));
     dimsGroup.add(dimLabel(S.facade+' мм',0,0.07,fz+0.14));
     dimsGroup.add(dimLine(new THREE.Vector3(-hx-0.14,0,fz),new THREE.Vector3(-hx-0.14,H,fz)));
     dimsGroup.add(dimLabel(t.h+' мм',-hx-0.14,H/2,fz));
     dimsGroup.add(dimLine(new THREE.Vector3(hx+0.14,0.01,offZ),new THREE.Vector3(hx+0.14,0.01,fz)));
-    dimsGroup.add(dimLabel(S.depth+' мм',hx+0.14,0.07,offZ+D/2));
-  }
-  if(firstBuild){ frameCamera(true); firstBuild=false; }
+    dimsGroup.add(dimLabel(S.depth+' мм',hx+0.14,0.07,offZ+D/2)); }
+  if(firstBuild||reframe){ frameCamera(firstBuild); firstBuild=false; }
+  // тіні оновлюємо лише при перебудові геометрії
+  renderer.shadowMap.needsUpdate=true; needsRender=true;
 }
 let center=new THREE.Vector3(), camDist=6;
 function frameCamera(initial){ const box=new THREE.Box3().setFromObject(root), sph=box.getBoundingSphere(new THREE.Sphere());
-  const nc=sph.center.clone(); camDist=sph.radius/Math.sin(THREE.MathUtils.degToRad(camera.fov/2))*0.95;
-  let dir;
-  if(initial){ dir=new THREE.Vector3(Math.sin(0.6)*0.8,0.42,Math.cos(0.6)*0.8).normalize(); }
+  center=sph.center.clone(); camDist=sph.radius/Math.sin(THREE.MathUtils.degToRad(camera.fov/2))*0.95;
+  let dir; if(initial){ dir=new THREE.Vector3(Math.sin(0.6)*0.8,0.42,Math.cos(0.6)*0.8).normalize(); }
   else { dir=camera.position.clone().sub(controls.target); if(dir.lengthSq()<1e-6) dir.set(Math.sin(0.6)*0.8,0.42,Math.cos(0.6)*0.8); dir.normalize(); }
-  center=nc; controls.target.copy(center); controls.minDistance=sph.radius*0.5; controls.maxDistance=sph.radius*6;
-  camera.position.copy(center).add(dir.multiplyScalar(camDist)); camera.lookAt(center); controls.update(); }
+  controls.target.copy(center); controls.minDistance=sph.radius*0.5; controls.maxDistance=sph.radius*6;
+  camera.position.copy(center).add(dir.multiplyScalar(camDist)); camera.lookAt(center); controls.update();
+  // тіньовий фрустум по моделі
+  const r=Math.min(sph.radius,9); key.shadow.camera.left=-r; key.shadow.camera.right=r; key.shadow.camera.top=r; key.shadow.camera.bottom=-r; key.shadow.camera.updateProjectionMatrix(); renderer.shadowMap.needsUpdate=true; needsRender=true; }
 
 const controls=new OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true; controls.dampingFactor=0.08; controls.enablePan=false; controls.maxPolarAngle=Math.PI*0.495;
-controls.addEventListener('start',()=>{ if(S.auto){S.auto=false; setV('rot',false);} });
-build();
+controls.addEventListener('change',()=>{ needsRender=true; });
+controls.addEventListener('start',()=>{ if(S.auto){S.auto=false; setV('rot',false);} once('orbit'); });
 
-/* ============ панель керування ============ */
+/* WebGL контекст */
+renderer.domElement.addEventListener('webglcontextlost',e=>{ e.preventDefault(); },false);
+renderer.domElement.addEventListener('webglcontextrestored',()=>{ try{ const p=new THREE.PMREMGenerator(renderer),re=new RoomEnvironment();
+  scene.environment=p.fromScene(re,0.04).texture; re.dispose&&re.dispose(); p.dispose(); }catch(e){} build(false); },false);
+
+build(true);
+
+/* ============ панель ============ */
 const body=document.getElementById('body');
+function decorList(){ const q=S.q.trim().toLowerCase();
+  return DECORS.filter(d=>!q||((d.code+' '+d.name).toLowerCase().includes(q))); }
 function render(){
   const t=typeBy(S.type), dec=decorBy(S.decor), err=dimsErr();
+  const dl=decorList();
   body.innerHTML=`
   <div class="sect"><h4>Тип виробу</h4>
-    <div class="chips">${TYPES.map(x=>`<button class="chip ${S.type===x.id?'sel':''}" data-act="type" data-v="${x.id}">${x.name}</button>`).join('')}</div></div>
+    <div class="chips" role="radiogroup" aria-label="Тип виробу">${TYPES.map(x=>`<button class="chip ${S.type===x.id?'sel':''}" role="radio" aria-checked="${S.type===x.id}" data-act="type" data-v="${x.id}">${x.name}</button>`).join('')}</div></div>
   <div class="sect"><h4>Вид</h4>
-    <div class="optgrid">${VIDS.map(v=>`<button class="opt ${S.vid===v.id?'sel':''}" data-act="vid" data-v="${v.id}"><div class="t">${v.name}</div><div class="d">${v.desc}</div></button>`).join('')}</div></div>
+    <div class="optgrid" role="radiogroup" aria-label="Вид">${VIDS.map(v=>`<button class="opt ${S.vid===v.id?'sel':''}" role="radio" aria-checked="${S.vid===v.id}" data-act="vid" data-v="${v.id}"><div class="t">${v.name}</div><div class="d">${v.desc}</div></button>`).join('')}</div></div>
   <div class="sect"><h4>Розміри</h4>
-    <div class="fld"><div class="lab">Висота <span>${t.h} мм · фіксована типом</span></div><div class="ro">${t.h} мм</div></div>
-    <div class="fld"><div class="lab">Глибина кабінки <span id="vDepth">${S.depth} мм</span></div>
-      <div class="rng"><input type="range" min="${DEPTH_MIN}" max="${DEPTH_MAX}" step="10" value="${S.depth}" data-rng="depth">
-        <input class="num" type="number" min="${DEPTH_MIN}" max="${DEPTH_MAX}" step="10" value="${S.depth}" data-num="depth"></div></div>
-    <div class="fld"><div class="lab">Довжина фасаду <span id="vFacade">${S.facade} мм</span></div>
-      <div class="rng"><input type="range" min="1100" max="8000" step="100" value="${S.facade}" data-rng="facade">
-        <input class="num" type="number" min="1100" max="8000" step="100" value="${S.facade}" data-num="facade"></div></div>
+    <div class="fld"><div class="lab">Висота <span class="hint">${t.h} мм · фіксована типом</span></div><div class="ro">${t.h} мм</div></div>
+    <div class="fld"><div class="lab"><span>Глибина кабінки</span><span class="v" id="vDepth">${S.depth} мм</span></div>
+      <div class="rng"><input type="range" min="${DEPTH_MIN}" max="${DEPTH_MAX}" step="10" value="${S.depth}" data-rng="depth" aria-label="Глибина" aria-valuetext="${S.depth} мм">
+        <input class="num" type="number" inputmode="numeric" min="${DEPTH_MIN}" max="${DEPTH_MAX}" step="10" value="${S.depth}" data-num="depth"></div>
+      <div class="lab" style="margin-top:4px"><span class="hint">діапазон ${DEPTH_MIN}–${DEPTH_MAX} мм</span></div></div>
+    <div class="fld"><div class="lab"><span>Довжина фасаду</span><span class="v" id="vFacade">${S.facade} мм</span></div>
+      <div class="rng"><input type="range" min="${FACADE_MIN}" max="${FACADE_MAX}" step="100" value="${S.facade}" data-rng="facade" aria-label="Довжина фасаду" aria-valuetext="${S.facade} мм">
+        <input class="num" type="number" inputmode="numeric" min="${FACADE_MIN}" max="${FACADE_MAX}" step="100" value="${S.facade}" data-num="facade"></div></div>
   </div>
   <div class="sect"><h4>Двері · стандарт</h4>
-    <div class="row2">
-      <div>${stepper('nStd',S.nStd,0,12)}</div>
-      <div class="chips">${[600,650,700].map(w=>`<button class="chip ${S.wStd===w?'sel':''}" data-act="wStd" data-v="${w}">${w}</button>`).join('')}</div>
-    </div></div>
+    <div class="row2"><div>${stepper('nStd',S.nStd,0,12)}</div>
+      <div class="chips" role="radiogroup" aria-label="Ширина дверей стандарт">${[600,650,700].map(w=>`<button class="chip ${S.wStd===w?'sel':''}" role="radio" aria-checked="${S.wStd===w}" data-act="wStd" data-v="${w}">${w}</button>`).join('')}</div></div></div>
   <div class="sect"><h4>Двері · інклюзив</h4>
-    <div class="row2">
-      <div>${stepper('nInc',S.nInc,0,6)}</div>
-      <div class="chips">${[900,1000].map(w=>`<button class="chip ${S.wInc===w?'sel':''}" data-act="wInc" data-v="${w}">${w}</button>`).join('')}</div>
-    </div></div>
-  <div class="sect"><h4>Перегородки</h4><div class="info">Автоматично за видом: <b id="partsN">${parts()} шт</b></div></div>
+    <div class="row2"><div>${stepper('nInc',S.nInc,0,6)}</div>
+      <div class="chips" role="radiogroup" aria-label="Ширина дверей інклюзив">${[900,1000].map(w=>`<button class="chip ${S.wInc===w?'sel':''}" role="radio" aria-checked="${S.wInc===w}" data-act="wInc" data-v="${w}">${w}</button>`).join('')}</div></div></div>
   <div class="sect"><h4>Декор (HPL Fundermax · FH)</h4>
-    <div class="sws">${DECORS.map(d=>`<div class="sw ${S.decor===d.code?'sel':''}" data-act="decor" data-v="${d.code}">
-      <div class="c" style="background:${d.hex}"></div><div class="n">${d.code}<span class="badge ${d.stock>0?'':'out'}">${d.stock>0?'є':'під зам.'}</span></div></div>`).join('')}</div></div>
-  <div class="sect"><h4>Фурнітура</h4><div class="info">Виготовляється з: <b>${fitText(t)}</b>${t.fit.length>1?' — обидва матеріали.':'.'}</div></div>
-  <div class="errmsg" id="dimsErrBox" role="alert" style="display:${err?'block':'none'}">${err}</div>`;
-  // ціна
-  const pv=document.getElementById('priceV'), pu=document.getElementById('priceU');
-  const p=price(); pv.textContent=Math.round(p).toLocaleString('uk-UA')+' €';
-  pu.textContent='≈ '+Math.round(p*SET.eurUah).toLocaleString('uk-UA')+' грн';
-  pv.classList.remove('bump'); void pv.offsetWidth; pv.classList.add('bump');
-  document.getElementById('orderBtn').disabled=!!err;
+    ${DECORS.length>8?`<div class="matbar"><input type="search" placeholder="Пошук декору / коду" data-search value="${S.q.replace(/"/g,'&quot;')}"></div>`:''}
+    <div class="sws" id="sws" role="radiogroup" aria-label="Декор">${dl.length?dl.map(d=>`<button class="sw ${S.decor===d.code?'sel':''}" role="radio" aria-checked="${S.decor===d.code}" data-act="decor" data-v="${d.code}">
+      <div class="c" style="background:${d.hex}"></div><div class="m"><div class="code">${d.code}</div><span class="badge ${d.stock>0?'in':'out'}">${d.stock>0?'є':'під зам.'}</span></div></button>`).join(''):'<div class="empty">Нічого не знайдено</div>'}</div></div>
+  <div class="specs">
+    <div class="r"><span>Декор</span><b>${dec.code} ${dec.name}</b></div>
+    <div class="r"><span>Поверхня · ядро</span><b>FH · чорне</b></div>
+    <div class="r"><span>Фурнітура</span><b>${fitText(t)}</b></div>
+    <div class="r"><span>Перегородки (авто)</span><b id="partsN">${parts()} шт</b></div>
+    <div class="r"><span>Площа деталей</span><b id="areaN">${area().toFixed(2)} м²</b></div>
+  </div>`;
+  setFills(); livePrice();
 }
-function stepper(k,v,min,max){ return `<div class="stepper"><button data-step="${k}" data-d="-1" data-min="${min}">−</button>
-  <input data-num="${k}" type="number" value="${v}" min="${min}" max="${max}"><button data-step="${k}" data-d="1" data-max="${max}">+</button></div>`; }
+function stepper(k,v,min,max){ return `<div class="stepper"><button data-step="${k}" data-d="-1" data-min="${min}" aria-label="менше">−</button>
+  <input data-num="${k}" type="number" inputmode="numeric" value="${v}" min="${min}" max="${max}" aria-label="${k}"><button data-step="${k}" data-d="1" data-max="${max}" aria-label="більше">+</button></div>`; }
+function setFills(){ const set=(k,lo,hi)=>{ const el=body.querySelector(`[data-rng="${k}"]`); if(el) el.style.setProperty('--fill',((S[k]-lo)/(hi-lo)*100)+'%'); };
+  set('depth',DEPTH_MIN,DEPTH_MAX); set('facade',FACADE_MIN,FACADE_MAX); }
 
-/* події панелі (делегування) */
+function livePrice(){ const err=dimsErr(), p=price();
+  const pv=document.getElementById('priceV'); if(pv){ pv.textContent=Math.round(p).toLocaleString('uk-UA')+' €'; pv.classList.remove('bump'); void pv.offsetWidth; pv.classList.add('bump'); }
+  const cap=document.getElementById('priceCap'); if(cap) cap.innerHTML='≈ '+Math.round(p*SET.eurUah).toLocaleString('uk-UA')+' грн<br>ставка '+SET.rate+' €/м²';
+  const dec=decorBy(S.decor), sl=document.getElementById('stockLine');
+  if(sl){ if(dec.stock>0){ sl.className='stockline in'; sl.textContent='✓ Декор у наявності · ціну зафіксуємо на 14 днів'; }
+    else { sl.className='stockline out'; sl.textContent='● Декор під замовлення · ціну зафіксуємо на 14 днів'; } }
+  const fe=document.getElementById('footerr'); if(fe){ fe.textContent=err; fe.style.display=err?'block':'none'; }
+  document.getElementById('orderBtn').disabled=!!err; document.getElementById('emailBtn').disabled=!!err;
+}
+function updateLive(){ const pn=document.getElementById('partsN'); if(pn) pn.textContent=parts()+' шт';
+  const an=document.getElementById('areaN'); if(an) an.textContent=area().toFixed(2)+' м²'; livePrice(); }
+
+/* події панелі */
 body.addEventListener('click',e=>{
-  const a=e.target.closest('[data-act]'); if(a){ const k=a.dataset.act, v=a.dataset.v;
-    if(k==='type'){ S.type=v; const t=typeBy(v); }
-    else if(k==='vid') S.vid=v;
-    else if(k==='wStd') S.wStd=+v; else if(k==='wInc') S.wInc=+v;
-    else if(k==='decor'){ S.decor=v; colorTarget.set(decorBy(v).hex); render(); track('decor',{code:v}); return; }
+  const a=e.target.closest('[data-act]'); if(a){ const k=a.dataset.act, v=a.dataset.v; once('first_interact');
+    if(k==='type') S.type=v; else if(k==='vid') S.vid=v; else if(k==='wStd') S.wStd=+v; else if(k==='wInc') S.wInc=+v;
+    else if(k==='decor'){ S.decor=v; colorTarget.set(decorBy(v).hex); persist(); render(); track('decor',{code:v}); return; }
     geomChanged(); return; }
-  const st=e.target.closest('[data-step]'); if(st){ const k=st.dataset.step, d=+st.dataset.d;
-    const min=+st.dataset.min, max=+st.dataset.max;
-    S[k]=Math.max(isNaN(min)?0:min, Math.min(isNaN(max)?99:max, (S[k]||0)+d)); geomChanged(); }
+  const st=e.target.closest('[data-step]'); if(st){ once('first_interact'); const k=st.dataset.step, d=+st.dataset.d;
+    const min=+st.dataset.min, max=+st.dataset.max; S[k]=Math.max(isNaN(min)?0:min, Math.min(isNaN(max)?99:max,(S[k]||0)+d)); geomChanged(); }
 });
 body.addEventListener('input',e=>{
-  const r=e.target.closest('[data-rng]'); const num=e.target.closest('[data-num]');
-  if(r){ S[r.dataset.rng]=+r.value; const ni=body.querySelector(`[data-num="${r.dataset.rng}"]`); if(ni) ni.value=r.value;
-    const lab=document.getElementById(r.dataset.rng==='depth'?'vDepth':'vFacade'); if(lab) lab.textContent=r.value+' мм'; geomLite(); }
-  else if(num){ const k=num.dataset.num; S[k]=+num.value||0; const ri=body.querySelector(`[data-rng="${k}"]`); if(ri) ri.value=num.value; geomLite(); }
+  const se=e.target.closest('[data-search]'); if(se){ S.q=se.value; const g=document.getElementById('sws'); if(g){ const dl=decorList();
+    g.innerHTML=dl.length?dl.map(d=>`<button class="sw ${S.decor===d.code?'sel':''}" role="radio" aria-checked="${S.decor===d.code}" data-act="decor" data-v="${d.code}"><div class="c" style="background:${d.hex}"></div><div class="m"><div class="code">${d.code}</div><span class="badge ${d.stock>0?'in':'out'}">${d.stock>0?'є':'під зам.'}</span></div></button>`).join(''):'<div class="empty">Нічого не знайдено</div>'; } return; }
+  const r=e.target.closest('[data-rng]'), num=e.target.closest('[data-num]');
+  if(r){ once('first_interact'); const k=r.dataset.rng; S[k]=+r.value; const ni=body.querySelector(`[data-num="${k}"]`); if(ni) ni.value=r.value;
+    const lab=document.getElementById(k==='depth'?'vDepth':'vFacade'); if(lab) lab.textContent=r.value+' мм'; r.style.setProperty('--fill',(k==='depth'?(S.depth-DEPTH_MIN)/(DEPTH_MAX-DEPTH_MIN):(S.facade-FACADE_MIN)/(FACADE_MAX-FACADE_MIN))*100+'%'); geomLite(); }
+  else if(num){ once('first_interact'); const k=num.dataset.num; S[k]=+num.value||0;
+    if(k==='nStd'||k==='nInc') S[k]=clampN(Math.floor(S[k]),0,k==='nStd'?12:6,0);
+    const ri=body.querySelector(`[data-rng="${k}"]`); if(ri) ri.value=num.value; geomLite(); }
 });
 body.addEventListener('change',e=>{ const el=e.target.closest('[data-rng],[data-num]'); if(!el) return;
-  S.depth=Math.max(DEPTH_MIN,Math.min(DEPTH_MAX,S.depth||DEPTH_MIN));
-  S.facade=Math.max(1100,Math.min(8000,S.facade||1100));
-  build(); render(); frameCamera(false); });
+  clampState(); build(true); render(); track('size_change',{depth:S.depth,facade:S.facade}); });
+// клавіатура для radio/кнопок
+body.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&e.target.getAttribute&&e.target.getAttribute('role')==='radio'){ e.preventDefault(); e.target.click(); } });
+
 let rafQ=false;
-function geomLite(){ if(!rafQ){ rafQ=true; requestAnimationFrame(()=>{ rafQ=false; build(); }); } livePrice(); updateLive(); }
-function updateLive(){ const pn=document.getElementById('partsN'); if(pn) pn.textContent=parts()+' шт';
-  const eb=document.getElementById('dimsErrBox'); if(eb){ const e=dimsErr(); eb.textContent=e; eb.style.display=e?'block':'none'; } }
-function geomChanged(){ build(); render(); track('change',{type:S.type,vid:S.vid}); }
-function livePrice(){ const pv=document.getElementById('priceV'),pu=document.getElementById('priceU'),p=price();
-  pv.textContent=Math.round(p).toLocaleString('uk-UA')+' €'; pu.textContent='≈ '+Math.round(p*SET.eurUah).toLocaleString('uk-UA')+' грн';
-  document.getElementById('orderBtn').disabled=!!dimsErr(); }
+function geomLite(){ if(!rafQ){ rafQ=true; requestAnimationFrame(()=>{ rafQ=false; build(false); }); } updateLive(); }
+function geomChanged(){ persist(); build(true); render(); }
 
 /* 3D-контролі */
 const VIC={rot:'<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v4h-4"/>',doors:'<rect x="3" y="3" width="8" height="18" rx="1"/><path d="M13 6l8 3v9l-8 3z"/>',dims:'<path d="M3 6h18M3 6v3M21 6v3M6 14h12M6 14v3M18 14v3"/>',reset:'<path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/>'};
-const vdefs=[['rot','Автообертання',()=>{S.auto=!S.auto;setV('rot',S.auto);}],['doors','Відкрити двері',()=>{S.doorsOpen=!S.doorsOpen;setV('doors',S.doorsOpen);}],['dims','Розміри',()=>{S.dims=!S.dims;build();setV('dims',S.dims);track('dims',{on:S.dims});}],['reset','Скинути вид',()=>frameCamera()]];
+const vdefs=[['rot','Обертати',()=>{ if(reduce)return; S.auto=!S.auto; setV('rot',S.auto); needsRender=true; }],
+  ['doors','Двері',()=>{ S.doorsOpen=!S.doorsOpen; setV('doors',S.doorsOpen); needsRender=true; track('doors',{open:S.doorsOpen}); }],
+  ['dims','Розміри',()=>{ S.dims=!S.dims; build(false); setV('dims',S.dims); track('dims',{on:S.dims}); }],
+  ['reset','Вид',()=>{ frameCamera(true); }]];
 const vc=document.getElementById('vctrl');
-vc.innerHTML=vdefs.map(d=>`<button class="vbtn" data-k="${d[0]}" aria-label="${d[1]}"><span class="tip">${d[1]}</span><svg viewBox="0 0 24 24">${VIC[d[0]]}</svg></button>`).join('');
+vc.innerHTML=vdefs.map(d=>`<button class="vbtn" data-k="${d[0]}" aria-label="${d[1]}"><svg viewBox="0 0 24 24">${VIC[d[0]]}</svg><span class="lbl">${d[1]}</span><span class="tip">${d[1]}</span></button>`).join('');
 vc.querySelectorAll('.vbtn').forEach((el,i)=>el.onclick=vdefs[i][2]);
 function setV(k,on){ const el=vc.querySelector(`[data-k="${k}"]`); if(el) el.classList.toggle('on',on); }
-setV('rot',true);
+setV('rot',S.auto);
 
-document.getElementById('resetBtn').onclick=()=>{ Object.assign(S,{type:'standart',vid:'кут',depth:1200,facade:4000,nStd:3,wStd:650,nInc:0,wInc:900,decor:'0077'}); colorTarget.set(decorBy('0077').hex); firstBuild=true; geomChanged(); };
+/* коучмарк */
+let coachT=null;
+function coach(){ const c=document.getElementById('coach'); c.textContent='Обертайте модель · відкрийте двері · покажіть розміри'; c.style.display='block';
+  coachT=setTimeout(hideCoach,5500); }
+function hideCoach(){ const c=document.getElementById('coach'); if(c){ c.style.opacity='0'; setTimeout(()=>c.remove(),500); } clearTimeout(coachT); }
+const _once={}; function once(ev){ if(_once[ev])return; _once[ev]=1; track(ev,{}); if(ev==='orbit'||ev==='first_interact') hideCoach(); }
 
-/* ============ заявка ============ */
-const SID='cfg'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+/* ============ мобільний peek ============ */
+const panelEl=document.getElementById('panel');
+function setPeek(on){ panelEl.classList.toggle('peek',on); resize(); }
+if(isMobile()) setPeek(true);
+document.getElementById('grab').onclick=()=>setPeek(!panelEl.classList.contains('peek'));
+document.getElementById('ph').onclick=()=>{ if(isMobile()) setPeek(!panelEl.classList.contains('peek')); };
+
+/* ============ share / persist ============ */
+const SID=(function(){ try{ let s=localStorage.getItem('cfg3d_sid'); if(s){ track('return_visit',{}); } else { s='cfg'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); localStorage.setItem('cfg3d_sid',s); } return s; }catch(e){ return 'cfg'+Date.now().toString(36); } })();
+function encodeState(){ const o={t:S.type,v:S.vid,d:S.depth,f:S.facade,ns:S.nStd,ws:S.wStd,ni:S.nInc,wi:S.wInc,dc:S.decor};
+  const by=new TextEncoder().encode(JSON.stringify(o)); let bin=''; by.forEach(b=>bin+=String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function decodeState(str){ try{ str=str.replace(/-/g,'+').replace(/_/g,'/'); const o=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(str),c=>c.charCodeAt(0))));
+  if(o.t)S.type=o.t; if(o.v)S.vid=o.v; if(o.d)S.depth=o.d; if(o.f)S.facade=o.f; if(o.ns!=null)S.nStd=o.ns; if(o.ws)S.wStd=o.ws; if(o.ni!=null)S.nInc=o.ni; if(o.wi)S.wInc=o.wi; if(o.dc)S.decor=o.dc; return true; }catch(e){ return false; } }
+function persist(){ try{ const h=encodeState(); history.replaceState(null,'','#'+h); localStorage.setItem('cfg3d_last',h); }catch(e){} }
+document.getElementById('shareBtn').onclick=async()=>{ persist(); const url=location.origin+location.pathname+'#'+encodeState();
+  try{ await navigator.clipboard.writeText(url); toast('Посилання скопійовано — надішліть колезі'); }catch(e){ prompt('Скопіюйте посилання:',url); } track('share',{}); };
+
+/* ============ аналітика ============ */
 function track(ev,props){ try{ fetch(SB.url+'/rest/v1/budzirka_events',{method:'POST',keepalive:true,
   headers:{'Content-Type':'application/json','apikey':SB.key,'Authorization':'Bearer '+SB.key,'Prefer':'return=minimal'},
   body:JSON.stringify({session_id:SID,event:'cfg3d_'+ev,props:props||{}})}).catch(()=>{});}catch(e){} }
+
+/* ============ заявка ============ */
 const modal=document.getElementById('modal');
-document.getElementById('orderBtn').onclick=()=>{ if(dimsErr())return; modal.classList.add('show'); track('order_open',{}); };
-window.closeModal=()=>modal.classList.remove('show');
-modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
+let emailMode=false;
+function openModal(email){ if(dimsErr())return; emailMode=email;
+  const t=typeBy(S.type),dec=decorBy(S.decor);
+  document.getElementById('mTitle').textContent=email?'Надішлемо кошторис на email':'Зафіксуємо ціну та наявність';
+  document.getElementById('mSub').textContent=email?'Надішлемо детальний кошторис цієї конфігурації. Без дзвінків.':'Менеджер підтвердить наявність декору і зафіксує цю ціну на 14 днів. Без дзвінків-нав’язувань.';
+  document.getElementById('fPhone').style.display=email?'none':'block';
+  document.getElementById('fEmail').querySelector('label').innerHTML=email?'Email *':'Email <span style="color:var(--ink-mut);font-weight:400">— надішлемо кошторис</span>';
+  document.getElementById('mSend').textContent=email?'Надіслати кошторис →':'Отримати фіксовану ціну →';
+  document.getElementById('recap').innerHTML=`<div class="sw-d" style="background:${dec.hex}"></div>
+    <b>${t.name}</b> · ${VIDS.find(v=>v.id===S.vid).name}<br>фасад ${S.facade}×${S.depth} мм · ${S.nStd}${S.nInc?'+'+S.nInc+' інкл.':''} двер. · ${dec.code} ${dec.name} · ${area().toFixed(2)} м²
+    <span class="big">${Math.round(price()).toLocaleString('uk-UA')} €</span>`;
+  document.getElementById('mErr').style.display='none'; modal.classList.add('show');
+  setTimeout(()=>document.getElementById('mName').focus(),50); track('order_open',{email:!!email}); }
+document.getElementById('orderBtn').onclick=()=>openModal(false);
+document.getElementById('emailBtn').onclick=()=>openModal(true);
+function closeModal(){ modal.classList.remove('show'); }
+document.getElementById('mClose').onclick=()=>{ closeModal(); track('order_abandon',{}); };
+modal.addEventListener('click',e=>{ if(e.target===modal){ closeModal(); track('order_abandon',{}); } });
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('show')){ closeModal(); } });
 document.getElementById('mSend').onclick=async()=>{
   const name=document.getElementById('mName').value.trim(), phone=document.getElementById('mPhone').value.trim(), email=document.getElementById('mEmail').value.trim();
-  const err=document.getElementById('mErr');
-  if(!name||phone.replace(/\D/g,'').length<10){ err.style.display='block'; err.textContent="Вкажіть ім'я і коректний телефон."; return; }
-  err.style.display='none';
+  const err=document.getElementById('mErr'), btn=document.getElementById('mSend');
+  if(!name){ err.style.display='block'; err.textContent='Вкажіть імʼя.'; return; }
+  if(emailMode){ if(!/.+@.+\..+/.test(email)){ err.style.display='block'; err.textContent='Вкажіть коректний email.'; return; } }
+  else if(phone.replace(/\D/g,'').length<10){ err.style.display='block'; err.textContent='Вкажіть коректний телефон.'; return; }
+  err.style.display='none'; btn.disabled=true; const orig=btn.textContent; btn.textContent='Надсилаємо…';
   const t=typeBy(S.type),dec=decorBy(S.decor);
   const item={mod:'cabins',title:t.name,qty:1,unitBase:Math.round(price()),
     meta:`${VIDS.find(v=>v.id===S.vid).name} · фасад ${S.facade}×${S.depth} мм · двері ${S.nStd}×${S.wStd}${S.nInc?'+'+S.nInc+'×'+S.wInc+' інкл.':''} · ${dec.code} ${dec.name} · ${area().toFixed(2)} м²`};
   try{
     await fetch(SB.url+'/rest/v1/budzirka_leads',{method:'POST',
       headers:{'Content-Type':'application/json','apikey':SB.key,'Authorization':'Bearer '+SB.key,'Prefer':'return=minimal'},
-      body:JSON.stringify({session_id:SID,name,phone,email:email||null,total_eur:Math.round(price()),estimate:[item],
-        price_cat:'Прайс 1',quote_number:'3D-'+new Date().getFullYear()+'/'+Math.floor(Math.random()*9000+1000),source:'3d-config'})});
-    track('order_sent',{total:Math.round(price())});
-    closeModal(); toast('Заявку надіслано ✓ Менеджер звʼяжеться найближчим часом');
+      body:JSON.stringify({session_id:SID,name,phone:phone||null,email:email||null,total_eur:Math.round(price()),estimate:[item],
+        price_cat:'Прайс 1',quote_number:'3D-'+new Date().getFullYear()+'/'+Math.floor(Math.random()*9000+1000),
+        viewer_url:location.origin+location.pathname+'#'+encodeState(),
+        source:emailMode?'3d-config-email':'3d-config',comment:'З 3D-конфігуратора'})});
+    track(emailMode?'email_capture':'order_sent',{total:Math.round(price()),type:S.type,decor:S.decor,in_stock:dec.stock>0});
+    closeModal(); toast(emailMode?'Кошторис надіслано ✓ Перевірте пошту':'Заявку надіслано ✓ Менеджер звʼяжеться найближчим часом');
   }catch(e){ err.style.display='block'; err.textContent='Помилка надсилання. Спробуйте ще раз.'; }
+  finally{ btn.disabled=false; btn.textContent=orig; }
 };
 let toastT=null; function toast(m){ const el=document.getElementById('toast'); el.textContent=m; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),3200); }
+document.getElementById('resetBtn').onclick=()=>{ Object.assign(S,{type:'standart',vid:'кут',depth:1200,facade:4000,nStd:3,wStd:650,nInc:0,wInc:900,decor:'0077',q:''}); colorTarget.set(decorBy('0077').hex); firstBuild=true; persist(); build(true); render(); };
 
-/* ============ каталог із бази ============ */
+/* ============ каталог ============ */
 (async()=>{ try{
   const h={apikey:SB.key,Authorization:'Bearer '+SB.key};
   const [t,d,st]=await Promise.all([
@@ -435,23 +562,33 @@ let toastT=null; function toast(m){ const el=document.getElementById('toast'); e
     fetch(SB.url+'/rest/v1/budzirka_decors?select=*&dir=eq.cabins&active=eq.true&order=code',{headers:h}).then(r=>r.json()),
     fetch(SB.url+'/rest/v1/budzirka_settings?select=*&id=eq.1',{headers:h}).then(r=>r.json()),
   ]);
-  if(Array.isArray(t)&&t.length) TYPES=t.filter(x=>x.rooms!==false).map(x=>({id:x.id,name:x.name,h:x.h||2100,fit:String(x.fit||'inox').split(',').map(s=>s.trim()).filter(Boolean),rail:x.id==='standart'||x.id==='tube'||x.id==='kids'||x.id==='comb'||x.id==='inclusive'}));
+  if(Array.isArray(t)&&t.length) TYPES=t.filter(x=>x.rooms!==false).map(x=>({id:x.id,name:x.name,h:x.h||2100,fit:String(x.fit||'inox').split(',').map(s=>s.trim()).filter(Boolean),rail:['standart','tube','kids','comb','inclusive'].includes(x.id)}));
   if(Array.isArray(d)&&d.length) DECORS=d.map(x=>({code:x.code,name:x.name||x.code,hex:x.hex||'#9aa3a8',stock:+x.stock||0}));
   const s=Array.isArray(st)&&st[0]; if(s){ SET.rate=+s.rate_per_m2||170; SET.eurUah=+s.eur_uah||52.06; }
   if(!typeBy(S.type)&&TYPES[0]) S.type=TYPES[0].id;
-  if(!DECORS.find(x=>x.code===S.decor)&&DECORS[0]){ S.decor=DECORS[0].code; colorTarget.set(DECORS[0].hex); }
-}catch(e){} render(); }) ();
+  if(!DECORS.find(x=>x.code===S.decor)&&DECORS[0]) S.decor=DECORS[0].code;
+  colorTarget.set(decorBy(S.decor).hex); build(true);
+}catch(e){} render(); })();
+
+/* ============ init: відновлення стану ============ */
+(function(){ const hash=(location.hash||'').replace(/^#/,'');
+  if(hash){ if(decodeState(hash)) track('config_from_link',{}); }
+  else { try{ const last=localStorage.getItem('cfg3d_last'); if(last&&decodeState(last)){ setTimeout(()=>toast('Відновлено попередню конфігурацію'),900); } }catch(e){} }
+  colorTarget.set(decorBy(S.decor).hex); firstBuild=true; })();
 
 /* ============ цикл ============ */
-addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); labelR.setSize(innerWidth,innerHeight); });
+function resize(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); labelR.setSize(innerWidth,innerHeight); needsRender=true; }
+addEventListener('resize',resize);
 function loop(){ requestAnimationFrame(loop);
-  decorMat.color.lerp(colorTarget,0.16);
-  const tgt=S.doorsOpen?-1.15:0; doorPivots.forEach(p=>{ p.rotation.y+=(tgt-p.rotation.y)*0.14; });
-  if(S.auto){ const t=Date.now()*0.00016; camera.position.x=center.x+Math.sin(t)*camDist*0.8; camera.position.z=center.z+Math.cos(t)*camDist*0.8; camera.position.y=center.y+camDist*0.42; camera.lookAt(center); }
-  controls.update(); renderer.render(scene,camera); labelR.render(scene,camera);
+  let dirty=needsRender;
+  if(Math.abs(decorMat.color.r-colorTarget.r)+Math.abs(decorMat.color.g-colorTarget.g)+Math.abs(decorMat.color.b-colorTarget.b)>0.003){ decorMat.color.lerp(colorTarget,0.16); dirty=true; }
+  const tgt=S.doorsOpen?-1.15:0; doorPivots.forEach(p=>{ if(Math.abs(tgt-p.rotation.y)>0.001){ p.rotation.y+=(tgt-p.rotation.y)*0.14; dirty=true; } });
+  if(S.auto&&!reduce){ const tm=Date.now()*0.00016; camera.position.x=center.x+Math.sin(tm)*camDist*0.8; camera.position.z=center.z+Math.cos(tm)*camDist*0.8; camera.position.y=center.y+camDist*0.42; camera.lookAt(center); dirty=true; }
+  controls.update();
+  if(dirty){ renderer.render(scene,camera); labelR.render(scene,camera); needsRender=false; }
 }
-render(); loop();
-requestAnimationFrame(()=>requestAnimationFrame(()=>{ window.__ready=true; const l=document.getElementById('loader'); if(l){ l.classList.add('hide'); setTimeout(()=>l.remove(),700); } track('loaded',{}); }));
+build(true); render(); loop();
+requestAnimationFrame(()=>requestAnimationFrame(()=>{ window.__ready=true; const l=document.getElementById('loader'); if(l){ l.classList.add('hide'); setTimeout(()=>l.remove(),700); } track('loaded',{}); if(!reduce&&!isMobile()) coach(); else if(isMobile()) coach(); }));
 </script>
 </body>
 </html>
