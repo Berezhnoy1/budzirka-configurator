@@ -416,7 +416,7 @@ input,select,textarea{font-family:inherit;color:inherit}
 <div class="topbar">
   <div class="logo" data-action="goHome"><div class="mark">B</div><b>BUDZIRKA</b><span>Конфігуратор</span></div>
   <div class="spacer"></div>
-  <div id="acct" class="acct-chip" style="display:none"></div>
+  <div id="acct" class="acct-chip" data-action="openCabinet" title="Особистий кабінет" style="display:none;cursor:pointer"></div>
   <button id="cart" class="cart no-print" data-action="openEstimate" style="display:none"></button>
 </div>
 <div id="app" class="wrap"></div>
@@ -459,7 +459,7 @@ let CABIN_TYPES=[
   {id:'shower',   name:'Душова перегородка',  h:2100, fit:['inox'], rooms:false, desc:'Перегородка для душових'},
   {id:'urinal',   name:'Пісуарна перегородка',h:1550, fit:['inox'], rooms:false, desc:'Екран між пісуарами'},
 ];
-const FITTINGS={ inox:'нержавіюча сталь', alu:'анодований алюміній' };
+const FITTINGS={ inox:'нержавіюча сталь', alu:'анодований алюміній', black:'чорна сатинова' };
 const VIDS=[
   {id:'між', name:'міжстінна', sides:0, desc:'Між двома стінами'},
   {id:'кут', name:'кутова',    sides:1, desc:'Одна бічна панель'},
@@ -557,6 +557,103 @@ function submitLead(){
     company:c.company||null, manager:c.manager||null, comment:c.comment||null,
     price_cat:c.priceCat||null, total_eur:Math.round(t.total*100)/100, estimate:state.estimate,
     no_call:!!c.noCall, via_messenger:!!c.viaMessenger, terms_ok:!!c.termsOk });
+}
+
+/* ============================================================
+   2.6) ОСОБИСТИЙ КАБІНЕТ (Supabase RPC: email + 6-значний PIN)
+   ============================================================ */
+const SBR=LEADS_API.url, SBKEY=LEADS_API.key;
+let sessionPin=null;                  // PIN тримаємо лише в памʼяті сесії (не зберігаємо)
+async function rpc(fn,args){ try{ if(typeof fetch==="undefined") return null;
+  const r=await fetch(SBR+"/rpc/"+fn,{method:"POST",
+    headers:{"Content-Type":"application/json","apikey":SBKEY,"Authorization":"Bearer "+SBKEY},
+    body:JSON.stringify(args||{})}); if(!r.ok) return null; return await r.json(); }catch(e){ return null; } }
+
+let _lookT=null,_lookKey="";
+function backendLookup(){
+  const c=state.client, em=(c.email||"").trim().toLowerCase(), ph=normPhone(c.phone);
+  if(!em && ph.length<10){ state.lookup.backend=undefined; return; }
+  const k=em+"|"+ph; if(k===_lookKey) return; _lookKey=k;
+  clearTimeout(_lookT); _lookT=setTimeout(async()=>{
+    const res=await rpc("cust_lookup",{p_email:em||null,p_phone:ph||null});
+    state.lookup.backend = (res&&typeof res==="object") ? res : undefined;
+    refreshAcctBox();
+  },450);
+}
+function pinVal(){ const el=document.getElementById("acctPin"); return el?String(el.value||"").replace(/\D/g,""):""; }
+async function doLogin(){
+  const b=state.lookup.backend||{}, em=(b.email||state.client.email||"").trim().toLowerCase(), pin=pinVal();
+  if(pin.length!==6){ toast("PIN — 6 цифр"); return; }
+  const res=await rpc("cust_login",{p_email:em,p_pin:pin});
+  if(res&&res.ok){ sessionPin=pin;
+    Object.assign(state.client,{name:res.name||state.client.name,surname:res.surname||state.client.surname,
+      phone:res.phone||state.client.phone,email:res.email,company:res.company||state.client.company,
+      priceCat:res.price_cat||"Прайс 1",accountId:res.id});
+    state.lookup.dismissed=false; toast("Вітаємо, "+(res.name||"")+"! Застосовано "+(res.price_cat||"Прайс 1")); save(); render(); }
+  else toast(res&&res.reason==="pin"?"Невірний PIN":"Акаунт не знайдено");
+}
+async function doRegister(){
+  const c=state.client, em=(c.email||"").trim().toLowerCase(), pin=pinVal();
+  if(!/^\S+@\S+\.\S+$/.test(em)){ toast("Вкажіть email для акаунта"); return; }
+  if(pin.length!==6){ toast("Придумайте PIN з 6 цифр"); return; }
+  const res=await rpc("cust_register",{p_email:em,p_phone:normPhone(c.phone),p_name:c.name,p_surname:c.surname,p_company:c.company,p_pin:pin});
+  if(res&&res.ok){ sessionPin=pin; c.accountId=res.id; c.priceCat=res.price_cat||"Прайс 1";
+    toast("Акаунт створено ✓"); save(); render(); }
+  else if(res&&res.reason==="exists"){ state.lookup.backend={found:true,has_pin:true,email:em,name:c.name}; toast("Акаунт існує — введіть PIN"); refreshAcctBox(); }
+  else toast("Не вдалося створити акаунт");
+}
+async function doRequestReset(em){
+  await rpc("cust_request_reset",{p_email:(em||state.client.email||"").trim().toLowerCase()});
+  toast("Якщо акаунт існує — лист із посиланням надіслано");
+}
+
+/* ---- особистий кабінет (модалка) ---- */
+function closeCabinet(){ const o=document.getElementById("cabinetOverlay"); if(o) o.remove(); }
+async function openCabinet(){
+  const c=state.client; if(!c.accountId){ toast("Спочатку увійдіть в акаунт"); return; }
+  closeCabinet();
+  const ov=document.createElement("div"); ov.id="cabinetOverlay";
+  ov.style.cssText="position:fixed;inset:0;z-index:200;background:rgba(21,36,32,.45);display:grid;place-items:center;padding:16px";
+  ov.innerHTML=
+    '<div style="background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 24px 70px rgba(21,36,32,.25);padding:24px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">'
+    +'<div><div style="font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:#5f6f6a;font-weight:700">Особистий кабінет</div>'
+    +'<h2 style="margin:3px 0 0;font-size:21px">'+esc(c.name)+" "+esc(c.surname||"")+'</h2></div>'
+    +'<button id="cabX" style="border:none;background:#EEF4F5;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px">✕</button></div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px;font-size:13px;color:#3c4a46">'
+    +'<span style="background:#EEF4F5;border-radius:99px;padding:4px 11px">'+esc(c.email||"—")+'</span>'
+    +'<span style="background:#EEF4F5;border-radius:99px;padding:4px 11px">'+esc(c.phone||"—")+'</span>'
+    +'<span style="background:#e6f0f0;color:#274C4F;border-radius:99px;padding:4px 11px;font-weight:700">'+esc(c.priceCat)+'</span></div>'
+    +'<h3 style="font-size:14px;margin:18px 0 8px">Мої замовлення</h3>'
+    +'<div id="cabOrders" style="font-size:13px;color:#5f6f6a">Завантаження…</div>'
+    +'<h3 style="font-size:14px;margin:20px 0 8px">Змінити PIN</h3>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+    +'<input id="cabOld" inputmode="numeric" maxlength="6" placeholder="Поточний PIN" style="border:1.5px solid #dbe6e6;border-radius:9px;padding:10px;width:130px">'
+    +'<input id="cabNew" inputmode="numeric" maxlength="6" placeholder="Новий PIN" style="border:1.5px solid #dbe6e6;border-radius:9px;padding:10px;width:130px">'
+    +'<button id="cabSetPin" style="border:1.5px solid #274C4F;background:#274C4F;color:#fff;border-radius:100px;padding:10px 16px;font-weight:600;cursor:pointer">Зберегти</button></div>'
+    +'<div style="margin-top:8px"><button id="cabReset" style="border:none;background:none;color:#456A6D;cursor:pointer;font-size:12.5px;text-decoration:underline">Забули PIN? Надіслати посилання на email</button></div>'
+    +'<div style="margin-top:20px;border-top:1px solid #dbe6e6;padding-top:14px"><button id="cabLogout" style="border:1.5px solid #dbe6e6;background:#fff;border-radius:100px;padding:10px 16px;font-weight:600;cursor:pointer">Вийти з акаунта</button></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener("click",ev=>{ if(ev.target===ov) closeCabinet(); });
+  document.getElementById("cabX").onclick=closeCabinet;
+  document.getElementById("cabLogout").onclick=()=>{ sessionPin=null; state.client.accountId=null; state.client.priceCat="Прайс 1"; closeCabinet(); save(); render(); };
+  document.getElementById("cabReset").onclick=()=>doRequestReset(c.email);
+  document.getElementById("cabSetPin").onclick=async()=>{
+    const o=document.getElementById("cabOld").value.replace(/\D/g,""), nw=document.getElementById("cabNew").value.replace(/\D/g,"");
+    if(nw.length!==6){ toast("Новий PIN — 6 цифр"); return; }
+    const res=await rpc("cust_set_pin",{p_email:c.email,p_old_pin:o,p_new_pin:nw});
+    if(res&&res.ok){ sessionPin=nw; toast("PIN змінено ✓"); } else toast("Невірний поточний PIN"); };
+  const oc=document.getElementById("cabOrders");
+  if(!sessionPin){ oc.innerHTML="Щоб побачити замовлення, увійдіть в акаунт, ввівши PIN на головній."; }
+  else { const res=await rpc("cust_orders",{p_email:c.email,p_pin:sessionPin});
+    if(res&&res.ok&&res.orders&&res.orders.length){
+      oc.innerHTML=res.orders.map(o=>{ const d=new Date(o.created_at).toLocaleDateString("uk-UA");
+        const tot=o.total_eur!=null?Math.round(o.total_eur).toLocaleString("uk-UA")+" €":"—";
+        return '<div style="display:flex;justify-content:space-between;gap:10px;border:1px solid #dbe6e6;border-radius:10px;padding:10px 12px;margin-bottom:7px">'
+          +'<div><b>'+esc(o.quote_number||"Замовлення")+'</b><br><span style="color:#5f6f6a">'+d+" · "+esc(o.status||"new")+'</span></div>'
+          +'<div style="font-weight:700;white-space:nowrap">'+tot+'</div></div>'; }).join("");
+    } else oc.innerHTML = (res&&res.ok)?"Поки немає замовлень.":"Не вдалося завантажити."; }
 }
 /* колір тексту на свотчі за яскравістю декору (контраст) */
 function txtOn(hex){
@@ -1079,27 +1176,38 @@ function lookupAccount(){
   return getAccounts().find(a=>(ph.length>=7&&normPhone(a.phone)===ph)||(em&&a.email&&a.email.toLowerCase()===em))||null;
 }
 function acctBoxHtml(){
-  const c=state.client, lk=state.lookup;
+  const c=state.client, lk=state.lookup, bk=lk.backend;
   if(c.accountId){
-    const a=getAccounts().find(x=>x.id===c.accountId);
     return `<div class="plate"><div class="pt">✓ Ви увійшли: ${esc(c.name)} ${esc(c.surname||'')}</div>
-      <div class="pd">${a&&a.company?esc(a.company)+' · ':''}цінова категорія: <b>${esc(c.priceCat)}</b></div>
-      <div class="row-btn"><button class="btn-sm" data-action="acctLogout">Вийти / інший клієнт</button></div></div>`;
+      <div class="pd">цінова категорія: <b>${esc(c.priceCat)}</b></div>
+      <div class="row-btn"><button class="btn-sm pri" data-action="openCabinet">Особистий кабінет</button>
+        <button class="btn-sm" data-action="acctLogout">Вийти</button></div></div>`;
+  }
+  if(bk&&bk.found){
+    const pin=`<input id="acctPin" class="inp" inputmode="numeric" maxlength="6" placeholder="6 цифр" autocomplete="off" style="max-width:160px;letter-spacing:.18em">`;
+    if(bk.has_pin){
+      return `<div class="plate"><div class="pt">Вітаємо, ${esc(bk.name||c.name||'')}! Введіть PIN</div>
+        <div class="row-btn" style="align-items:center">${pin}<button class="btn-sm pri" data-action="acctLoginPin">Увійти</button></div>
+        <div class="row-btn"><button class="btn-sm" data-action="acctForgot">Забули PIN?</button></div></div>`;
+    }
+    return `<div class="plate"><div class="pt">Ми вас знаємо, ${esc(bk.name||c.name||'')}</div>
+      <div class="pd">Встановіть 6-значний PIN — і зможете заходити в кабінет.</div>
+      <div class="row-btn" style="align-items:center">${pin}<button class="btn-sm pri" data-action="acctRegister">Створити PIN</button></div></div>`;
+  }
+  if(bk&&bk.found===false){
+    const em=(c.email||'').trim();
+    if(!/^\S+@\S+\.\S+$/.test(em))
+      return `<div class="plate"><div class="pd">Вкажіть email — і зможете створити акаунт із персональними цінами та історією замовлень.</div></div>`;
+    return `<div class="plate"><div class="pt">Новий клієнт?</div>
+      <div class="pd">Створіть акаунт, щоб бачити свої замовлення та персональні ціни.</div>
+      <div class="row-btn" style="align-items:center"><input id="acctPin" class="inp" inputmode="numeric" maxlength="6" placeholder="придумайте 6 цифр" autocomplete="off" style="max-width:200px">
+        <button class="btn-sm pri" data-action="acctRegister">Зареєструвати</button></div></div>`;
   }
   const m=lookupAccount();
   if(m&&!lk.dismissed){
     return `<div class="plate"><div class="pt">Це ви — ${esc(m.name)} ${esc(m.surname||'')}?</div>
-      <div class="pd">${m.company?esc(m.company)+' · ':''}знайдено в базі за ${normPhone(state.client.phone)===normPhone(m.phone)?'телефоном':'email'}</div>
-      <div class="row-btn">
-        <button class="btn-sm pri" data-action="acctYes" data-id="${m.id}">Так, це я</button>
-        <button class="btn-sm" data-action="acctNo">Ні, зареєструватися</button>
-      </div></div>`;
-  }
-  const ph=normPhone(c.phone);
-  if(ph.length>=10&&!m){
-    return `<div class="plate warn"><div class="pt">Акаунт не знайдено</div>
-      <div class="pd">Зареєструємо новий акаунт на ці контакти? Особистий рівень знижки призначає менеджер.</div>
-      <div class="row-btn"><button class="btn-sm pri" data-action="acctRegister">Зареєструвати акаунт</button></div></div>`;
+      <div class="row-btn"><button class="btn-sm pri" data-action="acctYes" data-id="${m.id}">Так, це я</button>
+        <button class="btn-sm" data-action="acctNo">Ні</button></div></div>`;
   }
   return '';
 }
@@ -1324,7 +1432,7 @@ function summaryCabins(c){
           <span class="spec">Тип: <b>${p.type.name}</b></span>
           <span class="spec">Фурнітура: <b>${fitText(p.type)}</b></span>
           <span class="spec">Висота: <b>${p.type.h} мм</b></span>
-          <span class="spec">${dec&&dec.stock>0?'В наявності: <b>'+dec.stock+' л.</b>':'Під замовлення'}</span>
+          ${dec&&!(dec.stock>0)?'<span class="spec">Під замовлення</span>':''}
         </div>
       </div>
     </div>
@@ -1703,12 +1811,11 @@ document.addEventListener('click',e=>{
         state.lookup.dismissed=false; toast('Вітаємо, '+acc.name+'! Застосовано '+(acc.priceCat||'Прайс 1')); render(); }
       break; }
     case 'acctNo': state.lookup.dismissed=true; refreshAcctBox(); break;
-    case 'acctLogout': state.client.accountId=null; state.client.priceCat='Прайс 1'; state.lookup.dismissed=false; render(); break;
-    case 'acctRegister':{ const c=state.client;
-      if(!contactOk()){ toast("Заповніть ім'я, прізвище і телефон"); break; }
-      const acc={ id:'u'+Date.now(), name:c.name.trim(), surname:c.surname.trim(), company:c.company.trim(),
-        phone:c.phone.trim(), email:c.email.trim(), priceCat:'Прайс 1' };
-      saveAccount(acc); c.accountId=acc.id; toast('Акаунт зареєстровано ✓'); refreshAcctBox(); break; }
+    case 'acctLogout': sessionPin=null; state.client.accountId=null; state.client.priceCat='Прайс 1'; state.lookup.dismissed=false; render(); break;
+    case 'acctLoginPin': doLogin(); break;
+    case 'acctRegister': doRegister(); break;
+    case 'acctForgot': doRequestReset(state.client.email); break;
+    case 'openCabinet': openCabinet(); break;
   }
 });
 function onField(el){
@@ -1716,7 +1823,7 @@ function onField(el){
   if(el.type==='checkbox') v=!!el.checked;
   else if(el.type==='number') v=parseFloat(v)||0;
   setPath(state,path,v); save();
-  if(el.dataset.lookup){ state.lookup.dismissed=false; refreshAcctBox(); }
+  if(el.dataset.lookup){ state.lookup.dismissed=false; backendLookup(); refreshAcctBox(); }
   if(path==='client.priceCat'){ render(); return; }
   if(path.startsWith('client.')){
     const b=document.getElementById('mkq');

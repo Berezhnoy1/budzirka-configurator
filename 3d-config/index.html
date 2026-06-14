@@ -236,19 +236,34 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 const SB={ url:'https://eymmfzpcuuibufondxfv.supabase.co',
   key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bW1menBjdXVpYnVmb25keGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNjM0ODMsImV4cCI6MjA5MzYzOTQ4M30.4LqMeLcuCGRBaXcEQJI6T0B01LpL_zTXghdIbV2JY9E' };
 let TYPES=[
-  {id:'standart',name:'MAX Standart',h:2100,fit:['inox'],rail:true},
-  {id:'tube',name:'Max Tube',h:2100,fit:['inox','alu'],rail:true},
-  {id:'top',name:'Max Top',h:2100,fit:['inox'],rail:false},
-  {id:'kids',name:'Max Kids',h:2100,fit:['inox'],rail:true},
-  {id:'inclusive',name:'Max Inclusive',h:2100,fit:['inox'],rail:true},
-  {id:'comb',name:'Max Comb',h:2100,fit:['inox'],rail:true},
+  {id:'standart',name:'MAX Standart',h:2100,fit:['inox']},
+  {id:'tube',name:'Max Tube',h:2000,fit:['inox']},
+  {id:'top',name:'Max Top',h:2700,fit:['inox']},
+  {id:'kids',name:'Max Kids',h:1250,fit:['inox']},
+  {id:'inclusive',name:'Max Inclusive',h:2100,fit:['inox']},
+  {id:'comb',name:'Max Comb',h:2700,fit:['inox']},
+  {id:'amfort',name:'Max Amfort',h:2100,fit:['black']},
+  {id:'nejlon',name:'Max Nejlon',h:2000,fit:['black']},
 ];
 let DECORS=[
-  {code:'0085',name:'Білий',hex:'#f1efe9',stock:9},{code:'0074',name:'Pastel Grey',hex:'#c7c7c1',stock:2.5},
-  {code:'0077',name:'Charcoal',hex:'#4b4f52',stock:7.5},{code:'0080',name:'Чорний',hex:'#1d1d1f',stock:4},
+  {code:'0085',name:'White',hex:'#f1efe9',stock:9},{code:'0074',name:'Pastel Grey',hex:'#c7c7c1',stock:2.5},
+  {code:'0077',name:'Charcoal',hex:'#4b4f52',stock:7.5},{code:'0080',name:'Black',hex:'#1d1d1f',stock:4},
 ];
 let SET={ rate:170, eurUah:52.06 };
-const FIT={inox:'нержавіюча сталь',alu:'анодований алюміній'};
+const FIT={inox:'нержавіюча сталь',alu:'анодований алюміній',black:'чорна сатинова'};
+/* конструктивні особливості за типом (з каталогу): глибина, верхня труба, колір фурнітури */
+const SPEC={
+  standart:{dMin:1200,dMax:1500,rail:'round'},
+  tube:{dMin:1200,dMax:1500,rail:'none'},
+  top:{dMin:1200,dMax:1500,rail:'none',ceiling:true},
+  comb:{dMin:1200,dMax:1500,rail:'none',ceiling:true},
+  kids:{dMin:1000,dMax:1000,rail:'round'},
+  inclusive:{dMin:1650,dMax:1650,rail:'round'},
+  amfort:{dMin:1200,dMax:1500,rail:'round',black:true},
+  nejlon:{dMin:1200,dMax:1500,rail:'none',black:true},
+};
+const specOf=id=>SPEC[id]||SPEC.standart;
+const depthRange=()=>{ const s=specOf(S.type); return {min:s.dMin,max:s.dMax}; };
 const VIDS=[{id:'між',name:'міжстінна',sides:0,desc:'Між двома стінами'},{id:'кут',name:'кутова',sides:1,desc:'Одна бічна панель'},{id:'окр',name:'окрема',sides:2,desc:'Дві бічні панелі'}];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isMobile=()=>innerWidth<=860;
@@ -265,11 +280,12 @@ const parts=()=>{ const s=(VIDS.find(v=>v.id===S.vid)||VIDS[0]).sides; return Ma
 const area=()=>{ const t=typeBy(S.type),H=t.h/1000; return (S.facade/1000)*H + parts()*(S.depth/1000)*H; };
 const price=()=>area()*SET.rate;
 const clampN=(v,lo,hi,d)=>{ v=+v; if(!isFinite(v))return d; return Math.max(lo,Math.min(hi,v)); };
-function clampState(){ S.depth=clampN(S.depth,DEPTH_MIN,DEPTH_MAX,1200); S.facade=clampN(S.facade,FACADE_MIN,FACADE_MAX,4000);
+function clampState(){ const dr=depthRange(); S.depth=clampN(S.depth,dr.min,dr.max,dr.min); S.facade=clampN(S.facade,FACADE_MIN,FACADE_MAX,4000);
   S.nStd=clampN(Math.floor(S.nStd),0,12,0); S.nInc=clampN(Math.floor(S.nInc),0,6,0); }
 function dimsErr(){
   if((S.nStd+S.nInc)<1) return 'Додайте хоча б одні двері.';
-  if(S.depth<DEPTH_MIN||S.depth>DEPTH_MAX) return 'Глибина '+S.depth+' мм — поза межами '+DEPTH_MIN+'–'+DEPTH_MAX+' мм.';
+  const dr=depthRange();
+  if(S.depth<dr.min||S.depth>dr.max) return 'Глибина '+S.depth+' мм — поза межами '+dr.min+'–'+dr.max+' мм.';
   const need=S.nStd*cabinMinW(S.wStd)+S.nInc*cabinMinW(S.wInc);
   if(need>S.facade) return 'Не вміщується: '+(S.nStd+S.nInc)+' кабін потребують ≥ '+need.toLocaleString('uk-UA')+' мм, фасад '+S.facade.toLocaleString('uk-UA')+' мм.';
   return '';
@@ -299,7 +315,9 @@ const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.ShadowMater
 const decorMat=new THREE.MeshPhysicalMaterial({color:new THREE.Color(decorBy(S.decor).hex),roughness:0.62,metalness:0,clearcoat:0.22,clearcoatRoughness:0.45,envMapIntensity:0.7,reflectivity:0.18});
 const chrome=new THREE.MeshStandardMaterial({color:0xcfd4d8,metalness:0.96,roughness:0.27,envMapIntensity:1.25});
 const darkMetal=new THREE.MeshStandardMaterial({color:0x394046,metalness:0.85,roughness:0.42});
-const coreEdge=new THREE.LineBasicMaterial({color:0x14181b,transparent:true,opacity:0.5});
+const blackMetal=new THREE.MeshStandardMaterial({color:0x161719,metalness:0.62,roughness:0.5,envMapIntensity:0.8});
+/* стик між панелями — у житті це лише тонкий зазор, тому пунктир, ледь помітний */
+const coreEdge=new THREE.LineDashedMaterial({color:0x47525a,transparent:true,opacity:0.26,dashSize:0.03,gapSize:0.022});
 const incMat=new THREE.MeshStandardMaterial({color:0x2c5f8a,roughness:0.5});
 const colorTarget=new THREE.Color(decorBy(S.decor).hex);
 const THICK=0.012;
@@ -308,7 +326,7 @@ function edgesFor(g,w,h,d){ const k=w.toFixed(4)+','+h.toFixed(4)+','+d.toFixed(
   let e=_edgeCache.get(k); if(!e){ e=new THREE.EdgesGeometry(g); _edgeCache.set(k,e); } return e; }
 function at(o,x,y,z){ o.position.set(x,y,z); return o; }
 function panel(w,h,d){ const g=new THREE.BoxGeometry(w,h,d); const m=new THREE.Mesh(g,decorMat); m.castShadow=true; m.receiveShadow=true;
-  const ls=new THREE.LineSegments(edgesFor(g,w,h,d),coreEdge); ls.userData.sharedEdges=true; m.add(ls); return m; }
+  const ls=new THREE.LineSegments(edgesFor(g,w,h,d),coreEdge); ls.userData.sharedEdges=true; ls.computeLineDistances(); m.add(ls); return m; }
 function tube(len,r,mat,horiz){ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,20),mat); m.castShadow=true; if(horiz) m.rotation.z=Math.PI/2; return m; }
 
 let root=new THREE.Group(); scene.add(root);
@@ -322,7 +340,10 @@ function dimLine(a,b){ return new THREE.Line(new THREE.BufferGeometry().setFromP
 
 function build(reframe){
   clampState(); clearRoot();
-  const t=typeBy(S.type), H=t.h/1000, D=clampN(S.depth,DEPTH_MIN,DEPTH_MAX,1200)/1000, F=Math.max(clampN(S.facade,FACADE_MIN,FACADE_MAX,4000)/1000,0.6);
+  const t=typeBy(S.type), sp=specOf(S.type), H=t.h/1000;
+  const dr=depthRange(), D=clampN(S.depth,dr.min,dr.max,dr.min)/1000, F=Math.max(clampN(S.facade,FACADE_MIN,FACADE_MAX,4000)/1000,0.6);
+  const GAP=sp.ceiling?0.0:0.15;            // 150 мм зазор від підлоги на ніжках; «підлога-стеля» — без зазору
+  const baseY=GAP, hw=sp.black?blackMetal:chrome;   // колір фурнітури за типом
   const sides=(VIDS.find(v=>v.id===S.vid)||VIDS[0]).sides;
   const cabs=[]; for(let i=0;i<S.nStd;i++) cabs.push({door:S.wStd,inc:false}); for(let i=0;i<S.nInc;i++) cabs.push({door:S.wInc,inc:true});
   if(!cabs.length) cabs.push({door:S.wStd,inc:false});
@@ -330,29 +351,30 @@ function build(reframe){
   const extra=Math.max(0,(F-mins.reduce((a,b)=>a+b,0)))/n, widths=mins.map(m=>m+extra), bx=[0];
   widths.forEach(w=>bx.push(bx[bx.length-1]+w));
   const total=bx[bx.length-1], offX=-total/2, offZ=-D/2, X=x=>x+offX;
-  root.add(at(panel(total,H,THICK),X(total/2),H/2,offZ));
+  root.add(at(panel(total,H,THICK),X(total/2),baseY+H/2,offZ));
   const partAt=new Set(); for(let i=1;i<n;i++) partAt.add(i); if(sides>=1) partAt.add(n); if(sides>=2) partAt.add(0);
-  partAt.forEach(i=>{ root.add(at(panel(THICK,H,D),X(bx[i]),H/2,offZ+D/2));
-    [offZ+0.06,offZ+D-0.06].forEach(z=>{ root.add(at(tube(0.085,0.013,chrome),X(bx[i]),0.043,z));
-      const foot=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.034,0.018,18),chrome); foot.castShadow=true; root.add(at(foot,X(bx[i]),0.009,z)); }); });
-  cabs.forEach((c,i)=>{ const cx=(bx[i]+bx[i+1])/2, dw=Math.min(c.door/1000,widths[i]-0.04);
-    const pivot=new THREE.Group(); pivot.position.set(X(cx-dw/2),H/2,offZ+D-THICK/2);
-    const door=panel(dw,H-0.02,THICK); door.position.set(dw/2,0,0); pivot.add(door);
-    [-(H-0.02)/2+0.20,0,(H-0.02)/2-0.20].forEach(hy=>{ const hg=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.085,0.03),darkMetal); hg.position.set(0.01,hy,0.02); hg.castShadow=true; pivot.add(hg); });
-    const lock=new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.02,20),chrome); lock.rotation.x=Math.PI/2; lock.position.set(dw-0.07,1.05-H/2,0.016); pivot.add(lock);
-    if(c.inc){ const m=new THREE.Mesh(new THREE.CircleGeometry(0.09,28),incMat); m.position.set(dw/2,1.45-H/2,0.014); pivot.add(m); }
+  partAt.forEach(i=>{ root.add(at(panel(THICK,H,D),X(bx[i]),baseY+H/2,offZ+D/2));
+    if(GAP>0.001){ [offZ+0.06,offZ+D-0.06].forEach(z=>{ root.add(at(tube(GAP,0.013,hw),X(bx[i]),GAP/2,z));
+      const foot=new THREE.Mesh(new THREE.CylinderGeometry(0.027,0.034,0.016,18),hw); foot.castShadow=true; root.add(at(foot,X(bx[i]),0.008,z)); }); } });
+  cabs.forEach((c,i)=>{ const cx=(bx[i]+bx[i+1])/2, dw=Math.min(c.door/1000,widths[i]-0.04), dh=H-0.02;
+    const pivot=new THREE.Group(); pivot.position.set(X(cx-dw/2),baseY+H/2,offZ+D-THICK/2);
+    const door=panel(dw,dh,THICK); door.position.set(dw/2,0,0); pivot.add(door);
+    [-dh/2+0.20,0,dh/2-0.20].forEach(hy=>{ const hg=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.085,0.03),hw); hg.position.set(0.01,hy,0.02); hg.castShadow=true; pivot.add(hg); });
+    const lockH=Math.min(1.05,H*0.55);
+    const lock=new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.02,20),hw); lock.rotation.x=Math.PI/2; lock.position.set(dw-0.07,lockH-H/2,0.016); pivot.add(lock);
+    if(c.inc){ const m=new THREE.Mesh(new THREE.CircleGeometry(0.09,28),incMat); m.position.set(dw/2,Math.min(1.45,H*0.7)-H/2,0.014); pivot.add(m); }
     root.add(pivot); doorPivots.push(pivot); });
-  if(t.rail){ const railY=H+0.03, railZ=offZ+D-0.02;
-    root.add(at(tube(total+0.16,0.016,chrome,true),X(total/2),railY,railZ));
+  if(sp.rail==='round'){ const railY=baseY+H+0.03, railZ=offZ+D-0.02;
+    root.add(at(tube(total+0.16,0.016,hw,true),X(total/2),railY,railZ));
     const posts=new Set([...partAt]); posts.add(0); posts.add(n);
-    posts.forEach(i=> root.add(at(tube(0.10,0.012,chrome),X(bx[i]),H,railZ))); }
+    posts.forEach(i=> root.add(at(tube(0.10,0.012,hw),X(bx[i]),baseY+H,railZ))); }
   if(S.dims){ dimsGroup=new THREE.Group(); root.add(dimsGroup);
-    const hx=total/2, fz=offZ+D;
-    dimsGroup.add(dimLine(new THREE.Vector3(-hx,0.01,fz+0.14),new THREE.Vector3(hx,0.01,fz+0.14)));
+    const hx=total/2, fz=offZ+D, V=(x,y,z)=>new THREE.Vector3(x,y,z);
+    dimsGroup.add(dimLine(V(-hx,0.01,fz+0.14),V(hx,0.01,fz+0.14)));
     dimsGroup.add(dimLabel(S.facade+' мм',0,0.07,fz+0.14));
-    dimsGroup.add(dimLine(new THREE.Vector3(-hx-0.14,0,fz),new THREE.Vector3(-hx-0.14,H,fz)));
-    dimsGroup.add(dimLabel(t.h+' мм',-hx-0.14,H/2,fz));
-    dimsGroup.add(dimLine(new THREE.Vector3(hx+0.14,0.01,offZ),new THREE.Vector3(hx+0.14,0.01,fz)));
+    dimsGroup.add(dimLine(V(-hx-0.14,baseY,fz),V(-hx-0.14,baseY+H,fz)));
+    dimsGroup.add(dimLabel(t.h+' мм',-hx-0.14,baseY+H/2,fz));
+    dimsGroup.add(dimLine(V(hx+0.14,0.01,offZ),V(hx+0.14,0.01,fz)));
     dimsGroup.add(dimLabel(S.depth+' мм',hx+0.14,0.07,offZ+D/2)); }
   if(firstBuild||reframe){ frameCamera(firstBuild); firstBuild=false; }
   // тіні оновлюємо лише при перебудові геометрії
@@ -394,10 +416,12 @@ function render(){
     <div class="optgrid" role="radiogroup" aria-label="Вид">${VIDS.map(v=>`<button class="opt ${S.vid===v.id?'sel':''}" role="radio" aria-checked="${S.vid===v.id}" data-act="vid" data-v="${v.id}"><div class="t">${v.name}</div><div class="d">${v.desc}</div></button>`).join('')}</div></div>
   <div class="sect"><h4>Розміри</h4>
     <div class="fld"><div class="lab">Висота <span class="hint">${t.h} мм · фіксована типом</span></div><div class="ro">${t.h} мм</div></div>
-    <div class="fld"><div class="lab"><span>Глибина кабінки</span><span class="v" id="vDepth">${S.depth} мм</span></div>
-      <div class="rng"><input type="range" min="${DEPTH_MIN}" max="${DEPTH_MAX}" step="10" value="${S.depth}" data-rng="depth" aria-label="Глибина" aria-valuetext="${S.depth} мм">
-        <input class="num" type="number" inputmode="numeric" min="${DEPTH_MIN}" max="${DEPTH_MAX}" step="10" value="${S.depth}" data-num="depth"></div>
-      <div class="lab" style="margin-top:4px"><span class="hint">діапазон ${DEPTH_MIN}–${DEPTH_MAX} мм</span></div></div>
+    ${(()=>{ const dr=depthRange(); return dr.min===dr.max
+      ? `<div class="fld"><div class="lab">Глибина кабінки <span class="hint">${dr.min} мм · фіксована типом</span></div><div class="ro">${dr.min} мм</div></div>`
+      : `<div class="fld"><div class="lab"><span>Глибина кабінки</span><span class="v" id="vDepth">${S.depth} мм</span></div>
+      <div class="rng"><input type="range" min="${dr.min}" max="${dr.max}" step="10" value="${S.depth}" data-rng="depth" aria-label="Глибина" aria-valuetext="${S.depth} мм">
+        <input class="num" type="number" inputmode="numeric" min="${dr.min}" max="${dr.max}" step="10" value="${S.depth}" data-num="depth"></div>
+      <div class="lab" style="margin-top:4px"><span class="hint">діапазон ${dr.min}–${dr.max} мм</span></div></div>`; })()}
     <div class="fld"><div class="lab"><span>Довжина фасаду</span><span class="v" id="vFacade">${S.facade} мм</span></div>
       <div class="rng"><input type="range" min="${FACADE_MIN}" max="${FACADE_MAX}" step="100" value="${S.facade}" data-rng="facade" aria-label="Довжина фасаду" aria-valuetext="${S.facade} мм">
         <input class="num" type="number" inputmode="numeric" min="${FACADE_MIN}" max="${FACADE_MAX}" step="100" value="${S.facade}" data-num="facade"></div></div>
