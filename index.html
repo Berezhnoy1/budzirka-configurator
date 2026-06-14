@@ -895,8 +895,8 @@ function sketchRoom(room,type,decorHex){
       // ніжки
       body+=`<rect x="${(x+4).toFixed(1)}" y="${(y0+fh).toFixed(1)}" width="3.5" height="9" fill="var(--brand-3)"/>`;
       x+=cw;
-      // межа кабін = перегородка
-      if(i<cabs.length-1) body+=`<line x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${(y0+fh).toFixed(1)}" stroke="${dk}" stroke-width="2"/>`;
+      // стик між дверима — лише тонкий зазор, тому пунктир, ледь помітний (не суцільна лінія)
+      if(i<cabs.length-1) body+=`<line x1="${x.toFixed(1)}" y1="${(y0+2).toFixed(1)}" x2="${x.toFixed(1)}" y2="${(y0+fh-2).toFixed(1)}" stroke="${dk}" stroke-width="1.2" stroke-dasharray="4 3" stroke-opacity=".45"/>`;
     });
     body+=`<rect x="${(x0+fw-8).toFixed(1)}" y="${(y0+fh).toFixed(1)}" width="3.5" height="9" fill="var(--brand-3)"/>`;
   }
