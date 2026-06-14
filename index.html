@@ -869,7 +869,7 @@ function sketchRoom(room,type,decorHex){
   }
   // кабінки: розкладка фасаду
   const facade=Math.max(room.facade,600);
-  const sc=Math.min((W-PAD-PADR)/facade, 150/H);
+  const sc=Math.min((W-PAD-PADR)/facade, 168/H);
   const x0=PAD, y0=24, fh=H*sc, fw=facade*sc;
   // кабінки: ширини = мінімалки + рівномірний розподіл залишку
   const cabs=[];
@@ -903,9 +903,11 @@ function sketchRoom(room,type,decorHex){
     body+=`<rect x="${x0.toFixed(1)}" y="${y0}" width="${fw.toFixed(1)}" height="${fh.toFixed(1)}" fill="none" stroke="${dk}" stroke-width="1" stroke-opacity=".4"/>`;
   }
   // ---- розмір висоти: винесена розмірна лінія зі стрілками + підпис у «пігулці» ----
+  // обидва розміри — в одному стилі: винесена лінія + стрілки + число у «пігулці»
   const dimX=x0+fw+18, DX=dimX.toFixed(1), midY=y0+fh/2, MY=midY.toFixed(1);
-  const Hs=H+' мм', pillW=Hs.length*6+14;
-  return `<svg viewBox="0 0 ${W} ${y0+fh+40}">
+  const Hs=H.toLocaleString('uk-UA')+' мм', pillW=Hs.length*6+14;
+  const wy=y0+fh+26, WY=wy.toFixed(1), WS=room.facade.toLocaleString('uk-UA')+' мм', wPillW=WS.length*6+14;
+  return `<svg viewBox="0 0 ${W} ${(y0+fh+46).toFixed(1)}">
     ${body}
     <line x1="${(x0+fw).toFixed(1)}" y1="${y0}" x2="${(dimX+4).toFixed(1)}" y2="${y0}" stroke="var(--border-2)" stroke-width="1"/>
     <line x1="${(x0+fw).toFixed(1)}" y1="${(y0+fh).toFixed(1)}" x2="${(dimX+4).toFixed(1)}" y2="${(y0+fh).toFixed(1)}" stroke="var(--border-2)" stroke-width="1"/>
@@ -916,10 +918,13 @@ function sketchRoom(room,type,decorHex){
       <rect x="${(dimX-pillW/2).toFixed(1)}" y="${(midY-9).toFixed(1)}" width="${pillW}" height="18" rx="9" fill="#fff" stroke="var(--border-2)" stroke-width="1"/>
       <text x="${DX}" y="${(midY+3.5).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">${Hs}</text>
     </g>
-    <line x1="${x0}" y1="${(y0+fh+18).toFixed(1)}" x2="${(x0+fw).toFixed(1)}" y2="${(y0+fh+18).toFixed(1)}" stroke="var(--border-2)" stroke-width="1"/>
-    <line x1="${x0}" y1="${(y0+fh+14).toFixed(1)}" x2="${x0}" y2="${(y0+fh+22).toFixed(1)}" stroke="var(--border-2)" stroke-width="1"/>
-    <line x1="${(x0+fw).toFixed(1)}" y1="${(y0+fh+14).toFixed(1)}" x2="${(x0+fw).toFixed(1)}" y2="${(y0+fh+22).toFixed(1)}" stroke="var(--border-2)" stroke-width="1"/>
-    <text x="${(x0+fw/2).toFixed(1)}" y="${(y0+fh+32).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--ink-soft)">довжина фасаду ${room.facade.toLocaleString('uk-UA')} мм</text>
+    <line x1="${x0}" y1="${(y0+fh+10).toFixed(1)}" x2="${x0}" y2="${(wy+4).toFixed(1)}" stroke="var(--border-2)" stroke-width="1"/>
+    <line x1="${(x0+fw).toFixed(1)}" y1="${(y0+fh+10).toFixed(1)}" x2="${(x0+fw).toFixed(1)}" y2="${(wy+4).toFixed(1)}" stroke="var(--border-2)" stroke-width="1"/>
+    <line x1="${x0}" y1="${WY}" x2="${(x0+fw).toFixed(1)}" y2="${WY}" stroke="var(--ink-mut)" stroke-width="1"/>
+    <path d="M${(x0+6).toFixed(1)} ${(wy-3).toFixed(1)} L${x0} ${WY} L${(x0+6).toFixed(1)} ${(wy+3).toFixed(1)}" fill="none" stroke="var(--ink-mut)" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M${(x0+fw-6).toFixed(1)} ${(wy-3).toFixed(1)} L${(x0+fw).toFixed(1)} ${WY} L${(x0+fw-6).toFixed(1)} ${(wy+3).toFixed(1)}" fill="none" stroke="var(--ink-mut)" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="${(x0+fw/2-wPillW/2).toFixed(1)}" y="${(wy-9).toFixed(1)}" width="${wPillW}" height="18" rx="9" fill="#fff" stroke="var(--border-2)" stroke-width="1"/>
+    <text x="${(x0+fw/2).toFixed(1)}" y="${(wy+3.5).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">${WS}</text>
   </svg>`;
 }
 /* Вид зверху (план). labeled=true → велика пояснювальна схема з виносками */
