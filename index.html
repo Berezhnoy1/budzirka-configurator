@@ -885,20 +885,22 @@ function sketchRoom(room,type,decorHex){
     const dk=shade(decorHex,-0.32), hndl=txtOn(decorHex);
     cabs.forEach((c,i)=>{
       const cw=(c.min+extra)*sc;
-      // панель кабіни — суцільна заливка декору, без жорсткого контуру
+      // панель кабіни — заливка без контуру (вертикальні лінії малюємо окремо)
       body+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}" fill-opacity=".5"/>`;
-      // двері — насиченіша заливка + ледь помітний пунктирний контур (у житті між дверима лише тонкий зазор)
+      // двері — суцільна рамка (як було)
       const dw=c.door*sc, dx=x+(cw-dw)/2;
-      body+=`<rect x="${dx.toFixed(1)}" y="${y0}" width="${dw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}" stroke="${dk}" stroke-width="1" stroke-dasharray="4 3" stroke-opacity=".4"/>
+      body+=`<rect x="${dx.toFixed(1)}" y="${y0}" width="${dw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}" stroke="${dk}" stroke-width="1.4"/>
         <circle cx="${(dx+dw-7).toFixed(1)}" cy="${(y0+fh/2).toFixed(1)}" r="2.4" fill="${hndl}" fill-opacity=".85"/>`;
       if(c.inc) body+=`<text x="${(x+cw/2).toFixed(1)}" y="${(y0+14).toFixed(1)}" text-anchor="middle" font-size="9" fill="${hndl}">♿</text>`;
       // ніжки
       body+=`<rect x="${(x+4).toFixed(1)}" y="${(y0+fh).toFixed(1)}" width="3.5" height="9" fill="var(--brand-3)"/>`;
       x+=cw;
+      // роз'єднування кабінок — пунктир: на фасаді лінії фактично немає, але перегородка-стіна позаду є
+      if(i<cabs.length-1) body+=`<line x1="${x.toFixed(1)}" y1="${y0}" x2="${x.toFixed(1)}" y2="${(y0+fh).toFixed(1)}" stroke="${dk}" stroke-width="1.3" stroke-dasharray="5 3" stroke-opacity=".6"/>`;
     });
     body+=`<rect x="${(x0+fw-8).toFixed(1)}" y="${(y0+fh).toFixed(1)}" width="3.5" height="9" fill="var(--brand-3)"/>`;
-    // один світлий силует фасаду замість безлічі суцільних чорних вертикальних ліній
-    body+=`<rect x="${x0.toFixed(1)}" y="${y0}" width="${fw.toFixed(1)}" height="${fh.toFixed(1)}" fill="none" stroke="${dk}" stroke-width="1" stroke-opacity=".35"/>`;
+    // зовнішній силует фасаду (торцеві панелі/стіни) — суцільний, ледь помітний
+    body+=`<rect x="${x0.toFixed(1)}" y="${y0}" width="${fw.toFixed(1)}" height="${fh.toFixed(1)}" fill="none" stroke="${dk}" stroke-width="1" stroke-opacity=".4"/>`;
   }
   return `<svg viewBox="0 0 ${W} ${y0+fh+40}">
     ${body}
