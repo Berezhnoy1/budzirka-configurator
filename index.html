@@ -860,7 +860,7 @@ function sketchRoom(room,type,decorHex){
     let s='';
     for(let i=0;i<n;i++){
       const x=x0+i*(pw+gap)*sc;
-      s+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${(pw*sc).toFixed(1)}" height="${ph.toFixed(1)}" rx="3" fill="${decorHex}" fill-opacity=".85" stroke="${shade(decorHex,-0.32)}" stroke-width="1.4"/>
+      s+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${(pw*sc).toFixed(1)}" height="${ph.toFixed(1)}" rx="3" fill="${decorHex}" stroke="${shade(decorHex,-0.32)}" stroke-width="1.4"/>
           <rect x="${(x+pw*sc/2-2).toFixed(1)}" y="${(y0+ph).toFixed(1)}" width="4" height="9" fill="var(--brand-3)"/>`;
     }
     return `<svg viewBox="0 0 ${W} ${y0+H*sc+34}">
@@ -888,8 +888,8 @@ function sketchRoom(room,type,decorHex){
     const dk=shade(decorHex,-0.32), hndl=txtOn(decorHex);
     cabs.forEach((c,i)=>{
       const cw=(c.min+extra)*sc;
-      // панель кабіни — заливка без контуру (вертикальні лінії малюємо окремо)
-      body+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}" fill-opacity=".5"/>`;
+      // панель кабіни — повний колір декору (увесь фасад однотонний, як у житті)
+      body+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}"/>`;
       // двері — суцільна рамка (як було)
       const dw=c.door*sc, dx=x+(cw-dw)/2;
       body+=`<rect x="${dx.toFixed(1)}" y="${y0}" width="${dw.toFixed(1)}" height="${fh.toFixed(1)}" fill="${decorHex}" stroke="${dk}" stroke-width="1.4"/>
@@ -1322,6 +1322,14 @@ function wizardError(mod){
 function partsRule(vid){
   return vid==='між'?'кількість дверей − 1':vid==='кут'?'дорівнює кількості дверей':'кількість дверей + 1';
 }
+function decorSwatches(c){
+  return `<div class="swatches">${decorsFor('cabins').map(x=>`
+    <div class="sw ${c.decor===x.code?'sel':''}" data-action="setDecor" data-mod="cabins" data-id="${x.code}">
+      <div class="chipc" style="background:${x.hex}"></div>
+      <div class="meta"><div class="code">${x.code}</div><div class="nm">${esc(x.name)}</div>
+      <span class="badge ${x.stock>0?'in':'out'}">${x.stock>0?'В наявності: '+x.stock+' л.':'Під замовлення'}</span></div>
+    </div>`).join('')}</div>`;
+}
 function roomsStepMain(c,type){
   const r=c.rooms[c.active];
   if(!r) return roomTabs(c);
@@ -1377,8 +1385,12 @@ function roomsStepMain(c,type){
     </div>
     <div class="note">Висота перегородки — ${kindHeight(r,type)} мм (за типом виробу).</div></div>`;
   }
-  return `<h2>Приміщення</h2><p class="sub">Усі параметри приміщення — на одній сторінці: вид, розміри та двері. Кілька приміщень додавайте вкладками нижче.</p>
-    ${roomTabs(c)}${body}${roomFooter(r,type)}`;
+  return `<h2>Приміщення</h2><p class="sub">Усі параметри приміщення — на одній сторінці: вид, розміри, двері та декор. Кілька приміщень додавайте вкладками нижче.</p>
+    ${roomTabs(c)}${body}
+    <div class="fset"><h4>Декор (HPL Fundermax)</h4>
+    <p class="sub" style="margin:-2px 0 8px">Колір спільний для всіх приміщень позиції — зміна одразу видно на схемі.</p>
+    ${decorSwatches(c)}</div>
+    ${roomFooter(r,type)}`;
 }
 function roomsStepDoors(c,type){
   const r=c.rooms[c.active];
