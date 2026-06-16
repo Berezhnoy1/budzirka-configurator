@@ -1270,20 +1270,13 @@ function cabinStep(c){
   switch(c.step){
     case 0: {
       const dec=decorBy(c.decor);
-      return `<h2>Тип виробу та матеріал</h2><p class="sub">Висота фіксована для типу. Поверхня — FH, ядро залежить від декору.</p>
+      return `<h2>Тип виробу та матеріал</h2><p class="sub">Висота фіксована для типу. Поверхня — HPL Fundermax (FH). Декор оберете на кроці «Приміщення».</p>
       <div class="grid c4">${CABIN_TYPES.map(t=>`<div class="opt ${c.type===t.id?'sel':''}" data-action="setCabinType" data-id="${t.id}">
         ${t.photo?`<div class="opt-ph"><img src="${esc(t.photo)}" loading="lazy" alt="${esc(t.name)}"></div>`:''}
         <div class="t">${t.name}</div><div class="d">${t.desc}</div></div>`).join('')}</div>
       <div class="infocard"><b>Стандарти / обмеження:</b><br>Максимальна висота кабінки — <b>${type.h} мм</b>.<br>Довжина — згідно проєкту. Глибина — згідно проєкту.</div>
       <h4>Фурнітура</h4>
       <div class="infocard" style="margin-top:0">Виготовляється з: <b>${fitText(type)}</b>${type.fit.length>1?' — використовуються обидва матеріали.':'.'}</div>
-      <h4>Декор (HPL Fundermax)</h4>
-      <div class="swatches">${decorsFor('cabins').map(x=>`
-        <div class="sw ${c.decor===x.code?'sel':''}" data-action="setDecor" data-mod="cabins" data-id="${x.code}">
-          <div class="chipc" style="background:${x.hex}"></div>
-          <div class="meta"><div class="code">${x.code}</div><div class="nm">${esc(x.name)}</div>
-          <span class="badge ${x.stock>0?'in':'out'}">${x.stock>0?'В наявності: '+x.stock+' л.':'Під замовлення'}</span></div>
-        </div>`).join('')}</div>
       <div class="kvrow">
         <div class="kv"><b>Поверхня</b>FH</div>
         <div class="kv"><b>Колір ядра</b>${dec?dec.core:'—'}</div>
