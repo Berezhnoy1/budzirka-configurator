@@ -467,8 +467,8 @@ const VIDS=[
 ];
 const ROOM_KINDS=[
   {id:'каб', name:'сантехнічні кабінки'},
-  {id:'душ', name:'душові перегородки'},
-  {id:'піс', name:'пісуарні перегородки'},
+  {id:'душ', name:'душові перегородки', h:2000},
+  {id:'піс', name:'пісуарні перегородки', h:1545},
 ];
 
 // Декори (Декори_напрямок + Напівфабрикати: залишки) — реальні дані
@@ -526,7 +526,7 @@ const DEMO_ACCOUNTS=[
   {id:'demo2', name:'Олена', surname:'Тестова', company:'ФОП Тестова', phone:'0679998877', email:'olena@test.ua', priceCat:'Прайс 3'},
 ];
 
-const CABIN_STEPS=['Тип і матеріал','Приміщення','Двері та перегородки','Підсумок'];
+const CABIN_STEPS=['Тип і матеріал','Приміщення','Підсумок'];
 const COUNTER_STEPS=['Форма','Розміри','Торець','Вирізи','Матеріал','Підсумок'];
 
 /* ============================================================
@@ -778,14 +778,17 @@ function roomParts(room){
   const sides=(VIDS.find(v=>v.id===room.vid)||VIDS[0]).sides;
   return Math.max(0, doors-1+sides);
 }
+function kindHeight(room,type){
+  if(room.kind==='каб') return type?type.h:2100;
+  const k=ROOM_KINDS.find(x=>x.id===room.kind); return (k&&k.h)||2000;
+}
 function roomArea(room, type){
-  const H=(type?type.h:2100)/1000;
   if(room.kind==='каб'){
-    const facade=room.facade/1000, depth=room.depth/1000;
+    const H=(type?type.h:2100)/1000, facade=room.facade/1000, depth=room.depth/1000;
     return facade*H + roomParts(room)*depth*H;
   }
-  // душові/пісуарні: n панелей × (ширина × висота типу)
-  const pw=(room.pw||1000)/1000;
+  // душові/пісуарні: n панелей × (ширина × власна висота перегородки, не кабіни)
+  const H=kindHeight(room,type)/1000, pw=(room.pw||1000)/1000;
   return (room.pn||1)*pw*H;
 }
 function roomCost(room,type){ return roomArea(room,type)*CONFIG.cabins.ratePerM2; }
@@ -846,7 +849,7 @@ function estimateTotals(){
    6) ВІЗУАЛІЗАЦІЯ — фронтальний вид як в AppSheet
    ============================================================ */
 function sketchRoom(room,type,decorHex){
-  const H=type?type.h:2100;
+  const H=kindHeight(room,type);
   const W=350, PAD=26, PADR=44;
   if(room.kind!=='каб'){
     // панелі душові/пісуарні
@@ -1235,8 +1238,7 @@ function contactOk(){ const c=state.client; return c.name.trim()&&c.surname.trim
 /* ---------- wizard ---------- */
 function canProceed(mod){
   const c=state[mod];
-  if(mod==='cabins'&&c.step===1) return c.rooms.length>0&&c.rooms.every(roomDimsValid);
-  if(mod==='cabins'&&c.step===2) return c.rooms.length>0&&c.rooms.every(roomValid);
+  if(mod==='cabins'&&c.step===1) return c.rooms.length>0&&c.rooms.every(roomValid);
   if(mod==='counters'&&c.step===1){
     const segs=c.segs.slice(0,SHAPES.find(s=>s.id===c.shape).segs);
     return segs.every(s=>s.l>0&&s.w>0);
@@ -1290,8 +1292,7 @@ function cabinStep(c){
       </div>`;
     }
     case 1: return roomsStepMain(c,type);
-    case 2: return roomsStepDoors(c,type);
-    case 3: return summaryCabins(c);
+    case 2: return summaryCabins(c);
   }
 }
 function roomTabs(c){
@@ -1314,8 +1315,7 @@ function roomDimsProblem(r){
 }
 function wizardError(mod){
   const c=state[mod];
-  if(mod==='cabins'&&c.step===1){ const r=c.rooms.find(x=>!roomDimsValid(x)); if(r) return esc(r.name)+': '+roomDimsProblem(r); }
-  if(mod==='cabins'&&c.step===2){ const r=c.rooms.find(x=>!roomValid(x)); if(r) return esc(r.name)+': '+(roomProblem(r)||roomDimsProblem(r)); }
+  if(mod==='cabins'&&c.step===1){ const r=c.rooms.find(x=>!roomValid(x)); if(r) return esc(r.name)+': '+(roomProblem(r)||roomDimsProblem(r)); }
   if(mod==='counters'&&c.step===1) return 'Вкажіть розміри всіх сегментів (довжина і глибина > 0).';
   return 'Перевірте параметри — є помилки.';
 }
@@ -1352,7 +1352,21 @@ function roomsStepMain(c,type){
       <div class="field"><label>Довжина фасаду <span class="hint">мм</span></label>
         <input class="inp" type="number" step="100" data-field="${f}facade" value="${r.facade}"></div>
     </div>
-    <div class="note err" id="dimserr" role="alert" style="${dimsProb?'':'display:none'}">${dimsProb}</div></div>`;
+    <div class="note err" id="dimserr" role="alert" style="${dimsProb?'':'display:none'}">${dimsProb}</div></div>
+    <div class="fset"><h4>Двері · стандарт</h4>
+    <div class="row">
+      <div class="field"><label>Кількість</label>${stepper(f+'nStd',r.nStd,0,12)}</div>
+      <div class="field"><label>Ширина дверей</label>
+        <div class="chips">${CONFIG.cabins.doorWidthsStd.map(w=>`<button class="chip ${r.wStd===w?'sel':''}" data-action="roomNum" data-path="${f}wStd" data-v="${w}">${w}</button>`).join('')}</div></div>
+    </div></div>
+    <div class="fset"><h4>Двері · інклюзив</h4>
+    <div class="row">
+      <div class="field"><label>Кількість</label>${stepper(f+'nInc',r.nInc,0,6)}</div>
+      <div class="field"><label>Ширина дверей</label>
+        <div class="chips">${CONFIG.cabins.doorWidthsInc.map(w=>`<button class="chip ${r.wInc===w?'sel':''}" data-action="roomNum" data-path="${f}wInc" data-v="${w}">${w}</button>`).join('')}</div></div>
+    </div></div>
+    <div class="infocard" style="margin-top:0">Перегородок: <b>${roomParts(r)} шт</b> <span style="color:var(--ink-mut);font-weight:400">— автоматично за видом (${partsRule(r.vid)})</span></div>
+    ${roomProblem(r)?`<div class="note err" role="alert">${esc(roomProblem(r))}</div>`:''}`;
   }else{
     body+=`
     <div class="fset"><h4>Панелі</h4>
@@ -1361,9 +1375,9 @@ function roomsStepMain(c,type){
       <div class="field"><label>Ширина панелі <span class="hint">мм</span></label>
         <input class="inp" type="number" step="50" data-field="${f}pw" value="${r.pw}"></div>
     </div>
-    <div class="note">Висота панелі — за типом виробу (${type.h} мм).</div></div>`;
+    <div class="note">Висота перегородки — ${kindHeight(r,type)} мм (за типом виробу).</div></div>`;
   }
-  return `<h2>Приміщення</h2><p class="sub">Одна позиція може містити кілька приміщень — як у поточному калькуляторі.</p>
+  return `<h2>Приміщення</h2><p class="sub">Усі параметри приміщення — на одній сторінці: вид, розміри та двері. Кілька приміщень додавайте вкладками нижче.</p>
     ${roomTabs(c)}${body}${roomFooter(r,type)}`;
 }
 function roomsStepDoors(c,type){
@@ -1417,7 +1431,7 @@ function summaryCabins(c){
     }else{
       rows=`
         <div><span>Панелі</span><span>${r.pn} шт × ${r.pw} мм</span></div>
-        <div><span>Висота</span><span>${p.type.h} мм</span></div>
+        <div><span>Висота</span><span>${kindHeight(r,p.type)} мм</span></div>
         <div><span>Площа деталей</span><span>${x.area.toFixed(2)} м²</span></div>`;
     }
     const sketch=isCab?`<div class="sr-sketch">${sketchTopView({facade:r.facade,depth:r.depth,vid:r.vid,cabs:cabsOf(r),parts:Math.max(0,((r.nStd||0)+(r.nInc||0))-1),hex:dec?dec.hex:null,labeled:false})}</div>`:'';
@@ -1855,6 +1869,7 @@ function onField(el){
   const mod=path.split('.')[0];
   if(mod==='cabins'||mod==='counters') refreshAside(mod);
   if(path.indexOf('cabins.rooms.')===0){
+    if(/\.kind$/.test(path)){ render(); return; }   // зміна типу приміщення — перемалювати поля
     const t=typeBy(state.cabins.type), r=state.cabins.rooms[state.cabins.active];
     const ra=document.getElementById('roomarea');
     if(ra&&r) ra.textContent=roomArea(r,t).toFixed(2)+' м²';
