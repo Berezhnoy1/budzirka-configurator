@@ -216,6 +216,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 
 <div class="toast" id="toast"></div>
 
+<script src="../pricing.js"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -275,9 +276,9 @@ const DEPTH_MIN=1200,DEPTH_MAX=1500,FACADE_MIN=1100,FACADE_MAX=8000,CABIN_MIN=11
 const typeBy=id=>TYPES.find(t=>t.id===id)||TYPES[0];
 const decorBy=c=>DECORS.find(d=>d.code===c)||DECORS[0];
 const fitText=t=>(t.fit||['inox']).map(f=>FIT[f]||f).join(' та ');
-const cabinMinW=door=>Math.max(CABIN_MIN, door+2*SIDE);
-const parts=()=>{ const s=(VIDS.find(v=>v.id===S.vid)||VIDS[0]).sides; return Math.max(0,(S.nStd+S.nInc)-1+s); };
-const area=()=>{ const t=typeBy(S.type),H=t.h/1000; return (S.facade/1000)*H + parts()*(S.depth/1000)*H; };
+const cabinMinW=door=>BZ.cabinMinW(door);                                      // → ../pricing.js (єдине джерело)
+const parts=()=>BZ.parts(S.nStd+S.nInc, S.vid);
+const area=()=>BZ.cabinArea(S.facade, S.depth, S.nStd+S.nInc, S.vid, typeBy(S.type).h);
 const price=()=>area()*SET.rate;
 const clampN=(v,lo,hi,d)=>{ v=+v; if(!isFinite(v))return d; return Math.max(lo,Math.min(hi,v)); };
 function clampState(){ const dr=depthRange(); S.depth=clampN(S.depth,dr.min,dr.max,dr.min); S.facade=clampN(S.facade,FACADE_MIN,FACADE_MAX,4000);

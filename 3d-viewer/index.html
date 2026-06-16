@@ -137,6 +137,7 @@ window.addEventListener('error',function(e){ var l=document.getElementById('load
   if(l&&!window.__ready){ l.innerHTML='<div class="box" style="padding:0 24px;max-width:360px"><div class="mk" style="background:#fff;animation:none">!</div><p style="color:#fff">Не вдалося відкрити 3D<br><span style="font-size:11px;color:#cfe0e1;word-break:break-word">'+((e.message||e.error&&e.error.message||'')+(e.filename?(' — '+String(e.filename).split('/').pop()):''))+'</span></p></div>'; } });
 setTimeout(function(){ var l=document.getElementById('loader'); if(l&&!window.__ready){ l.querySelector('p').textContent='Завантаження триває… (повільний CDN?)'; } },10000);
 </script>
+<script src="../pricing.js"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -223,7 +224,7 @@ const THICK=0.012;
 function panel(w,h,d){ const g=new THREE.BoxGeometry(w,h,d); const m=new THREE.Mesh(g,decorMat);
   m.castShadow=true; m.receiveShadow=true; m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g),coreEdge)); return m; }
 function tube(len,r,mat,horiz){ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,20),mat); m.castShadow=true; if(horiz) m.rotation.z=Math.PI/2; return m; }
-function cabinMinW(door){ return Math.max(1.1, door/1000+0.4); }
+function cabinMinW(door){ return BZ.cabinMinW(door)/1000; }   // → ../pricing.js (у метрах)
 function at(o,x,y,z){ o.position.set(x,y,z); return o; }
 
 /* ============ модель ============ */

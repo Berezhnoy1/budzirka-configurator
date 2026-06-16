@@ -421,20 +421,21 @@ input,select,textarea{font-family:inherit;color:inherit}
 </div>
 <div id="app" class="wrap"></div>
 
+<script src="pricing.js"></script>
 <script>
 /* ============================================================
    1) CONFIG — цінова логіка (дані з реальної бази CALCULATOR)
    ============================================================ */
 const CONFIG = {
   cur:'€',
-  eurUah: 52.06,                       // аркуш «Курс»
+  eurUah: BZ.EUR_UAH,                   // аркуш «Курс»
   cabins:{
-    ratePerM2: 170,                    // Тип_кабінок: 170 EUR/м²
-    cabinMinWidth: 1100,               // мін. ширина однієї кабінки
-    sidePanelMm: 200,                  // панелі ~200 мм з кожного боку дверей
+    ratePerM2: BZ.RATE_EUR_M2,         // Тип_кабінок: 170 EUR/м² (БД може перевизначити)
+    cabinMinWidth: BZ.CABIN_MIN_W,     // мін. ширина однієї кабінки
+    sidePanelMm: BZ.SIDE_PANEL,        // панелі ~200 мм з кожного боку дверей
     doorWidthsStd: [600,650,700],
     doorWidthsInc: [900,1000],
-    depthMin:1200, depthMax:1500,
+    depthMin: BZ.DEPTH_MIN, depthMax: BZ.DEPTH_MAX,
   },
   counters:{
     defaultM2Price:135,                // EUR/м², якщо для декору немає ціни
@@ -550,13 +551,46 @@ function apiPost(table,row){
   }catch(e){}
 }
 function track(event,props){ apiPost('budzirka_events',{session_id:SID,event:event,props:props||{}}); }
-function submitLead(){
+function leadRow(){
   const c=state.client, t=estimateTotals();
-  apiPost('budzirka_leads',{ session_id:SID, quote_number:state.quoteNum||null,
+  return { session_id:SID, quote_number:state.quoteNum||null,
     name:c.name||null, surname:c.surname||null, phone:c.phone||null, email:c.email||null,
     company:c.company||null, manager:c.manager||null, comment:c.comment||null,
     price_cat:c.priceCat||null, total_eur:Math.round(t.total*100)/100, estimate:state.estimate,
-    no_call:!!c.noCall, via_messenger:!!c.viaMessenger, terms_ok:!!c.termsOk });
+    no_call:!!c.noCall, via_messenger:!!c.viaMessenger, terms_ok:!!c.termsOk };
+}
+async function postLead(row){
+  try{ if(typeof fetch==='undefined') return false;
+    const r=await fetch(LEADS_API.url+'/budzirka_leads',{ method:'POST', keepalive:true,
+      headers:{ 'Content-Type':'application/json','apikey':LEADS_API.key,
+        'Authorization':'Bearer '+LEADS_API.key,'Prefer':'return=minimal' },
+      body:JSON.stringify(row) });
+    return r.ok;
+  }catch(e){ return false; }
+}
+function queueLead(row){ try{ const q=JSON.parse(localStorage.getItem('bz_lead_queue')||'[]');
+  q.push(row); localStorage.setItem('bz_lead_queue', JSON.stringify(q.slice(-20))); }catch(e){} }
+async function submitLead(){
+  const row=leadRow();
+  if(await postLead(row)) track('lead_sent',{total:row.total_eur});
+  else { queueLead(row); track('lead_failed',{}); }   // не загубити — повторимо при наступному завантаженні
+}
+async function flushLeadQueue(){
+  let q; try{ q=JSON.parse(localStorage.getItem('bz_lead_queue')||'[]'); }catch(e){ q=[]; }
+  if(!q.length) return;
+  const remain=[];
+  for(const row of q){ if(!(await postLead(row))) remain.push(row); }
+  try{ localStorage.setItem('bz_lead_queue', JSON.stringify(remain)); }catch(e){}
+  if(q.length>remain.length) track('lead_flushed',{recovered:q.length-remain.length});
+}
+/* «теплий» абандон: контакт є + ≥1 позиція в кошторисі, але КП ще не сформовано */
+let _partialSent=false;
+function partialLead(){
+  if(_partialSent || !contactOk() || !state.estimate.length) return;
+  _partialSent=true;
+  const t=estimateTotals();
+  track('partial_lead',{ total:Math.round(t.total), items:state.estimate.length,
+    has_email:!!(state.client.email||'').trim(), price_cat:state.client.priceCat||null });
 }
 
 /* ============================================================
@@ -768,28 +802,21 @@ const normPhone=p=>String(p||'').replace(/\D/g,'').slice(-10);
    Площа кабінок = фасад×H + перегородки×(глибина×H) + бічні×(глибина×H)
    Вартість = Площа × 170 EUR/м²   (звірено: 4000×2100 + 3×1200×2100 = 15.96 м² → 2 713.20 €)
    ============================================================ */
-function cabinMinW(doorW){ return Math.max(CONFIG.cabins.cabinMinWidth, doorW + 2*CONFIG.cabins.sidePanelMm); }
+function cabinMinW(doorW){ return BZ.cabinMinW(doorW); }   // → pricing.js (єдине джерело)
 function maxDoors(room){ // скільки кабінок влазить у фасад
   return Math.floor(room.facade / cabinMinW(room.wStd||650));
 }
 /* перегородки — автоматично за видом: міжстінна = дверей−1, кутова = дверей, окрема = дверей+1 */
-function roomParts(room){
-  const doors=(room.nStd||0)+(room.nInc||0);
-  const sides=(VIDS.find(v=>v.id===room.vid)||VIDS[0]).sides;
-  return Math.max(0, doors-1+sides);
-}
+function roomParts(room){ return BZ.parts((room.nStd||0)+(room.nInc||0), room.vid); }   // → pricing.js
 function kindHeight(room,type){
   if(room.kind==='каб') return type?type.h:2100;
   const k=ROOM_KINDS.find(x=>x.id===room.kind); return (k&&k.h)||2000;
 }
-function roomArea(room, type){
-  if(room.kind==='каб'){
-    const H=(type?type.h:2100)/1000, facade=room.facade/1000, depth=room.depth/1000;
-    return facade*H + roomParts(room)*depth*H;
-  }
-  // душові/пісуарні: n панелей × (ширина × власна висота перегородки, не кабіни)
-  const H=kindHeight(room,type)/1000, pw=(room.pw||1000)/1000;
-  return (room.pn||1)*pw*H;
+function roomArea(room, type){   // площа → pricing.js (єдине джерело з 3D-конфігуратором)
+  if(room.kind==='каб')
+    return BZ.cabinArea(room.facade, room.depth, (room.nStd||0)+(room.nInc||0), room.vid, type?type.h:2100);
+  // душові/пісуарні: n панелей × ширина × власна висота перегородки (не кабіни)
+  return BZ.panelArea(room.pn, room.pw, kindHeight(room,type));
 }
 function roomCost(room,type){ return roomArea(room,type)*CONFIG.cabins.ratePerM2; }
 function roomDimsValid(room){
@@ -1831,7 +1858,7 @@ document.addEventListener('click',e=>{
     case 'roomNum': setPath(state,el.dataset.path,+el.dataset.v); render(); break;
     case 'inc':{ const p=el.dataset.path; setPath(state,p,Math.min(+el.dataset.max||999,(getPath(p)||0)+1)); render(); break; }
     case 'dec':{ const p=el.dataset.path; setPath(state,p,Math.max(+el.dataset.min||0,(getPath(p)||0)-1)); render(); break; }
-    case 'addEstimate': addToEstimate(mod); state.screen='estimate'; render(); break;
+    case 'addEstimate': addToEstimate(mod); partialLead(); state.screen='estimate'; render(); break;
     case 'estInc':{ const it=state.estimate.find(x=>x.id===el.dataset.id); if(it){it.qty++; render();} break; }
     case 'estDec':{ const it=state.estimate.find(x=>x.id===el.dataset.id); if(it){it.qty=Math.max(1,it.qty-1); render();} break; }
     case 'removeItem': state.estimate=state.estimate.filter(x=>x.id!==el.dataset.id); render(); break;
@@ -1906,6 +1933,7 @@ document.addEventListener('change',e=>{ const f=e.target.closest('[data-filter]'
 load();
 render();
 loadCatalog();
+flushLeadQueue();   // дослати ліди, що не пішли минулого разу (мережа моргнула)
 track('session_start',{device:(typeof window!=='undefined'&&window.innerWidth&&window.innerWidth<=560)?'mobile':'desktop'});
 </script>
 </body>
