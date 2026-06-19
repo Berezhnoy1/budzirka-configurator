@@ -1759,9 +1759,8 @@ function viewQuote(){
     <td class="r" data-l="К-сть">${it.qty}</td><td class="r" data-l="Ціна">${money2(it.unitBase)}</td><td class="r" data-l="Сума">${money2(it.unitBase*it.qty)}</td></tr>`).join('');
   return `
   <div class="qtools no-print">
-    <button class="btn ghost" data-action="backFromQuote">← Назад</button>
-    <button class="btn" style="flex:0 0 auto" data-action="savePdf">⬇ Зберегти PDF</button>
-    <button class="btn primary" style="flex:0 0 auto" data-action="printQuote">🖨 Друк</button>
+    <button class="btn ghost" data-action="backFromQuote">← Назад до кошторису</button>
+    <button class="btn primary" style="flex:0 0 auto" data-action="printQuote">🖨 Друк / Зберегти PDF</button>
   </div>
   <div class="quote">
     <div class="qbar">
@@ -1787,30 +1786,6 @@ function viewQuote(){
       </div>
     </div>
   </div>`;
-}
-
-/* надійне збереження КП у PDF (працює на мобільному без діалогу друку) */
-function loadScriptOnce(src){
-  return new Promise((res,rej)=>{
-    if([...document.scripts].some(s=>s.src===src)) return res();
-    const s=document.createElement('script'); s.src=src; s.onload=()=>res(); s.onerror=()=>rej(new Error('load')); document.head.appendChild(s);
-  });
-}
-async function savePdfQuote(){
-  const el=document.querySelector('.quote'); if(!el) return;
-  toast('Готуємо PDF…');
-  try{
-    await loadScriptOnce('https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js');
-    const name=(state.quoteNum||'KP').replace(/[^\w\-]+/g,'_');
-    track('quote_saved_pdf',{quote:state.quoteNum});
-    await window.html2pdf().set({
-      margin:[8,8,10,8], filename:name+'.pdf',
-      image:{type:'jpeg',quality:0.96},
-      html2canvas:{ scale:2, useCORS:true, backgroundColor:'#ffffff', windowWidth:1000 },  // 1000 → завжди «десктопна» розкладка таблиці
-      jsPDF:{ unit:'mm', format:'a4', orientation:'portrait' },
-      pagebreak:{ mode:['css','legacy'] }
-    }).from(el).save();
-  }catch(e){ toast('Не вдалося згенерувати PDF — скористайтесь «Друк»'); }
 }
 
 /* ============================================================
@@ -1895,7 +1870,6 @@ document.addEventListener('click',e=>{
       render(); } break;
     case 'backFromQuote': state.screen='estimate'; render(); break;
     case 'printQuote': track('quote_printed',{quote:state.quoteNum}); window.print(); break;
-    case 'savePdf': savePdfQuote(); break;
     case 'acctYes':{ const acc=getAccounts().find(x=>x.id===el.dataset.id);
       if(acc){ Object.assign(state.client,{name:acc.name,surname:acc.surname||'',phone:acc.phone||state.client.phone,
         email:acc.email||state.client.email,company:acc.company||'',priceCat:acc.priceCat||'Прайс 1',accountId:acc.id});
