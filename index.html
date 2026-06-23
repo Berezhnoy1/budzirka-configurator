@@ -522,10 +522,7 @@ let EDGES=[
 const PRICE_CATS=Object.keys(CONFIG.priceCat);
 
 // Демо-акаунти (реальна клієнтська база підключається через бекенд — не публікуємо персональні дані)
-const DEMO_ACCOUNTS=[
-  {id:'demo1', name:'Іван', surname:'Демченко', company:'ТОВ «Демо Буд»', phone:'0501112233', email:'demo@budzirka.ua', priceCat:'Прайс 2'},
-  {id:'demo2', name:'Олена', surname:'Тестова', company:'ФОП Тестова', phone:'0679998877', email:'olena@test.ua', priceCat:'Прайс 3'},
-];
+const DEMO_ACCOUNTS=[];   // прибрано демо-акаунти: реальні клієнти більше не матчаться на фейкові імена
 
 const CABIN_STEPS=['Тип і матеріал','Приміщення','Підсумок'];
 const COUNTER_STEPS=['Форма','Розміри','Торець','Вирізи','Матеріал','Підсумок'];
@@ -624,7 +621,8 @@ async function doLogin(){
       phone:res.phone||state.client.phone,email:res.email,company:res.company||state.client.company,
       priceCat:res.price_cat||"Прайс 1",accountId:res.id});
     state.lookup.dismissed=false; toast("Вітаємо, "+(res.name||"")+"! Застосовано "+(res.price_cat||"Прайс 1")); save(); render(); }
-  else toast(res&&res.reason==="pin"?"Невірний PIN":"Акаунт не знайдено");
+  else toast(res&&res.reason==="locked"?"Забагато спроб. Спробуйте за 15 хвилин."
+    :res&&res.reason==="pin"?"Невірний PIN":"Акаунт не знайдено");
 }
 async function doRegister(){
   const c=state.client, em=(c.email||"").trim().toLowerCase(), pin=pinVal();
@@ -794,7 +792,7 @@ const decorsFor=dir=>DECORS.filter(x=>x.dir===dir);
 const typeBy=id=>CABIN_TYPES.find(t=>t.id===id);
 function setPath(obj,path,val){const p=path.split('.');let o=obj;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val;}
 function getPath(path){const p=path.split('.');let o=state;for(const k of p)o=o[k];return o;}
-const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const normPhone=p=>String(p||'').replace(/\D/g,'').slice(-10);
 
 /* ============================================================

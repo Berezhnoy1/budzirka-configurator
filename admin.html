@@ -140,7 +140,7 @@ const API='https://eymmfzpcuuibufondxfv.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bW1menBjdXVpYnVmb25keGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNjM0ODMsImV4cCI6MjA5MzYzOTQ4M30.4LqMeLcuCGRBaXcEQJI6T0B01LpL_zTXghdIbV2JY9E';
 const HDR={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY};
 const app=document.getElementById('app');
-const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cssId=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,'_');
 
 const LEAD_STATUSES=[
