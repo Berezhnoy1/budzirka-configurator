@@ -1366,7 +1366,7 @@ function roomsStepMain(c,type){
     <div class="fset"><h4>Вид</h4>
     <div class="grid c3">${VIDS.map(v=>`<div class="opt ${r.vid===v.id?'sel':''}" data-action="roomVid" data-id="${v.id}">
       <div class="t">${v.name}</div><div class="d">${v.desc}</div></div>`).join('')}</div>
-    <details class="schemebox-d" ${(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(max-width:560px)').matches)?'':'open'}>
+    <details class="schemebox-d" open>
       <summary>Схема виду «${(VIDS.find(v=>v.id===r.vid)||VIDS[0]).name}»</summary>
       <div class="schemebox" style="margin-top:6px">${explainScheme(r.vid)}</div>
     </details></div>
@@ -1867,7 +1867,7 @@ document.addEventListener('click',e=>{
       submitLead();
       render(); } break;
     case 'backFromQuote': state.screen='estimate'; render(); break;
-    case 'printQuote': track('quote_printed',{quote:state.quoteNum}); window.print(); break;
+    case 'printQuote': document.title='BUDZIRKA · '+(state.quoteNum||'КП'); track('quote_printed',{quote:state.quoteNum}); window.print(); break;
     case 'acctYes':{ const acc=getAccounts().find(x=>x.id===el.dataset.id);
       if(acc){ Object.assign(state.client,{name:acc.name,surname:acc.surname||'',phone:acc.phone||state.client.phone,
         email:acc.email||state.client.email,company:acc.company||'',priceCat:acc.priceCat||'Прайс 1',accountId:acc.id});
